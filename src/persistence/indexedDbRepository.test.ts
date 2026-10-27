@@ -66,3 +66,53 @@ describe('adapter IndexedDB', () => {
     expect(await repository.load()).toEqual(state);
   });
 });
+
+describe('transakcje wyprawy', () => {
+  it('odtwarza aktywną wyprawę i zachowuje rozliczenie po ponownym otwarciu', async () => {
+    const { startExpedition, settleExpedition } = await import('../domain/game');
+    const factory = new IDBFactory();
+    const repository = new IndexedDbRepository(factory, 'test');
+    const started = startExpedition(createInitialState(0), 1000);
+    await repository.save(started, null);
+    const reopened = new IndexedDbRepository(factory, 'test');
+    const loaded = (await reopened.load())!;
+    expect(loaded).toEqual(started);
+    const settled = settleExpedition(loaded, loaded.activeExpedition!.id, 61000);
+    const outcomes = await Promise.allSettled([repository.save(settled, loaded), reopened.save(settled, loaded)]);
+    expect(outcomes.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    expect(outcomes.filter((result) => result.status === 'rejected')).toHaveLength(1);
+    expect(await reopened.load()).toEqual(settled);
+    const after = (await repository.load())!;
+    expect(settleExpedition(after, loaded.activeExpedition!.id, 999999)).toBe(after);
+    await expect(repository.save(renameHero(loaded, 'Kruk'), loaded)).rejects.toThrow('innej karcie');
+    expect(await repository.load()).toEqual(settled);
+  });
+  it('przerwany odbiór pozostawia aktywną wyprawę bez częściowej nagrody', async () => {
+    const { startExpedition, settleExpedition } = await import('../domain/game');
+    const repository = new IndexedDbRepository(new IDBFactory(), 'test');
+    const started = startExpedition(createInitialState(0), 1000);
+    await repository.save(started, null);
+    const original = IDBDatabase.prototype.transaction;
+    const spy = vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(function (this: IDBDatabase, ...args: Parameters<typeof original>) {
+      const tx = original.apply(this, args);
+      queueMicrotask(() => tx.abort());
+      return tx;
+    });
+    const result = settleExpedition(started, started.activeExpedition!.id, 61000);
+    await expect(repository.save(result, started)).rejects.toThrow();
+    spy.mockRestore();
+    expect(await repository.load()).toEqual(started);
+    await repository.save(result, started);
+    expect(await repository.load()).toEqual(result);
+  });
+  it('wczytuje v1 i zapisuje v2 dopiero przy udanej zmianie', async () => {
+    const factory = new IDBFactory();
+    const { lastReport: _, ...legacy } = createInitialState(0);
+    await writeRaw(factory, { ...legacy, schemaVersion: 1 });
+    const repository = new IndexedDbRepository(factory, 'test');
+    const loaded = (await repository.load())!;
+    expect(loaded.schemaVersion).toBe(2);
+    await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
+    expect((await repository.load())!.hero.name).toBe('Kruk');
+  });
+});

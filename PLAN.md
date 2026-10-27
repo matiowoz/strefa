@@ -15,7 +15,7 @@
 
 Kryterium ukończenia: aplikacja startuje w Kryjówce, wszystkie ekrany są dostępne na telefonie, zmiany przetrwają odświeżenie, testy i kompilacja przechodzą. Nie uruchamiamy jeszcze wypraw.
 
-## Etap 2 — minimalna wyprawa po osobnym zleceniu
+## Etap 2 — minimalna wyprawa
 
 Plan, start jednej automatycznej wyprawy, czas zakończenia i jednokrotne rozliczenie prostego raportu. Bez walki i losowego zaawansowanego silnika.
 
@@ -37,13 +37,13 @@ Szczegółowe wnętrze, jedna dopracowana lokacja i krótki ciąg celów; dalsze
 - Widok kryjówki jest kompozycją CSS. Nie udaje docelowej szczegółowej grafiki.
 - Brak fabuły, walki, craftingu, produkcji, badań, energii, x4 i transportu. Nie zmienia to ich ustalonej wizji.
 - Lokalny zapis zamiast serwera jest świadomym ograniczeniem zlecenia. Nie zapewnia synchronizacji ani ochrony przed edycją danych i zmianą zegara.
-- Pierwszy adapter zastępuje cały snapshot. Bez rozstrzygania konfliktów między kilkoma kartami: pracuj w jednej karcie. Przed dodaniem silnika zaprojektuj kontrolę wersji zmian.
+- Adapter zapisuje snapshot z atomowym sprawdzeniem oczekiwanego stanu. Nieaktualna karta nie może nadpisać nowszego zapisu; przy konflikcie odśwież stronę. Brak scalania zmian i synchronizacji urządzeń.
 - Nie dodajemy resetu zapisu, automatycznego kasowania błędnych danych, kont ani płatności.
 - Ekran startowy i rozwinięcie panelu są ustawieniami interfejsu, nie elementem trwałego stanu gry.
-- Schemat v1: nieznana wersja lub nieznane ID danych zatrzymują odczyt. Przed zmianą katalogu dodaj migrację; nie usuwaj używanych ID.
+- Schemat v2: poprawny v1 migruje w pamięci bez utraty postępu; zapis v2 następuje przy udanej zmianie. Nieznana wersja, uszkodzone dane lub nieznane ID zatrzymują odczyt bez nadpisania.
 - Późniejszy adapter HTTP implementuje port GameRepository. Komendy i reguły gospodarki trzeba wówczas przenieść na serwer; sama zmiana adaptera nie zapewnia bezpieczeństwa.
 
-Po etapie 1 zatrzymujemy prace. Dalsze etapy nie są automatycznie autoryzowane.
+Etap 2 został zlecony osobno. Po nim zatrzymujemy prace; etap 3 wymaga osobnego zlecenia.
 
 ## Wyniki weryfikacji 26 października 2026
 
@@ -54,3 +54,14 @@ Po etapie 1 zatrzymujemy prace. Dalsze etapy nie są automatycznie autoryzowane.
 - Kontrola wizualna w wąskim oknie przeglądarki. Nie testowano fizycznego telefonu, połączenia LAN, Safari ani instalacji PWA.
 - Instalacja zależności: 0 zgłoszonych podatności w audycie npm w chwili instalacji.
 - Środowisko pracy: użyto dostarczonego Node 24 i zapisywalnego cache npm w work/, ponieważ systemowy Node 20.12 i domyślny cache miały ograniczenia. Nie zmieniano ustawień systemowych. Użytkownik powinien użyć Node 22.12+ zgodnie z README.
+
+## Realizacja etapu 2
+
+- [x] Jedna aktywna wyprawa, trwały cel i termin powrotu, działanie podczas nieobecności.
+- [x] Odbiór po terminie: nagroda, raport i usunięcie aktywnej wyprawy w jednej transakcji; ponowiona komenda niczego nie przyznaje.
+- [x] Ochrona przed nieaktualną kartą i migracja v1 → v2.
+- [x] Testy regresji: termin, ponowny odbiór, nieobecność, zmiana celu na mapie, konflikt kart i przerwana transakcja.
+
+Roboczy balans do sprawdzenia pętli, nie finalne reguły GDD: osiedle 1 minuta / 2 złomu, warsztat 2 minuty / 4 złomu. Jedyna strategia startu to zrównoważona; bez symulacji taktyk, walki, urazów, zużycia zapasów, doświadczenia, wyczerpywania lokacji i automatycznych serii. Przechowywany jest tylko ostatni rozliczony raport. Odebranie raportu przyznaje łup; do tego czasu wyprawa blokuje następny start. Zegar urządzenia jest prototypowy i nie zabezpiecza gospodarki przed manipulacją. Przyszłe zmiany balansu wymagają wersjonowania wyniku aktywnej wyprawy.
+
+Weryfikacja etapu 2: `npm test` — 32/32, `npm run build` — sukces. Chromium headless, szerokość 390 px: start, odtworzenie aktywnej wyprawy po odświeżeniu, odbiór po terminie, raport po ponownym odświeżeniu i ekwipunek +2 złomu; brak poziomego przewijania. Upływ czasu zasymulowany przesunięciem zegara tylko w izolowanym profilu testowym. Bez testu fizycznego telefonu i Safari.

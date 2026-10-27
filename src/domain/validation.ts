@@ -7,8 +7,8 @@ const integer = (value: unknown): value is number => number(value) && Number.isS
 const nonempty = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0;
 const timestamp = (value: unknown): value is number => integer(value) && value >= 0;
 
-export function isGameState(value: unknown): value is GameState {
-  if (!record(value) || value.schemaVersion !== 1 || !timestamp(value.updatedAt)) return false;
+function validStructure(value: unknown): boolean {
+  if (!record(value) || (value.schemaVersion !== 1 && value.schemaVersion !== 2) || !timestamp(value.updatedAt)) return false;
   const { hero, inventory, activeExpedition } = value;
   if (!record(hero) || !nonempty(hero.id) || !nonempty(hero.name)
     || hero.name.trim() !== hero.name || hero.name.length < 2 || hero.name.length > 24
@@ -44,9 +44,21 @@ export function isGameState(value: unknown): value is GameState {
   return true;
 }
 
+export function isGameState(value: unknown): value is GameState {
+  if (!record(value) || value.schemaVersion !== 2 || !validStructure(value)) return false;
+  const report = value.lastReport;
+  return report === null || (record(report) && nonempty(report.expeditionId)
+    && locations.some((location) => location.id === report.locationId)
+    && timestamp(report.returnedAt) && integer(report.scrap) && report.scrap > 0
+    && (!record(value.activeExpedition) || value.activeExpedition.id !== report.expeditionId));
+}
+
 export function validateSave(value: unknown): GameState {
-  if (record(value) && value.schemaVersion !== 1) {
+  if (record(value) && value.schemaVersion !== 1 && value.schemaVersion !== 2) {
     throw new Error('Nieobsługiwana wersja zapisu. Dane pozostawiono bez zmian.');
+  }
+  if (record(value) && value.schemaVersion === 1 && validStructure(value)) {
+    return validateSave({ ...value, schemaVersion: 2, lastReport: null });
   }
   if (!isGameState(value)) throw new Error('Zapis jest nieprawidłowy. Dane pozostawiono bez zmian.');
   return value;

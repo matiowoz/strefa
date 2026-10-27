@@ -1,6 +1,6 @@
 # STREFA
 
-Fundament prototypu mobilnego idle survival RPG. Etap 1: pięć ekranów, lokalny zapis i podstawowe typy; bez silnika wypraw i walki.
+Fundament prototypu mobilnego idle survival RPG. Etap 2: pięć ekranów, lokalny zapis i jedna prosta automatyczna wyprawa; bez walki.
 
 Praca z telefonu przy wyłączonym komputerze: zobacz CLOUD.md. Dokumentacja projektu: docs/GDD.pdf i tekst pomocniczy docs/GDD.md.
 
@@ -39,11 +39,13 @@ npm.cmd run preview
 1. Domyślnie otwiera się Kryjówka. Można zwinąć jej panel i przejść do pozostałych ekranów.
 2. W Bohaterze zmień pseudonim, poczekaj na potwierdzenie zapisu.
 3. Na Mapie wybierz drugi punkt i odśwież stronę. Aplikacja wróci do Kryjówki, ale pseudonim i wybrany cel pozostaną.
-4. W Wyprawach sprawdź zapamiętany cel; nie ma jeszcze przycisku uruchamiania wyprawy.
+4. W Wyprawach sprawdź cel, czas i nagrodę, a następnie rozpocznij wyprawę. Osiedle trwa minutę (2 złomu), warsztat dwie (4 złomu); to parametry demonstracyjne.
+5. Odśwież lub zamknij grę i wróć po terminie. W Wyprawach odbierz raport i nagrodę. Ilość złomu w Ekwipunku zwiększy się raz; raport pozostanie po odświeżeniu. Następna wyprawa jest dostępna po odbiorze poprzedniej.
+6. Przy błędzie zapisu zmiana nie zostaje zastosowana; ponów odbiór. Przy konflikcie z inną kartą odśwież stronę.
 
-Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v1. Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
+Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v2 (migracja poprawnego v1 bez utraty postępu). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
 
-Zapis jest osobny dla urządzenia, przeglądarki i adresu z portem. localhost i adres LAN mają różne zapisy; telefon nie współdzieli zapisu komputera. Czyszczenie danych witryny lub tryb prywatny może usunąć postęp. Brak synchronizacji, eksportu i kopii chmurowej. Korzystaj z jednej karty, aby uniknąć nadpisania snapshotu przez drugą kartę.
+Zapis jest osobny dla urządzenia, przeglądarki i adresu z portem. localhost i adres LAN mają różne zapisy; telefon nie współdzieli zapisu komputera. Czyszczenie danych witryny lub tryb prywatny może usunąć postęp. Brak synchronizacji, eksportu i kopii chmurowej. Nieaktualny zapis z drugiej karty jest odrzucany atomowo; odśwież ją przed kolejną zmianą. Czas wypraw opiera się na zegarze urządzenia, bez zabezpieczeń serwerowych.
 
 ## Struktura i zależności
 

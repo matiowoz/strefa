@@ -42,8 +42,16 @@ export interface Location {
   discovery: 'known' | 'visited';
 }
 
+export interface ExpeditionReport {
+  expeditionId: string;
+  locationId: string;
+  returnedAt: number;
+  scrap: number;
+}
+
 export interface GameState {
-  schemaVersion: 1;
+  schemaVersion: 2;
+  lastReport: ExpeditionReport | null;
   updatedAt: number;
   hero: Hero;
   inventory: InventoryEntry[];
@@ -54,5 +62,5 @@ export interface GameState {
 // Port zależy wyłącznie od domeny. Adapter HTTP może później zastąpić IndexedDB.
 export interface GameRepository {
   load(): Promise<GameState | null>;
-  save(state: GameState): Promise<void>;
+  save(state: GameState, expected?: GameState | null): Promise<void>;
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../app/useGame';
 import { getItem, locations, skillNames } from '../domain/catalog';
-import { inventoryWeight, renameHero, selectLocation } from '../domain/game';
+import { expeditionRules, inventoryWeight, renameHero, selectLocation, startExpedition, settleExpedition } from '../domain/game';
 import type { GameRepository, GameState } from '../domain/types';
 
 const screens = [
@@ -32,7 +32,7 @@ function Shelter({ state, navigate }: { state: GameState; navigate: (screen: Scr
     </div>
     {panel && <div className="card-grid" id="shelter-panel">
       <article className="card"><span className="eyebrow">Ocalały</span><h3>{state.hero.name}</h3><p>Zdrowie {state.hero.health} / {state.hero.maxHealth}</p><button onClick={() => navigate('hero')}>Zobacz bohatera</button></article>
-      <article className="card"><span className="eyebrow">Ekspedycja</span><h3>{state.activeExpedition ? 'W toku' : 'W kryjówce'}</h3><p>Planowanie wypraw to następny etap prototypu.</p><button onClick={() => navigate('expeditions')}>Zobacz wyprawy</button></article>
+      <article className="card"><span className="eyebrow">Ekspedycja</span><h3>{state.activeExpedition ? 'W toku' : 'W kryjówce'}</h3><p>Wyrusz po materiały i odbierz raport po powrocie.</p><button onClick={() => navigate('expeditions')}>Zobacz wyprawy</button></article>
       <article className="card"><span className="eyebrow">Warsztat</span><h3>Brak aktywnej produkcji</h3><p>Stanowiska i receptury pojawią się w kolejnych etapach.</p></article>
       <article className="card"><span className="eyebrow">Radio i zadania</span><h3>Cisza w eterze</h3><p>Na razie poznaj kryjówkę, mapę i zapasy. Fabuła nie została uruchomiona.</p></article>
     </div>}
@@ -54,14 +54,38 @@ function MapScreen({ state, update, saving }: { state: GameState; update: Update
     </article>)}</div></>;
 }
 
-function ExpeditionsScreen({ state }: { state: GameState }) {
-  const location = locations.find((entry) => entry.id === state.selectedLocationId);
-  return <article className="card empty-state"><span className="eyebrow">Plan wyprawy</span><h2>Najpierw przygotowanie.</h2>
-    <p>Wybrany cel: <strong>{location?.name}</strong></p>
-    <p>W tym etapie możesz wybrać lokację na mapie. Uruchamianie wypraw, upływ czasu i raporty nie są jeszcze dostępne.</p>
-    <dl><div><dt>Bohater</dt><dd>{state.hero.name}</dd></div><div><dt>Aktywna wyprawa</dt><dd>{state.activeExpedition ? 'W toku' : 'Brak'}</dd></div></dl>
-    <p className="muted">Jedna postać. Jedna wyprawa naraz. Bez obowiązku stałego nadzoru.</p>
-  </article>;
+function ExpeditionsScreen({ state, update, saving }: { state: GameState; update: Update; saving: boolean }) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const active = state.activeExpedition;
+  const locationId = active?.plan.locationId ?? state.selectedLocationId;
+  const location = locations.find((entry) => entry.id === locationId);
+  const rule = expeditionRules[locationId as keyof typeof expeditionRules];
+  const remaining = active ? Math.max(0, Math.ceil((active.expectedReturnAt - now) / 1000)) : 0;
+  const report = state.lastReport;
+  return <>
+    <article className="card"><span className="eyebrow">{active ? 'Aktywna wyprawa' : 'Plan wyprawy'}</span>
+      <h2>{location?.name}</h2>
+      {active ? <>
+        <p>{remaining > 0 ? `Powrót za ${Math.floor(remaining / 60)} min ${remaining % 60} s` : 'Bohater wrócił. Raport gotowy do odbioru.'}</p>
+        <p>Planowany powrót: <time dateTime={new Date(active.expectedReturnAt).toISOString()}>{new Date(active.expectedReturnAt).toLocaleTimeString('pl-PL')}</time></p>
+        <button disabled={saving || remaining > 0} onClick={() => { void update((previous) => settleExpedition(previous, active.id)); }}>Odbierz raport i nagrodę</button>
+      </> : <>
+        <p>Cel wybierzesz na Mapie. Strategia: zrównoważona.</p>
+        <dl><div><dt>Czas</dt><dd>{rule.durationMs / 60_000} min</dd></div><div><dt>Nagroda</dt><dd>Złom ×{rule.scrap}</dd></div></dl>
+        <button disabled={saving} onClick={() => { void update((previous) => startExpedition(previous)); }}>Rozpocznij wyprawę</button>
+      </>}
+      <p className="muted">Wyprawa upływa także po zamknięciu gry. Jedna wyprawa naraz; odbierz raport przed kolejną. Prototyp: stałe łupy, bez walki i zużycia zapasów. Czas i nagrody są demonstracyjne; strategie nie mają jeszcze odrębnego działania.</p>
+    </article>
+    {report && <article className="card" aria-label="Ostatni raport"><span className="eyebrow">Ostatni raport / rozliczony</span>
+      <h2>Bezpieczny powrót</h2><p>{locations.find((entry) => entry.id === report.locationId)?.name}</p>
+      <p>Dodano do ekwipunku: złom ×{report.scrap}. Zdrowie i wyposażenie bez zmian.</p>
+      <p>Powrót: {new Date(report.returnedAt).toLocaleString('pl-PL')}</p>
+    </article>}
+  </>;
 }
 
 function InventoryScreen({ state }: { state: GameState }) {
@@ -104,7 +128,7 @@ export function App({ repository }: { repository: GameRepository }) {
         {state && <>
           {screen === 'shelter' && <Shelter state={state} navigate={setScreen} />}
           {screen === 'map' && <MapScreen state={state} update={update} saving={saving} />}
-          {screen === 'expeditions' && <ExpeditionsScreen state={state} />}
+          {screen === 'expeditions' && <ExpeditionsScreen state={state} update={update} saving={saving} />}
           {screen === 'inventory' && <InventoryScreen state={state} />}
           {screen === 'hero' && <HeroScreen state={state} update={update} saving={saving} />}
         </>}

@@ -22,7 +22,7 @@ export function useGame(repository: GameRepository) {
         const loaded = await repository.load();
         const next = loaded ?? createInitialState();
         if (!alive) return;
-        if (loaded === null) await repository.save(next);
+        if (loaded === null) await repository.save(next, loaded);
         if (alive) { current.current = next; setState(next); }
       } catch (cause) { if (alive) setError(message(cause)); }
     })();
@@ -36,7 +36,8 @@ export function useGame(repository: GameRepository) {
     setError(null);
     try {
       const next = change(current.current);
-      await repository.save(next);
+      if (next === current.current) return true;
+      await repository.save(next, current.current);
       current.current = next;
       setState(next);
       return true;

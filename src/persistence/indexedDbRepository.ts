@@ -41,7 +41,7 @@ export class IndexedDbRepository implements GameRepository {
     } finally { db.close(); }
   }
 
-  async save(state: GameState): Promise<void> {
+  async save(state: GameState, expected?: GameState | null): Promise<void> {
     const snapshot = validateSave(structuredClone(state));
     const db = await this.open();
     try {
@@ -50,7 +50,19 @@ export class IndexedDbRepository implements GameRepository {
         transaction.oncomplete = () => resolve();
         transaction.onabort = () => reject(transaction.error ?? new Error('Zapis został przerwany.'));
         transaction.onerror = () => reject(transaction.error ?? new Error('Nie udało się zapisać danych.'));
-        transaction.objectStore(STORE).put(snapshot, KEY);
+        const store = transaction.objectStore(STORE);
+        const request = store.get(KEY);
+        request.onsuccess = () => {
+          try {
+            const stored = request.result === undefined ? null : validateSave(request.result);
+            if (expected !== undefined && JSON.stringify(stored) !== JSON.stringify(expected)) {
+              reject(new Error('Zapis zmienił się w innej karcie. Odśwież stronę przed kolejną zmianą.'));
+              transaction.abort();
+              return;
+            }
+            store.put(snapshot, KEY);
+          } catch (error) { reject(error); transaction.abort(); }
+        };
       });
     } finally { db.close(); }
   }
