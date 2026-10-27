@@ -7,6 +7,9 @@ export const items = [
   { id: 'ration', name: 'Racja żywnościowa', category: 'supply', weightKg: 0.4, description: 'Zapas na drogę.' },
   { id: 'bandage', name: 'Bandaż', category: 'supply', weightKg: 0.1, description: 'Środek medyczny. Leczenie nie jest jeszcze wdrożone.' },
   { id: 'scrap', name: 'Złom', category: 'material', weightKg: 0.5, description: 'Materiał do przyszłych receptur.' },
+  { id: 'raw-water', name: 'Woda do uzdatnienia', category: 'material', weightKg: 1, description: 'Surowiec do przygotowania czystej wody.' },
+  { id: 'food', name: 'Składniki żywnościowe', category: 'material', weightKg: 0.4, description: 'Surowiec do przygotowania racji.' },
+  { id: 'cloth', name: 'Czysta tkanina', category: 'material', weightKg: 0.1, description: 'Materiał na bandaże.' },
 ] as const satisfies readonly ItemDefinition[];
 
 export const locations = [

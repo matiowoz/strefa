@@ -2,7 +2,7 @@
 
 ## Stan projektu
 
-Etap 1 jest zakończony: pięć ekranów, typy, czyste funkcje i lokalny zapis IndexedDB. Weryfikacja etapu 2 w chmurze: 32 testy zaliczone, poprawna kompilacja i przepływ wyprawy w Chromium przy szerokości telefonu. Etap 2 dodaje jedną prostą wyprawę, raport i jednokrotną nagrodę; bez walki. Etap 3 wymaga osobnego zlecenia właściciela.
+Etap 1 jest zakończony: pięć ekranów, typy, czyste funkcje i lokalny zapis IndexedDB. Weryfikacja etapu 3 w chmurze: 44 testy zaliczone, poprawna kompilacja i przepływ wyprawy w Chromium przy szerokości telefonu. Etap 2 dodaje jedną prostą wyprawę, raport i jednokrotną nagrodę; bez walki. Etap 3 dodaje zapasy, wybór sprzętu i trzy receptury. Etap 4 wymaga osobnego zlecenia właściciela.
 
 Przeczytaj AGENTS.md, PLAN.md oraz docs/GDD.md. Źródłowy dokument jest w docs/GDD.pdf. Nie zakładaj, że nowa rozmowa zna wywiad lub poprzedni czat.
 
@@ -29,6 +29,6 @@ Sam link do prywatnego repozytorium nie uruchamia aplikacji. Podgląd graficzny 
 
 ## Przekazanie do kolejnej sesji
 
-STREFA to mobilny idle survival RPG. Zachowaj rozdzielenie domain/persistence/app/ui, małą liczbę zależności i reguły GDD. Ukończono fundament i minimalną wyprawę etapu 2. Kolejny jest etap 3: zapasy wyprawowe, prosty zestaw, bezpieczny powrót i niewielka liczba receptur. Nie zaczynaj go bez nowego zlecenia.
+STREFA to mobilny idle survival RPG. Zachowaj rozdzielenie domain/persistence/app/ui, małą liczbę zależności i reguły GDD. Ukończono etapy 1–3: fundament, minimalną wyprawę, zapasy, prosty zestaw i trzy receptury. Kolejny jest etap 4: pionowy wycinek opisany w PLAN.md. Nie zaczynaj go bez nowego zlecenia.
 
 Lokalny zapis gry jest zależny od adresu i urządzenia. Repozytorium przenosi kod oraz dokumentację, ale nie postęp zapisany w IndexedDB komputera.

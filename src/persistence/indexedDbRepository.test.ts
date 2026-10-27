@@ -105,14 +105,49 @@ describe('transakcje wyprawy', () => {
     await repository.save(result, started);
     expect(await repository.load()).toEqual(result);
   });
-  it('wczytuje v1 i zapisuje v2 dopiero przy udanej zmianie', async () => {
+  it('wczytuje v1 i zapisuje v3 dopiero przy udanej zmianie', async () => {
     const factory = new IDBFactory();
     const { lastReport: _, ...legacy } = createInitialState(0);
     await writeRaw(factory, { ...legacy, schemaVersion: 1 });
     const repository = new IndexedDbRepository(factory, 'test');
     const loaded = (await repository.load())!;
-    expect(loaded.schemaVersion).toBe(2);
+    expect(loaded.schemaVersion).toBe(3);
     await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
     expect((await repository.load())!.hero.name).toBe('Kruk');
+  });
+});
+
+describe('atomowe przygotowanie', () => {
+  it('równoległe wytwarzanie nie powiela wyniku i przetrwa ponowne otwarcie', async () => {
+    const { addResources, craft, quantity } = await import('../domain/preparation');
+    const factory = new IDBFactory();
+    const repository = new IndexedDbRepository(factory, 'test');
+    const initial = createInitialState(0);
+    const state = { ...initial, inventory: addResources(initial.inventory, [{ itemId: 'cloth', quantity: 2 }]) };
+    await repository.save(state, null);
+    const result = craft(state, 'bandage', 1000);
+    const outcomes = await Promise.allSettled([repository.save(result, state), repository.save(result, state)]);
+    expect(outcomes.filter((entry) => entry.status === 'fulfilled')).toHaveLength(1);
+    const loaded = (await new IndexedDbRepository(factory, 'test').load())!;
+    expect(quantity(loaded.inventory, 'bandage')).toBe(3);
+    expect(quantity(loaded.inventory, 'cloth')).toBe(0);
+  });
+  it('przerwany start nie pobiera zapasów; ponowienie pobiera je tylko raz', async () => {
+    const { startExpedition } = await import('../domain/game');
+    const { quantity } = await import('../domain/preparation');
+    const repository = new IndexedDbRepository(new IDBFactory(), 'test');
+    const initial = createInitialState(0);
+    await repository.save(initial, null);
+    const original = IDBDatabase.prototype.transaction;
+    const spy = vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(function (this: IDBDatabase, ...args: Parameters<typeof original>) {
+      const tx = original.apply(this, args); queueMicrotask(() => tx.abort()); return tx;
+    });
+    const started = startExpedition(initial, 1000);
+    await expect(repository.save(started, initial)).rejects.toThrow();
+    spy.mockRestore();
+    expect(await repository.load()).toEqual(initial);
+    await repository.save(started, initial);
+    await expect(repository.save(started, initial)).rejects.toThrow();
+    expect(quantity((await repository.load())!.inventory, 'water')).toBe(2);
   });
 });

@@ -1,6 +1,6 @@
 # STREFA
 
-Fundament prototypu mobilnego idle survival RPG. Etap 2: pięć ekranów, lokalny zapis i jedna prosta automatyczna wyprawa; bez walki.
+Fundament prototypu mobilnego idle survival RPG. Etap 3: przygotowanie wyprawy, lokalny zapis, zapasy i proste receptury; bez walki.
 
 Praca z telefonu przy wyłączonym komputerze: zobacz CLOUD.md. Dokumentacja projektu: docs/GDD.pdf i tekst pomocniczy docs/GDD.md.
 
@@ -39,11 +39,12 @@ npm.cmd run preview
 1. Domyślnie otwiera się Kryjówka. Można zwinąć jej panel i przejść do pozostałych ekranów.
 2. W Bohaterze zmień pseudonim, poczekaj na potwierdzenie zapisu.
 3. Na Mapie wybierz drugi punkt i odśwież stronę. Aplikacja wróci do Kryjówki, ale pseudonim i wybrany cel pozostaną.
-4. W Wyprawach sprawdź cel, czas i nagrodę, a następnie rozpocznij wyprawę. Osiedle trwa minutę (2 złomu), warsztat dwie (4 złomu); to parametry demonstracyjne.
+4. W Wyprawach sprawdź cel, czas i nagrodę, a wybierz zestaw zapasów i opcjonalnie plecak, następnie rozpocznij wyprawę. Osiedle trwa minutę (2 złomu), warsztat dwie (4 złomu); to parametry demonstracyjne.
 5. Odśwież lub zamknij grę i wróć po terminie. W Wyprawach odbierz raport i nagrodę. Ilość złomu w Ekwipunku zwiększy się raz; raport pozostanie po odświeżeniu. Następna wyprawa jest dostępna po odbiorze poprzedniej.
-6. Przy błędzie zapisu zmiana nie zostaje zastosowana; ponów odbiór. Przy konflikcie z inną kartą odśwież stronę.
+6. Sprawdź, że woda i racje zostały pobrane raz przy starcie; plecak pozostaje bez zmian. W Ekwipunku z surowców z wyprawy uzdatnij wodę i przygotuj rację. Po dwóch wyprawach wystarczy tkaniny na bandaż. Widać koszt i wynik każdej receptury. Brak zasobów blokuje operację.
+7. Przy błędzie zapisu zmiana nie zostaje zastosowana; ponów odbiór. Przy konflikcie z inną kartą odśwież stronę.
 
-Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v2 (migracja poprawnego v1 bez utraty postępu). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
+Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v3 (migracja poprawnych v1 i v2 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
 
 Zapis jest osobny dla urządzenia, przeglądarki i adresu z portem. localhost i adres LAN mają różne zapisy; telefon nie współdzieli zapisu komputera. Czyszczenie danych witryny lub tryb prywatny może usunąć postęp. Brak synchronizacji, eksportu i kopii chmurowej. Nieaktualny zapis z drugiej karty jest odrzucany atomowo; odśwież ją przed kolejną zmianą. Czas wypraw opiera się na zegarze urządzenia, bez zabezpieczeń serwerowych.
 
@@ -61,3 +62,7 @@ src/
 Bez routera, globalnego store, biblioteki CSS, ikon ani wrappera IndexedDB. Pięć widoków nie wymaga jeszcze tras URL. React i ReactDOM to zależności aplikacji. Vite, TypeScript i typy służą kompilacji. Vitest oraz fake-indexeddb są wyłącznie do testów; emulacja nie zastępuje testu przeglądarki.
 
 PLAN.md określa dalsze etapy i ograniczenia względem GDD 1.1. AGENTS.md zawiera reguły pracy. Lista dokładnych wersji jest w package.json i package-lock.json.
+
+## Uproszczenia przygotowania
+
+Lekki zestaw kosztuje 1 wodę i 1 rację, z zapasem 2 i 2. Koszt obejmuje całą drogę i jest pobierany przy starcie. Wariant z zapasem nie daje jeszcze dodatkowej korzyści. Nie ma głodu ani pragnienia upływającego podczas nieobecności. Plecak jest rezerwowany do powrotu, bez premii i zużycia. Receptury wykonują się od razu: 1 woda do uzdatnienia → 1 woda, 1 składnik żywnościowy → 1 racja, 2 czyste tkaniny → 1 bandaż. Są to robocze parametry opisane w PLAN.md.

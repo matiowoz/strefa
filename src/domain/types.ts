@@ -28,7 +28,16 @@ export interface ExpeditionPlan {
   locationId: string;
   strategy: Strategy;
 }
+export interface ResourceAmount { itemId: string; quantity: number }
+export interface Preparation { kit: 'light' | 'stocked'; equipmentId: string | null }
+export interface Cargo {
+  equipmentId: string | null;
+  water: number;
+  ration: number;
+  loot: ResourceAmount[];
+}
 export interface Expedition {
+  cargo: Cargo;
   id: string;
   plan: ExpeditionPlan;
   status: 'running' | 'returning';
@@ -43,6 +52,7 @@ export interface Location {
 }
 
 export interface ExpeditionReport {
+  cargo: Cargo;
   expeditionId: string;
   locationId: string;
   returnedAt: number;
@@ -50,7 +60,8 @@ export interface ExpeditionReport {
 }
 
 export interface GameState {
-  schemaVersion: 2;
+  schemaVersion: 3;
+  preparation: Preparation;
   lastReport: ExpeditionReport | null;
   updatedAt: number;
   hero: Hero;

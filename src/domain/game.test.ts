@@ -39,7 +39,7 @@ describe('reguły podstawowego stanu', () => {
 
 describe('walidacja wersjonowanego zapisu', () => {
   it('odrzuca nowszą wersję zamiast tworzyć nowy stan', () => {
-    expect(() => validateSave({ ...createInitialState(), schemaVersion: 3 })).toThrow('wersja');
+    expect(() => validateSave({ ...createInitialState(), schemaVersion: 4 })).toThrow('wersja');
   });
   it.each([
     null,
@@ -61,7 +61,7 @@ describe('walidacja wersjonowanego zapisu', () => {
   });
   it('sprawdza również zapis planu i czasu przyszłej wyprawy', () => {
     const state = createInitialState();
-    state.activeExpedition = { id: 'e1', plan: { locationId: 'workshop', strategy: 'cautious' }, status: 'running', startedAt: 1000, expectedReturnAt: 2000 };
+    state.activeExpedition = { cargo: { equipmentId: null, water: 0, ration: 0, loot: [{ itemId: 'scrap', quantity: 4 }] }, id: 'e1', plan: { locationId: 'workshop', strategy: 'cautious' }, status: 'running', startedAt: 1000, expectedReturnAt: 2000 };
     expect(isGameState(state)).toBe(true);
     state.activeExpedition.expectedReturnAt = 500;
     expect(isGameState(state)).toBe(false);

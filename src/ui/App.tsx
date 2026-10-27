@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useGame } from '../app/useGame';
 import { getItem, locations, skillNames } from '../domain/catalog';
 import { expeditionRules, inventoryWeight, renameHero, selectLocation, startExpedition, settleExpedition } from '../domain/game';
-import type { GameRepository, GameState } from '../domain/types';
+import { craft, kits, preparationError, prepareExpedition, quantity, recipes } from '../domain/preparation';
+import type { GameRepository, GameState, ResourceAmount } from '../domain/types';
 
 const screens = [
   { id: 'shelter', label: 'Kryjówka', mark: '01' },
@@ -33,7 +34,7 @@ function Shelter({ state, navigate }: { state: GameState; navigate: (screen: Scr
     {panel && <div className="card-grid" id="shelter-panel">
       <article className="card"><span className="eyebrow">Ocalały</span><h3>{state.hero.name}</h3><p>Zdrowie {state.hero.health} / {state.hero.maxHealth}</p><button onClick={() => navigate('hero')}>Zobacz bohatera</button></article>
       <article className="card"><span className="eyebrow">Ekspedycja</span><h3>{state.activeExpedition ? 'W toku' : 'W kryjówce'}</h3><p>Wyrusz po materiały i odbierz raport po powrocie.</p><button onClick={() => navigate('expeditions')}>Zobacz wyprawy</button></article>
-      <article className="card"><span className="eyebrow">Warsztat</span><h3>Brak aktywnej produkcji</h3><p>Stanowiska i receptury pojawią się w kolejnych etapach.</p></article>
+      <article className="card"><span className="eyebrow">Warsztat</span><h3>Brak aktywnej produkcji</h3><p>W Ekwipunku przygotujesz wodę, racje i bandaże.</p></article>
       <article className="card"><span className="eyebrow">Radio i zadania</span><h3>Cisza w eterze</h3><p>Na razie poznaj kryjówkę, mapę i zapasy. Fabuła nie została uruchomiona.</p></article>
     </div>}
   </>;
@@ -54,6 +55,30 @@ function MapScreen({ state, update, saving }: { state: GameState; update: Update
     </article>)}</div></>;
 }
 
+function ResourceList({ resources }: { resources: readonly ResourceAmount[] }) {
+  return <>{resources.map((entry) => `${getItem(entry.itemId)?.name} ×${entry.quantity}`).join(', ')}</>;
+}
+
+function PreparationPanel({ state, update, saving }: { state: GameState; update: Update; saving: boolean }) {
+  const problem = preparationError(state);
+  return <fieldset disabled={saving || !!state.activeExpedition} className="preparation">
+    <legend>Przygotowanie</legend>
+    <label htmlFor="supply-kit">Zestaw zapasów</label>
+    <select id="supply-kit" value={state.preparation.kit} onChange={(event) => {
+      const kit = event.target.value as keyof typeof kits;
+      void update((previous) => prepareExpedition(previous, { ...previous.preparation, kit }));
+    }}>{Object.entries(kits).map(([id, kit]) => <option key={id} value={id}>{kit.name}: woda ×{kit.water}, racja ×{kit.ration}</option>)}</select>
+    <label htmlFor="equipment">Wyposażenie</label>
+    <select id="equipment" value={state.preparation.equipmentId ?? ''} onChange={(event) => {
+      const equipmentId = event.target.value || null;
+      void update((previous) => prepareExpedition(previous, { ...previous.preparation, equipmentId }));
+    }}><option value="">Bez sprzętu</option>{state.inventory.filter((entry) => getItem(entry.itemId)?.category === 'equipment').map((entry) => <option key={entry.id} value={entry.id} disabled={entry.condition === 0}>{getItem(entry.itemId)?.name} ({entry.condition}%)</option>)}</select>
+    <p>W magazynie: woda ×{quantity(state.inventory, 'water')}, racja ×{quantity(state.inventory, 'ration')}.</p>
+    <p className="muted">Zapasy na całą drogę, również powrotną, zużywane raz przy starcie. Wariant z zapasem zużywa więcej, bez dodatkowej nagrody. Sprzęt pozostaje Twoją własnością i wraca bez uszkodzeń; plecak nie daje jeszcze premii.</p>
+    {problem && <p role="status">{problem}</p>}
+  </fieldset>;
+}
+
 function ExpeditionsScreen({ state, update, saving }: { state: GameState; update: Update; saving: boolean }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
@@ -71,31 +96,48 @@ function ExpeditionsScreen({ state, update, saving }: { state: GameState; update
       <h2>{location?.name}</h2>
       {active ? <>
         <p>{remaining > 0 ? `Powrót za ${Math.floor(remaining / 60)} min ${remaining % 60} s` : 'Bohater wrócił. Raport gotowy do odbioru.'}</p>
+        <p>Zapasy pobrane przy starcie: woda ×{active.cargo.water}, racja ×{active.cargo.ration}. Sprzęt: {active.cargo.equipmentId ? 'zarezerwowany, wróci bez zmian' : 'bez sprzętu'}.</p>
         <p>Planowany powrót: <time dateTime={new Date(active.expectedReturnAt).toISOString()}>{new Date(active.expectedReturnAt).toLocaleTimeString('pl-PL')}</time></p>
         <button disabled={saving || remaining > 0} onClick={() => { void update((previous) => settleExpedition(previous, active.id)); }}>Odbierz raport i nagrodę</button>
       </> : <>
         <p>Cel wybierzesz na Mapie. Strategia: zrównoważona.</p>
         <dl><div><dt>Czas</dt><dd>{rule.durationMs / 60_000} min</dd></div><div><dt>Nagroda</dt><dd>Złom ×{rule.scrap}</dd></div></dl>
-        <button disabled={saving} onClick={() => { void update((previous) => startExpedition(previous)); }}>Rozpocznij wyprawę</button>
+        <PreparationPanel state={state} update={update} saving={saving} />
+        <p>Łupy oprócz złomu: woda do uzdatnienia ×2, składniki żywnościowe ×2, czysta tkanina ×1.</p>
+        <button disabled={saving || !!preparationError(state)} onClick={() => { void update((previous) => startExpedition(previous)); }}>Rozpocznij wyprawę</button>
       </>}
-      <p className="muted">Wyprawa upływa także po zamknięciu gry. Jedna wyprawa naraz; odbierz raport przed kolejną. Prototyp: stałe łupy, bez walki i zużycia zapasów. Czas i nagrody są demonstracyjne; strategie nie mają jeszcze odrębnego działania.</p>
+      <p className="muted">Wyprawa upływa także po zamknięciu gry. Jedna wyprawa naraz; odbierz raport przed kolejną. Prototyp: stałe łupy, bez walki i pasków głodu lub pragnienia. Czas i nagrody są demonstracyjne; strategie nie mają jeszcze odrębnego działania.</p>
     </article>
     {report && <article className="card" aria-label="Ostatni raport"><span className="eyebrow">Ostatni raport / rozliczony</span>
       <h2>Bezpieczny powrót</h2><p>{locations.find((entry) => entry.id === report.locationId)?.name}</p>
-      <p>Dodano do ekwipunku: złom ×{report.scrap}. Zdrowie i wyposażenie bez zmian.</p>
+      <p>Dodano do ekwipunku: <ResourceList resources={report.cargo.loot} />. Zdrowie i wyposażenie bez zmian.</p>
+      <p>Zużyto przy starcie: woda ×{report.cargo.water}, racja ×{report.cargo.ration}. Wyposażenie jest znowu dostępne.</p>
       <p>Powrót: {new Date(report.returnedAt).toLocaleString('pl-PL')}</p>
     </article>}
   </>;
 }
 
-function InventoryScreen({ state }: { state: GameState }) {
+function InventoryScreen({ state, update, saving }: { state: GameState; update: Update; saving: boolean }) {
+  const [notice, setNotice] = useState('');
   return <><div className="section-heading"><p className="intro">Zapasy w kryjówce</p><span className="badge">Masa: {inventoryWeight(state).toLocaleString('pl-PL', { maximumFractionDigits: 1 })} kg</span></div>
     <ul className="inventory-list">{state.inventory.map((entry) => {
       const item = getItem(entry.itemId);
       return <li className="inventory-item" key={entry.id}><span className="item-mark" aria-hidden="true">{item?.category === 'equipment' ? 'E' : item?.category === 'material' ? 'M' : 'Z'}</span>
-        <div><h2>{item?.name}</h2><p>{item?.description}</p>{entry.condition !== null && <small>Stan: {entry.condition}%</small>}</div><span className="quantity">×{entry.quantity}</span>
+        <div><h2>{item?.name}</h2><p>{item?.description}</p>{entry.condition !== null && <small>Stan: {entry.condition}%</small>}</div><span className="quantity">×{entry.quantity}</span>{entry.id === state.activeExpedition?.cargo.equipmentId && <small>Zarezerwowany na wyprawę</small>}
       </li>;
-    })}</ul><p className="muted">Minimalny zestaw demonstracyjny. Przedmioty nie są zużywane ani sprzedawane w tym etapie.</p></>;
+    })}</ul><p className="muted">Zarezerwowany sprzęt pozostaje w ewidencji; zapasy wyprawy są już odjęte. Sprzedaż nie jest dostępna.</p>
+    <h2>Przygotowanie zapasów</h2><p>Surowce znajdziesz na wyprawach. Receptury demonstracyjne, wykonywane od razu w kryjówce.</p>
+    <div className="card-grid">{recipes.map((recipe) => {
+      const available = recipe.costs.every((cost) => quantity(state.inventory, cost.itemId) >= cost.quantity);
+      return <article className="card" key={recipe.id}><h3>{recipe.name}</h3>
+        <p>Koszt: <ResourceList resources={recipe.costs} />.</p>
+        <p>W magazynie: {recipe.costs.map((cost) => `${getItem(cost.itemId)?.name} ×${quantity(state.inventory, cost.itemId)}`).join(', ')}.</p>
+        <p>Wynik: <ResourceList resources={recipe.output} />. Czas: natychmiast.</p>
+        <button disabled={saving || !available} onClick={() => {
+          setNotice(''); void update((previous) => craft(previous, recipe.id)).then((ok) => { if (ok) setNotice(`${recipe.name}: wykonano i zapisano.`); });
+        }}>{recipe.name}</button>{!available && <p className="muted">Brak surowców.</p>}
+      </article>;
+    })}</div><p role="status">{notice}</p></>;
 }
 
 function HeroScreen({ state, update, saving }: { state: GameState; update: Update; saving: boolean }) {
@@ -129,7 +171,7 @@ export function App({ repository }: { repository: GameRepository }) {
           {screen === 'shelter' && <Shelter state={state} navigate={setScreen} />}
           {screen === 'map' && <MapScreen state={state} update={update} saving={saving} />}
           {screen === 'expeditions' && <ExpeditionsScreen state={state} update={update} saving={saving} />}
-          {screen === 'inventory' && <InventoryScreen state={state} />}
+          {screen === 'inventory' && <InventoryScreen state={state} update={update} saving={saving} />}
           {screen === 'hero' && <HeroScreen state={state} update={update} saving={saving} />}
         </>}
         <footer className="page-footer">Wersja robocza. Postęp jest zapisywany tylko w tej przeglądarce.</footer>

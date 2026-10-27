@@ -33,17 +33,17 @@ Szczegółowe wnętrze, jedna dopracowana lokacja i krótki ciąg celów; dalsze
 
 ## Ograniczenia i propozycje względem GDD
 
-- Jedna kryjówka, 2 poglądowe punkty mapy i 5 definicji przedmiotów; to dane testowe, nie finalny scenariusz ani balans.
+- Jedna kryjówka, 2 poglądowe punkty mapy i 8 definicji przedmiotów; to dane testowe, nie finalny scenariusz ani balans.
 - Widok kryjówki jest kompozycją CSS. Nie udaje docelowej szczegółowej grafiki.
-- Brak fabuły, walki, craftingu, produkcji, badań, energii, x4 i transportu. Nie zmienia to ich ustalonej wizji.
+- Brak fabuły, walki, kolejek produkcji, badań, energii, x4 i transportu. Nie zmienia to ich ustalonej wizji.
 - Lokalny zapis zamiast serwera jest świadomym ograniczeniem zlecenia. Nie zapewnia synchronizacji ani ochrony przed edycją danych i zmianą zegara.
 - Adapter zapisuje snapshot z atomowym sprawdzeniem oczekiwanego stanu. Nieaktualna karta nie może nadpisać nowszego zapisu; przy konflikcie odśwież stronę. Brak scalania zmian i synchronizacji urządzeń.
 - Nie dodajemy resetu zapisu, automatycznego kasowania błędnych danych, kont ani płatności.
 - Ekran startowy i rozwinięcie panelu są ustawieniami interfejsu, nie elementem trwałego stanu gry.
-- Schemat v2: poprawny v1 migruje w pamięci bez utraty postępu; zapis v2 następuje przy udanej zmianie. Nieznana wersja, uszkodzone dane lub nieznane ID zatrzymują odczyt bez nadpisania.
+- Schemat v3: poprawne v1 i v2 migrują w pamięci bez utraty postępu; zapis v3 następuje przy udanej zmianie. Nieznana wersja, uszkodzone dane lub nieznane ID zatrzymują odczyt bez nadpisania.
 - Późniejszy adapter HTTP implementuje port GameRepository. Komendy i reguły gospodarki trzeba wówczas przenieść na serwer; sama zmiana adaptera nie zapewnia bezpieczeństwa.
 
-Etap 2 został zlecony osobno. Po nim zatrzymujemy prace; etap 3 wymaga osobnego zlecenia.
+Etapy 2 i 3 zostały zlecone osobno. Po etapie 3 zatrzymujemy prace; etap 4 wymaga osobnego zlecenia.
 
 ## Wyniki weryfikacji 26 października 2026
 
@@ -65,3 +65,20 @@ Etap 2 został zlecony osobno. Po nim zatrzymujemy prace; etap 3 wymaga osobnego
 Roboczy balans do sprawdzenia pętli, nie finalne reguły GDD: osiedle 1 minuta / 2 złomu, warsztat 2 minuty / 4 złomu. Jedyna strategia startu to zrównoważona; bez symulacji taktyk, walki, urazów, zużycia zapasów, doświadczenia, wyczerpywania lokacji i automatycznych serii. Przechowywany jest tylko ostatni rozliczony raport. Odebranie raportu przyznaje łup; do tego czasu wyprawa blokuje następny start. Zegar urządzenia jest prototypowy i nie zabezpiecza gospodarki przed manipulacją. Przyszłe zmiany balansu wymagają wersjonowania wyniku aktywnej wyprawy.
 
 Weryfikacja etapu 2: `npm test` — 32/32, `npm run build` — sukces. Chromium headless, szerokość 390 px: start, odtworzenie aktywnej wyprawy po odświeżeniu, odbiór po terminie, raport po ponownym odświeżeniu i ekwipunek +2 złomu; brak poziomego przewijania. Upływ czasu zasymulowany przesunięciem zegara tylko w izolowanym profilu testowym. Bez testu fizycznego telefonu i Safari.
+
+## Realizacja etapu 3 — przygotowanie
+
+- [x] Trwały wybór zestawu: lekki (1 woda + 1 racja), z zapasem (2 + 2); opcjonalnie jeden własny plecak.
+- [x] Koszt całej wyprawy wraz z powrotem pobierany atomowo przy starcie. Brak zapasów lub niesprawny sprzęt blokuje start. Nie ma pasków głodu/pragnienia.
+- [x] Sprzęt pozostaje w ewidencji i jest zarezerwowany do odbioru raportu, nie jest zużywany ani usuwany. Zestawu nie można zmieniać w trakcie.
+- [x] Łupy i zużycie utrwalone przy starcie, pokazane w raporcie. Receptury nie korzystają ze sprzętu ani zapasów już pobranych na wyprawę.
+- [x] Trzy deterministyczne receptury w Ekwipunku, z podglądem kosztów, stanu magazynu, wyniku i czasu. Koszty i wynik zapisywane w jednej transakcji. Równoległa nieaktualna karta jest odrzucana.
+- [x] Migracja v1/v2 → v3: dotychczasowa wyprawa zachowuje czas i nagrodę, bez nowych kosztów ani dodatkowych łupów; stary raport pozostaje dostępny.
+
+Robocze uproszczenia i balans, nie nowe ustalone reguły GDD:
+- Nowe wyprawy oprócz dotychczasowego złomu dają 2 wody do uzdatnienia, 2 składniki żywnościowe i 1 czystą tkaninę. Pozwala to odtwarzać zapasy bez bezpłatnego przyznawania gotowych racji.
+- Receptury: 1 woda do uzdatnienia → 1 woda; 1 składnik żywnościowy → 1 racja; 2 czyste tkaniny → 1 bandaż. Wykonanie natychmiastowe, bez paliwa, stanowisk, losowej jakości, doświadczenia, kolejek i x4. Bandaż nadal nie leczy.
+- Wariant z zapasem zużywa cały podany koszt, bez premii do łupu lub czasu; to test wyboru i pobierania zapasów, bez symulacji nadwyżek. Plecak nie dodaje jeszcze udźwigu ani premii. Nie wdrażamy napraw, modułów i zużycia sprzętu.
+- Brak odwrotu i porażek; bezpieczny powrót oznacza ukończenie po terminie bez strat własnego wyposażenia. Zegar nadal lokalny.
+
+Weryfikacja: 44/44 testy, TypeScript i Vite build zaliczone. Chromium przy szerokości 390 px: zapis zestawu i sprzętu, odświeżenie, start, odtworzenie wyprawy, odbiór, blokada braku zapasów, wytworzenie wody i racji, odświeżenie i kolejny start. Brak poziomego przewijania. Czas przesunięty tylko w izolowanym profilu testowym. Bez fizycznego telefonu i Safari.
