@@ -249,3 +249,31 @@ it('migruje v6 z plecakiem poza siatkę i zapisuje nowy stan z kontrolą współ
   expect(reopened.backpack).toEqual(initial.backpack);
   expect(reopened.inventory).toEqual(initial.inventory);
 });
+
+it('rozdzielenie stosu przetrwa ponowne otwarcie, a dwie karty nie powielą sztuk', async () => {
+  const { splitStack } = await import('../domain/inventory');
+  const { quantity } = await import('../domain/preparation');
+  const factory = new IDBFactory();
+  const repository = new IndexedDbRepository(factory, 'test');
+  const initial = createInitialState(0); await repository.save(initial, null);
+  const next = splitStack(initial, 'starter-water', 1, 1000);
+  const results = await Promise.allSettled([repository.save(next, initial), repository.save(next, initial)]);
+  expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+  const loaded = (await new IndexedDbRepository(factory, 'test').load())!;
+  expect(loaded).toEqual(next);
+  expect(quantity(loaded.inventory, 'water')).toBe(3);
+  expect(loaded.inventory.filter((entry) => entry.itemId === 'water')).toHaveLength(2);
+});
+
+it('przerwany podział nie zmniejsza źródła i nie dodaje nowego stosu ani pozycji', async () => {
+  const { splitStack } = await import('../domain/inventory');
+  const repository = new IndexedDbRepository(new IDBFactory(), 'test');
+  const initial = createInitialState(0); await repository.save(initial, null);
+  const next = splitStack(initial, 'starter-water', 1, 1000);
+  const original = IDBDatabase.prototype.transaction;
+  const spy = vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(function (this: IDBDatabase, ...args: Parameters<typeof original>) {
+    const tx = original.apply(this, args); queueMicrotask(() => tx.abort()); return tx;
+  });
+  await expect(repository.save(next, initial)).rejects.toThrow(); spy.mockRestore();
+  expect(await repository.load()).toEqual(initial);
+});

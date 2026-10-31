@@ -94,6 +94,8 @@ Przeciągnij rzecz na siatkę: podgląd centruje się pod kursorem bez zmiany wy
 
 Receptury korzystają wyłącznie z rzeczy przy postaci; surowce ze schowka trzeba najpierw przenieść. Znaleziska i wyniki receptur najpierw trafiają do ekwipunku, następnie do wolnych miejsc schowka, a przy braku miejsca do bezpiecznego odbioru. Odbiór służy wyłącznie zabezpieczeniu wyników i migracji — nie można odkładać tam rzeczy. Stare zapisy zachowują całą zawartość, nazwę i aktywną wyprawę. Wyprawy nadal nie pokazują przyszłych zdobyczy.
 
+Stosy większe niż 1 sztuka mają przycisk „Rozdziel” w opisie po najechaniu i w szczegółach. Wybierz ilość od 1 do liczby sztuk pomniejszonej o 1. Nowy stos zajmuje osobny prostokąt w tej samej siatce; przy braku miejsca stan pozostaje bez zmian. Podział jest dostępny po powrocie do kryjówki i zachowuje łączną liczbę przedmiotów.
+
 W przyszłości będzie możliwość budowania kolejnych skrytek. Obecnie jest jedna; nie ma stron, zakupów ani płatności. Rzeczy z dawnej drugiej strony są przenoszone do wolnych miejsc schowka, a jeśli się nie mieszczą, pozostają w bezpiecznym odbiorze.
 
 ## Ilustrowana kryjówka

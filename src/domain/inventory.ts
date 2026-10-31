@@ -97,3 +97,22 @@ export function tryMoveItem(...args: Parameters<typeof moveItem>): GameState {
   try { return moveItem(...args); }
   catch (error) { if (error instanceof InventorySpaceError) return args[0]; throw error; }
 }
+
+// A split stays in its source container. Lack of room is a silent no-op.
+export function splitStack(state: GameState, id: string, amount: number, now = Date.now()): GameState {
+  if (!atShelter(state, now)) throw new Error('Rozdzielanie jest dostępne po powrocie do kryjówki.');
+  const carried = state.inventory.some((entry) => entry.id === id);
+  const source = carried ? state.inventory : state.stash;
+  const entry = source.find((entry) => entry.id === id);
+  if (!entry) throw new Error('Nie znaleziono stosu w siatce.');
+  if (!Number.isSafeInteger(amount) || amount < 1 || amount >= entry.quantity) throw new Error('Wybierz liczbę mniejszą od całego stosu.');
+  const all = [...state.inventory, ...state.stash, ...state.overflow, state.backpack];
+  let newId = `${id}-split`;
+  while (all.some((item) => item.id === newId)) newId += '-new';
+  const separated = { ...entry, id: newId, quantity: amount };
+  const target = firstFree([...state.inventory, ...state.stash], state.positions, separated, carried ? -1 : 0);
+  if (!target) return state;
+  const next = [...source.map((item) => item.id === id ? { ...item, quantity: item.quantity - amount } : item), separated];
+  return { ...state, inventory: carried ? next : state.inventory, stash: carried ? state.stash : next,
+    positions: { ...state.positions, [newId]: target }, updatedAt: now };
+}

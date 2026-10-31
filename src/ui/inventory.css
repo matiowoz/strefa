@@ -87,3 +87,10 @@
 
 .equipped-backpack { display:flex; align-items:center; gap:1rem; margin-bottom:1rem; }
 .equipped-backpack > .item-art { width:64px; height:90px; flex:none; }
+
+.split-stack-dialog { width:min(390px, calc(100vw - 32px)); max-height:calc(100dvh - 32px); overflow:auto; padding:1.25rem; border:1px solid #b39b68; border-radius:8px; background:linear-gradient(135deg, #39422c, #19251c); color:#e8d9b4; box-shadow:0 12px 45px #0009; }
+.split-stack-dialog::backdrop { background:#080e09bb; }
+.split-stack-dialog h2 { margin:0 0 .7rem; font:1.5rem Georgia,serif; }
+.split-stack-dialog p, .split-stack-dialog label { font-size:.85rem; line-height:1.6; }
+.split-stack-dialog label { display:block; margin-bottom:.4rem; }
+.split-stack-dialog input { width:100%; margin-bottom:.4rem; }

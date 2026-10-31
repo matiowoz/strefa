@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { getItem } from '../domain/catalog';
 import { inventoryWeight } from '../domain/game';
 import { consumableIds, useItem } from '../domain/useItem';
-import { atShelter, itemSizes, tryMoveItem } from '../domain/inventory';
+import { atShelter, itemSizes, splitStack, tryMoveItem } from '../domain/inventory';
 import { craft, quantity, recipes } from '../domain/preparation';
 import type { GameState, InventoryEntry } from '../domain/types';
 import { ItemArt } from './ItemArt';
+import { SplitStackDialog } from './SplitStackDialog';
 import { InventoryGrid } from './InventoryGrid';
 import './inventory.css';
 import './inventory-grid.css';
@@ -22,6 +23,8 @@ export function InventoryScreen({ state, update, saving, storage }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(state.inventory[0]?.id ?? null);
   const [moving, setMoving] = useState(false);
   const [notice, setNotice] = useState('');
+  const [splitId, setSplitId] = useState<string | null>(null);
+  const splitEntry = [...state.inventory, ...state.stash].find((entry) => entry.id === splitId);
   const selected = [...state.inventory, ...state.stash, ...state.overflow].find((entry) => entry.id === selectedId);
   const item = selected && getItem(selected.itemId);
   const home = atShelter(state, now);
@@ -36,6 +39,19 @@ export function InventoryScreen({ state, update, saving, storage }: Props) {
       if (ok) setNotice(entry.itemId === 'water' ? 'Wypito wodę.' : entry.itemId === 'ration' ? 'Zjedzono rację.' : 'Zużyto bandaż.');
     });
   }
+  function openSplit(entry: InventoryEntry) {
+    setMoving(false); setSelectedId(entry.id); setNotice(''); setSplitId(entry.id);
+  }
+  function divide(amount: number) {
+    if (!splitEntry) return;
+    let changed = false;
+    void update((previous) => {
+      const next = splitStack(previous, splitEntry.id, amount);
+      changed = next !== previous; return next;
+    }).then((ok) => {
+      if (ok) { setSplitId(null); if (changed) setNotice('Stos rozdzielony i zapisany.'); }
+    });
+  }
   function actions(entry: InventoryEntry) {
     const isCarried = state.inventory.some((item) => item.id === entry.id);
     const locked = disabled || state.activeExpedition?.cargo.equipmentId === entry.id;
@@ -43,9 +59,11 @@ export function InventoryScreen({ state, update, saving, storage }: Props) {
       {consumableIds.has(entry.itemId) && <button disabled={locked} title="Zużyj 1 sztukę; na razie bez zmiany statystyk" onClick={() => useThis(entry)}>Użyj</button>}
       {storage && isCarried && <button disabled={locked} onClick={() => place(entry.id, 0)}>Do skrytki</button>}
       {storage && !isCarried && <button disabled={locked} onClick={() => place(entry.id, -1)}>Do ekwipunku</button>}
+      {entry.quantity > 1 && <button disabled={locked} onClick={() => openSplit(entry)}>Rozdziel</button>}
     </>;
   }
   return <div className="inventory-workbench">
+    {splitEntry && <SplitStackDialog entry={splitEntry} disabled={disabled} close={() => setSplitId(null)} submit={divide} />}
     <div className="inventory-intro"><div><span className="eyebrow">To, co niesiesz. To, co zostawiasz.</span><p>{storage ? 'Ekwipunek i skrytka' : 'Ekwipunek postaci'}</p></div><span className="pack-weight">Przy postaci <strong>{inventoryWeight(state).toLocaleString('pl-PL', { maximumFractionDigits: 1 })} <small>kg</small></strong></span></div>
     <section className="stash-panel equipped-backpack"><ItemArt itemId="backpack" /><div><span className="eyebrow">Założony na stałe</span><h2>{getItem(state.backpack.itemId)?.name}</h2><p>Podstawowy plecak · 5 × 9 pól. W przyszłości wymienisz go na większy.</p></div></section>
     {!home && <p className="storage-warning">Postać jest na wyprawie. Przenoszenie przedmiotów będzie możliwe po powrocie do kryjówki.</p>}
@@ -57,7 +75,7 @@ export function InventoryScreen({ state, update, saving, storage }: Props) {
     <p className="inventory-notice" role="status">{notice}</p>
     <details className="selected-item-details"><summary>Szczegóły i układanie zaznaczonego przedmiotu</summary><section id="item-details" className="stash-panel storage-details" aria-label="Szczegóły przedmiotu">{selected && item ? <><div className="detail-top"><div className="detail-art"><ItemArt itemId={item.id} /></div><div><span className="eyebrow">{carried ? 'Przy postaci' : state.stash.some((entry) => entry.id === selected.id) ? 'Schowek' : 'Odbiór'}</span><h3>{item.name}</h3><p>{item.description}</p></div></div>
       <dl><div><dt>Ilość</dt><dd>{selected.quantity}</dd></div><div><dt>Rozmiar</dt><dd>{itemSizes[item.id].width} × {itemSizes[item.id].height}</dd></div><div><dt>Masa sztuki</dt><dd>{item.weightKg} kg</dd></div>{selected.condition !== null && <div><dt>Stan</dt><dd>{selected.condition}%</dd></div>}</dl>
-      <div className="storage-actions">{consumableIds.has(selected.itemId) && <button disabled={disabled} onClick={() => useThis(selected)}>Użyj</button>}{storage && <button disabled={disabled || state.activeExpedition?.cargo.equipmentId === selected.id} onClick={() => place(selected.id, carried ? page : -1)}>{carried ? 'Do skrytki' : 'Do ekwipunku'}</button>}{storage && !carried && <button disabled={disabled || state.activeExpedition?.cargo.equipmentId === selected.id} onClick={() => place(selected.id, page)}>Do skrytki</button>}<button disabled={disabled || state.activeExpedition?.cargo.equipmentId === selected.id} aria-pressed={moving} onClick={() => setMoving(!moving)}>{moving ? 'Anuluj przenoszenie' : 'Zmień położenie'}</button>
+      <div className="storage-actions">{selected.quantity > 1 && !state.overflow.some((entry) => entry.id === selected.id) && <button disabled={disabled} onClick={() => openSplit(selected)}>Rozdziel</button>}{consumableIds.has(selected.itemId) && <button disabled={disabled} onClick={() => useThis(selected)}>Użyj</button>}{storage && <button disabled={disabled || state.activeExpedition?.cargo.equipmentId === selected.id} onClick={() => place(selected.id, carried ? page : -1)}>{carried ? 'Do skrytki' : 'Do ekwipunku'}</button>}{storage && !carried && <button disabled={disabled || state.activeExpedition?.cargo.equipmentId === selected.id} onClick={() => place(selected.id, page)}>Do skrytki</button>}<button disabled={disabled || state.activeExpedition?.cargo.equipmentId === selected.id} aria-pressed={moving} onClick={() => setMoving(!moving)}>{moving ? 'Anuluj przenoszenie' : 'Zmień położenie'}</button>
       </div>{moving && <p>Wskaż puste pole w wybranej siatce.</p>}
     </> : <p>Wybierz przedmiot w siatce, aby przenieść go lub zobaczyć szczegóły.</p>}</section></details>
     {state.overflow.length > 0 && <section className="stash-panel storage-recovery"><h2>Przedmioty do odebrania</h2><p>Nie zmieściły się w siatkach. Są bezpieczne — zwolnij miejsce i przenieś je do ekwipunku lub schowka. Nie są to dodatkowe pola użytkowe.</p>{state.overflow.map((entry) => <button key={entry.id} onClick={() => setSelectedId(entry.id)}>{getItem(entry.itemId)?.name} ×{entry.quantity}</button>)}</section>}

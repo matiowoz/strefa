@@ -180,3 +180,11 @@ Na doprecyzowane polecenie użytkownika Użyj zużywa jedną wodę, rację albo 
 Zakres nie obejmuje walki, backendu, płatności ani rozbudowanego silnika zdarzeń. Nowe reguły zastępują wcześniejsze demonstracyjne zestawy i stałe nagrody, zgodnie z bieżącym zleceniem.
 
 Weryfikacja tego etapu: 81/81 testów Vitest, kompilacja TypeScript strict i Vite. Chromium: pełny ciąg wyprawa → raport → naprawa → nowa receptura, wynik i postęp po odświeżeniu, założony plecak poza siatką, brak wyboru zestawów i zużycia przy starcie; szerokości 320, 390, 768 i 1440 px bez poziomego przepełnienia strony. Materiały naprawy w izolowanym profilu przeglądarki dodano do testu; losowe i puste wyniki sprawdzono testami domeny. Testy adaptera obejmują przerwanie naprawy, dwie karty i migrację plecaka v6 przy zapisie.
+
+## Rozdzielanie stosów
+
+Na polecenie użytkownika dodano „Rozdziel” dla stosów większych niż 1 w siatkach ekwipunku i skrytki oraz panelu szczegółów. Okienko pozwala wybrać całkowitą ilość od 1 do ilości stosu minus 1; domyślnie połowa. Zatwierdzenie tworzy drugi stos tego samego przedmiotu i stanu w pierwszym wolnym prostokącie tego samego kontenera. Brak miejsca jest cichym brakiem zmiany, bez zapisu i bez przenoszenia do skrytki/odbioru. Pojedyncza sztuka i założony plecak nie mają tej akcji. Nie można rozdzielać podczas wyprawy ani bezpośrednio z odbioru nadmiaru. Brak automatycznego scalania rozdzielonych stosów i zmiany schematu v7.
+
+Weryfikacja: 101/101 testów Vitest i build. Nowe przypadki sprawdzają sumę sztuk, osobne ID i pozycje, podział w obu kontenerach, niepoprawne ilości, brak całego prostokąta, pełne siatki bez przenoszenia do innej, blokadę w drodze, trwałość, konflikt kart i przerwanie transakcji.
+
+Chromium: rzeczywista mysz od ikony do przycisku, podział w ekwipunku i skrytce, brak akcji dla 1 sztuki, walidacja ilości, Enter/Escape, anulowanie bez zapisu, trwałość po odświeżeniu, pełny kontener bez podziału i bez błędu danych. Okienko mieści się w szerokościach 320/390/768/1440 px.
