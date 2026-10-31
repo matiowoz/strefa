@@ -1,0 +1,56 @@
+.expedition-page .eyebrow { color: #c7b389; font-size: .65rem; letter-spacing: .12em; }
+.expedition-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.4rem; }
+.expedition-heading h2 { font: 1.65rem Georgia, serif; color: #eadfc1; margin: .4rem 0 0; }
+.expedition-phase { color: #dfc692; border: 1px solid #867953; padding: .4rem .7rem; border-radius: 3px; font-size: .7rem; background: #4f503327; }
+.expedition-layout { display: grid; gap: 1.2rem; align-items: start; }
+.expedition-destination, .expedition-plan { min-width: 0; border: 1px solid #686348; border-radius: 7px; overflow: hidden; background: linear-gradient(135deg, #333a27, #1e291f); }
+.expedition-landscape { position: relative; }
+.expedition-landscape img { width: 100%; height: auto; aspect-ratio: 16/10; object-fit: cover; display: block; }
+.expedition-landscape > span { position: absolute; bottom: .8rem; left: 1rem; font-size: .65rem; color: #efe1bb; background: #1c2717df; border: 1px solid #b49e6577; border-radius: 3px; padding: .3rem .6rem; }
+.destination-copy, .expedition-plan { padding: 1.25rem; }
+.destination-copy h2, .expedition-plan h2 { font: 1.5rem/1.25 Georgia, serif; color: #e7dabc; margin: .5rem 0 .8rem; }
+.destination-copy > p, .expedition-plan > p { font-size: .8rem; line-height: 1.7; color: #c3c9b0; }
+.unknown-findings { display: flex; align-items: center; gap: 1rem; border-top: 1px solid #566043; margin: 1rem 0; padding: 1rem 0 0; }
+.unknown-findings > span { width: 44px; height: 44px; border: 1px dashed #8b835b; border-radius: 4px; display: grid; place-items: center; color: #d0b780; font: 1.7rem Georgia, serif; flex-shrink: 0; }
+.unknown-findings p { font: 1rem Georgia, serif; color: #daca9e; margin: 0; }
+.unknown-findings small { display: block; font: .7rem/1.5 system-ui, sans-serif; color: #b8c1a5; margin-top: .5rem; }
+.expedition-duration { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #596043; padding: .6rem 0 1rem; font-size: .8rem; color: #bdc6aa; }
+.expedition-duration strong { font: 1.8rem Georgia, serif; color: #e4d1a2; }
+.expedition-duration small { font: .75rem system-ui, sans-serif; }
+.expedition-plan .preparation { padding: 1rem 0; margin: .8rem 0; border: 0; }
+.expedition-plan .preparation legend { color: #c7b389; font-size: .7rem; }
+.expedition-plan .preparation label { font-size: .75rem; }
+.expedition-plan select { font-size: .8rem; border-color: #77754e; }
+.expedition-plan .preparation p { font-size: .72rem; line-height: 1.65; }
+.departure-cost { padding: 1rem; border: 1px solid #756b48; border-radius: 4px; background: #655a2c22; margin-bottom: 1rem; }
+.departure-cost p { color: #e1cd9b; font-size: .95rem; margin: .4rem 0; }
+.departure-cost small { font-size: .7rem; color: #c0c6ab; }
+.expedition-primary { width: 100%; color: #fff0c7; background: linear-gradient(#716544, #4c5132); border-color: #c0a575; font-size: .8rem; }
+.expedition-stock-link { width: 100%; background: transparent; border: 0; color: #c8bc96; margin-top: .5rem; font-size: .72rem; }
+.expedition-plan .expedition-countdown { font: 1.5rem/1.4 Georgia, serif; color: #ead7a7; margin: 1.6rem 0 1rem; }
+.expedition-progress { display: block; width: 100%; height: 6px; border: 0; background: #10190d; accent-color: #b9be87; }
+.expedition-progress::-webkit-progress-bar { background: #10190d; }
+.expedition-progress::-webkit-progress-value { background: linear-gradient(90deg, #687e4c, #cfbf86); }
+.expedition-plan .expedition-clock, .expedition-plan .expedition-small { font-size: .7rem; }
+.expedition-plan dl { font-size: .75rem; }
+.expedition-plan dd { max-width: 55%; text-align: right; color: #e7d7ae; }
+.expedition-report { margin-top: 1.6rem; padding: 1.25rem; border: 1px solid #918159; border-radius: 7px; background: linear-gradient(135deg, #3b3f2c, #202a20); }
+.report-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1rem; border-bottom: 1px solid #616447; padding-bottom: 1rem; }
+.report-header h2 { font: 1.8rem Georgia, serif; color: #ede0be; margin: .4rem 0; }
+.report-header p { font-size: .8rem; margin: 0; }
+.report-header > span { color: #c2c6ad; font-size: .65rem; }
+.expedition-report > h3 { color: #c9c9b0; font-size: .8rem; font-weight: 400; margin: 1.3rem 0 1rem; }
+.report-findings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); list-style: none; gap: .65rem; padding: 0; margin: 0; }
+.report-findings li { display: flex; flex-direction: column; align-items: center; text-align: center; padding: .8rem; border: 1px solid #5e684a; border-radius: 5px; background: #19241a55; }
+.report-findings .item-art { width: 76px; height: 76px; flex-shrink: 0; }
+.report-findings li > span { font-size: .7rem; color: #ded6b7; }
+.report-findings strong { display: block; font: 1.3rem Georgia, serif; color: #f2dfb1; margin-top: .3rem; }
+.report-accounting { display: grid; gap: .8rem; padding: 1.2rem 0; margin-top: .8rem; border-bottom: 1px solid #596045; }
+.report-accounting p { font-size: .8rem; color: #e2d4ae; margin: 0; }
+.report-accounting .eyebrow { display: block; margin-bottom: .5rem; }
+.report-accounting small { display: block; color: #b5c0a3; font-size: .65rem; margin-top: .4rem; }
+.report-footer { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; padding-top: 1rem; }
+.report-footer p { margin: 0; font-size: .7rem; }
+.expedition-footnote { font-size: .7rem; color: #aeb99f; margin: 1.4rem 0 0; }
+@media (min-width: 680px) { .report-findings { grid-template-columns: repeat(4, minmax(0, 1fr)); } .report-accounting { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1180px) { .expedition-layout { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } .expedition-landscape img { aspect-ratio: 4/3; } .destination-copy, .expedition-plan { padding: 1.5rem; } }

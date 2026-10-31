@@ -49,8 +49,8 @@ npm.cmd run preview
 1. Domyślnie otwiera się Kryjówka. Można zwinąć jej panel i przejść do pozostałych ekranów.
 2. W Bohaterze zmień pseudonim, poczekaj na potwierdzenie zapisu.
 3. Na Mapie wybierz drugi punkt i odśwież stronę. Aplikacja wróci do Kryjówki, ale pseudonim i wybrany cel pozostaną.
-4. W Wyprawach sprawdź cel, czas i nagrodę, a wybierz zestaw zapasów i opcjonalnie plecak, następnie rozpocznij wyprawę. Osiedle trwa minutę (2 złomu), warsztat dwie (4 złomu); to parametry demonstracyjne.
-5. Odśwież lub zamknij grę i wróć po terminie. W Wyprawach odbierz raport i nagrodę. Ilość złomu w Ekwipunku zwiększy się raz; raport pozostanie po odświeżeniu. Następna wyprawa jest dostępna po odbiorze poprzedniej.
+4. W Wyprawach sprawdź cel i czas, a wybierz zestaw zapasów i opcjonalnie plecak, następnie rozpocznij wyprawę. Osiedle trwa minutę, warsztat dwie; to parametry demonstracyjne.
+5. Odśwież lub zamknij grę i wróć po terminie. W Wyprawach odbierz raport i nagrodę. Znaleziska w Ekwipunku pojawią się raz; raport pozostanie po odświeżeniu. Następna wyprawa jest dostępna po odbiorze poprzedniej.
 6. Sprawdź, że woda i racje zostały pobrane raz przy starcie; plecak pozostaje bez zmian. W Ekwipunku z surowców z wyprawy uzdatnij wodę i przygotuj rację. Po dwóch wyprawach wystarczy tkaniny na bandaż. Widać koszt i wynik każdej receptury. Brak zasobów blokuje operację.
 7. Przy błędzie zapisu zmiana nie zostaje zastosowana; ponów odbiór. Przy konflikcie z inną kartą odśwież stronę.
 
@@ -87,4 +87,8 @@ Główny ekran przedstawia schronienie postapo. Pod ilustracją przejdziesz do p
 
 ## Mapa okolicy
 
-Na papierowym planie wybierz osiedle lub warsztat, albo użyj listy pod mapą. Wybór zapisuje się od razu; panel pokazuje ilustrację miejsca, czas, demonstracyjny łup i wybrany zestaw. Przycisk „Przygotuj wyprawę” przenosi do istniejącego planowania, nie rozpoczyna podróży. Znacznik kryjówki wraca do głównego ekranu. Podczas aktywnej wyprawy mapa wybiera tylko następny cel, bez zmiany trwającej wyprawy i bez pobierania zapasów.
+Na papierowym planie wybierz osiedle lub warsztat, albo użyj listy pod mapą. Wybór zapisuje się od razu; panel pokazuje ilustrację miejsca, czas i wybrany zestaw. Przycisk „Przygotuj wyprawę” przenosi do istniejącego planowania, nie rozpoczyna podróży. Znacznik kryjówki wraca do głównego ekranu. Podczas aktywnej wyprawy mapa wybiera tylko następny cel, bez zmiany trwającej wyprawy i bez pobierania zapasów.
+
+## Wyprawa i raport
+
+Przygotowanie pokazuje cel, czas, wybrany sprzęt i jawny koszt zapasów. Mapa, plan oraz trwająca wyprawa nie pokazują przyszłych zdobyczy. Odbiór po terminie zapisuje znaleziska i rozliczony raport z ilustracjami przedmiotów oraz zestawieniem zużycia. Ostatni rozliczony raport pozostaje dostępny jako historia, również podczas kolejnej wyprawy; nie jest prognozą nowych nagród. To zmiana prezentacji, bez zmiany dotychczasowego modelu wyników i zapisu.

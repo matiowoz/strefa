@@ -48,8 +48,8 @@ export function MapScreen({ state, update, saving, navigate }: Props) {
       <section className="location-details" id="location-details" aria-labelledby="location-heading">
         <div className="location-image"><img src={`/art/${selected.id}.webp`} alt={selected.id === 'outskirts' ? 'Opuszczone bloki wokół zarośniętego podwórka, zardzewiałe auto i pusty plac zabaw.' : 'Stary warsztat z cegły i blachy, skorodowana brama, stare opony i zarośnięty dziedziniec.'} width="1672" height="941" /><span>{selected.discovery === 'visited' ? 'Odwiedzone' : 'Znane z informacji'}</span></div>
         <div className="location-description"><span className="eyebrow">Cel następnej wyprawy</span><h2 id="location-heading">{selected.name}</h2><p>{selected.description}</p>
-          <dl><div><dt>Czas wyprawy</dt><dd>{rule.durationMs / 60000} min</dd></div><div><dt>Łup demonstracyjny</dt><dd>Złom ×{rule.scrap}</dd></div></dl>
-          <p className="location-loot-note">Także surowce do przygotowania zapasów. Pełny plan i koszty sprawdzisz przed startem.</p>
+          <dl><div><dt>Czas wyprawy</dt><dd>{rule.durationMs / 60000} min</dd></div></dl>
+          <p className="location-loot-note">Nie wiesz, co znajdziesz na miejscu. Zdobycze poznasz dopiero z raportu po powrocie.</p>
           <div className="map-kit-note"><span className="eyebrow">Wybrany zestaw: {kit.name}</span><p>Woda ×{kit.water} · Racje ×{kit.ration}</p><small>Zapasy pobierane dopiero przy rozpoczęciu wyprawy.</small></div>
           {state.activeExpedition && <p className="map-active-note">Trwa już wyprawa do: <strong>{activeLocation?.name}</strong>. Zmiana celu na mapie nie zmieni jej planu.</p>}
           <button className="map-prepare" disabled={saving} onClick={() => navigate('expeditions')}>{state.activeExpedition ? 'Zobacz aktywną wyprawę' : 'Przygotuj wyprawę'} <span aria-hidden="true">→</span></button>

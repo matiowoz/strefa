@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
+import { ExpeditionsScreen } from './ExpeditionsScreen';
 import { MapScreen } from './MapScreen';
 import { ShelterScreen } from './ShelterScreen';
 import { InventoryScreen } from './InventoryScreen';
 import { useGame } from '../app/useGame';
-import { getItem, locations, skillNames } from '../domain/catalog';
-import { expeditionRules, renameHero, startExpedition, settleExpedition } from '../domain/game';
-import { kits, preparationError, prepareExpedition, quantity } from '../domain/preparation';
-import type { GameRepository, GameState, ResourceAmount } from '../domain/types';
+import { skillNames } from '../domain/catalog';
+import { renameHero } from '../domain/game';
+import type { GameRepository, GameState } from '../domain/types';
 
 const screens = [
   { id: 'shelter', label: 'Kryjówka', mark: '01' },
@@ -17,68 +17,6 @@ const screens = [
 ] as const;
 type Screen = typeof screens[number]['id'];
 type Update = (change: (previous: GameState) => GameState) => Promise<boolean>;
-
-function ResourceList({ resources }: { resources: readonly ResourceAmount[] }) {
-  return <>{resources.map((entry) => `${getItem(entry.itemId)?.name} ×${entry.quantity}`).join(', ')}</>;
-}
-
-function PreparationPanel({ state, update, saving }: { state: GameState; update: Update; saving: boolean }) {
-  const problem = preparationError(state);
-  return <fieldset disabled={saving || !!state.activeExpedition} className="preparation">
-    <legend>Przygotowanie</legend>
-    <label htmlFor="supply-kit">Zestaw zapasów</label>
-    <select id="supply-kit" value={state.preparation.kit} onChange={(event) => {
-      const kit = event.target.value as keyof typeof kits;
-      void update((previous) => prepareExpedition(previous, { ...previous.preparation, kit }));
-    }}>{Object.entries(kits).map(([id, kit]) => <option key={id} value={id}>{kit.name}: woda ×{kit.water}, racja ×{kit.ration}</option>)}</select>
-    <label htmlFor="equipment">Wyposażenie</label>
-    <select id="equipment" value={state.preparation.equipmentId ?? ''} onChange={(event) => {
-      const equipmentId = event.target.value || null;
-      void update((previous) => prepareExpedition(previous, { ...previous.preparation, equipmentId }));
-    }}><option value="">Bez sprzętu</option>{state.inventory.filter((entry) => getItem(entry.itemId)?.category === 'equipment').map((entry) => <option key={entry.id} value={entry.id} disabled={entry.condition === 0}>{getItem(entry.itemId)?.name} ({entry.condition}%)</option>)}</select>
-    <p>W magazynie: woda ×{quantity(state.inventory, 'water')}, racja ×{quantity(state.inventory, 'ration')}.</p>
-    <p className="muted">Zapasy na całą drogę, również powrotną, zużywane raz przy starcie. Wariant z zapasem zużywa więcej, bez dodatkowej nagrody. Sprzęt pozostaje Twoją własnością i wraca bez uszkodzeń; plecak nie daje jeszcze premii.</p>
-    {problem && <p role="status">{problem}</p>}
-  </fieldset>;
-}
-
-function ExpeditionsScreen({ state, update, saving }: { state: GameState; update: Update; saving: boolean }) {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-  const active = state.activeExpedition;
-  const locationId = active?.plan.locationId ?? state.selectedLocationId;
-  const location = locations.find((entry) => entry.id === locationId);
-  const rule = expeditionRules[locationId as keyof typeof expeditionRules];
-  const remaining = active ? Math.max(0, Math.ceil((active.expectedReturnAt - now) / 1000)) : 0;
-  const report = state.lastReport;
-  return <>
-    <article className="card"><span className="eyebrow">{active ? 'Aktywna wyprawa' : 'Plan wyprawy'}</span>
-      <h2>{location?.name}</h2>
-      {active ? <>
-        <p>{remaining > 0 ? `Powrót za ${Math.floor(remaining / 60)} min ${remaining % 60} s` : 'Bohater wrócił. Raport gotowy do odbioru.'}</p>
-        <p>Zapasy pobrane przy starcie: woda ×{active.cargo.water}, racja ×{active.cargo.ration}. Sprzęt: {active.cargo.equipmentId ? 'zarezerwowany, wróci bez zmian' : 'bez sprzętu'}.</p>
-        <p>Planowany powrót: <time dateTime={new Date(active.expectedReturnAt).toISOString()}>{new Date(active.expectedReturnAt).toLocaleTimeString('pl-PL')}</time></p>
-        <button disabled={saving || remaining > 0} onClick={() => { void update((previous) => settleExpedition(previous, active.id)); }}>Odbierz raport i nagrodę</button>
-      </> : <>
-        <p>Cel wybierzesz na Mapie. Strategia: zrównoważona.</p>
-        <dl><div><dt>Czas</dt><dd>{rule.durationMs / 60_000} min</dd></div><div><dt>Nagroda</dt><dd>Złom ×{rule.scrap}</dd></div></dl>
-        <PreparationPanel state={state} update={update} saving={saving} />
-        <p>Łupy oprócz złomu: woda do uzdatnienia ×2, składniki żywnościowe ×2, czysta tkanina ×1.</p>
-        <button disabled={saving || !!preparationError(state)} onClick={() => { void update((previous) => startExpedition(previous)); }}>Rozpocznij wyprawę</button>
-      </>}
-      <p className="muted">Wyprawa upływa także po zamknięciu gry. Jedna wyprawa naraz; odbierz raport przed kolejną. Prototyp: stałe łupy, bez walki i pasków głodu lub pragnienia. Czas i nagrody są demonstracyjne; strategie nie mają jeszcze odrębnego działania.</p>
-    </article>
-    {report && <article className="card" aria-label="Ostatni raport"><span className="eyebrow">Ostatni raport / rozliczony</span>
-      <h2>Bezpieczny powrót</h2><p>{locations.find((entry) => entry.id === report.locationId)?.name}</p>
-      <p>Dodano do ekwipunku: <ResourceList resources={report.cargo.loot} />. Zdrowie i wyposażenie bez zmian.</p>
-      <p>Zużyto przy starcie: woda ×{report.cargo.water}, racja ×{report.cargo.ration}. Wyposażenie jest znowu dostępne.</p>
-      <p>Powrót: {new Date(report.returnedAt).toLocaleString('pl-PL')}</p>
-    </article>}
-  </>;
-}
 
 function HeroScreen({ state, update, saving }: { state: GameState; update: Update; saving: boolean }) {
   const [name, setName] = useState(state.hero.name);
@@ -110,7 +48,7 @@ export function App({ repository }: { repository: GameRepository }) {
         {state && <>
           {screen === 'shelter' && <ShelterScreen state={state} navigate={setScreen} />}
           {screen === 'map' && <MapScreen state={state} update={update} saving={saving} navigate={setScreen} />}
-          {screen === 'expeditions' && <ExpeditionsScreen state={state} update={update} saving={saving} />}
+          {screen === 'expeditions' && <ExpeditionsScreen state={state} update={update} saving={saving} navigate={setScreen} />}
           {screen === 'inventory' && <InventoryScreen state={state} update={update} saving={saving} />}
           {screen === 'hero' && <HeroScreen state={state} update={update} saving={saving} />}
         </>}
