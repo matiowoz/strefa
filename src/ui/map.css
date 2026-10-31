@@ -1,0 +1,60 @@
+.neighborhood .eyebrow { color: #c5b18a; font-size: .65rem; letter-spacing: .12em; }
+.map-introduction { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: .6rem 1rem; margin-bottom: 1.4rem; }
+.map-introduction h2 { font: 1.7rem Georgia, serif; color: #e6d9b9; margin: .35rem 0 0; }
+.map-introduction > p { font-size: .75rem; margin: 0; color: #b8bfaa; }
+.neighborhood-layout { display: grid; gap: 1.3rem; align-items: start; }
+.field-map-panel { min-width: 0; }
+.field-map-heading { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: .65rem; }
+.field-map-heading h3 { margin: 0; color: #c4c6af; font-size: .75rem; font-weight: 400; letter-spacing: .05em; }
+.field-map-heading > span { font-size: .65rem; color: #aeb79e; }
+.field-map { position: relative; isolation: isolate; border: 1px solid #92764f; border-radius: 6px; background: #817450; box-shadow: 0 12px 30px #0004; }
+.field-map > img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; border-radius: 5px; }
+.map-compass { position: absolute; right: 4%; top: 4%; color: #3a3528; text-align: center; font: .8rem Georgia, serif; opacity: .8; }
+.map-compass b { display: block; font: 1.8rem Georgia, serif; }
+.field-marker { position: absolute; z-index: 1; transform: translate(-50%, -23px); display: flex; flex-direction: column; align-items: center; gap: .25rem; width: 96px; min-height: 69px; padding: 0; border: 0; background: transparent; border-radius: 3px; color: #f8edcf; }
+.field-marker:hover:not(:disabled) { background: transparent; }
+.pin-symbol { display: grid; place-items: center; width: 46px; height: 46px; border: 2px solid #d5bb83; border-radius: 50%; background: #303b2aed; box-shadow: 0 3px 8px #0006, 0 0 0 4px #d9c69444; color: #e1cf9f; font: .85rem Georgia, serif; }
+.pin-caption { display: block; padding: .2rem .4rem; color: #f0e4c4; background: #273021f2; border: 1px solid #a28d5c; border-radius: 2px; font-size: .62rem; line-height: 1.4; box-shadow: 0 2px 5px #0004; }
+.known-marker .pin-symbol { border-style: dashed; }
+.chosen-marker .pin-symbol { background: #76643e; color: #fff4d2; border-color: #fff0ba; box-shadow: 0 0 0 5px #382e1b66, 0 4px 10px #0005; }
+.chosen-marker .pin-caption { background: #645534; color: #fff5d8; border-color: #f1d49a; }
+.field-marker:hover .pin-symbol { border-color: #fff0c3; background: #5c5b37; }
+.field-marker:focus-visible { outline: 3px solid #172019; outline-offset: 5px; }
+.field-marker:disabled { opacity: .8; }
+.shelter-marker .pin-symbol { border-radius: 4px; background: #343f2c; color: #eee3b6; font-size: 1.5rem; }
+.field-map-stamp { position: absolute; bottom: 3%; right: 3%; border: 1px solid #6a56377a; color: #534a34; padding: .35rem .6rem; transform: rotate(-7deg); font-size: .55rem; letter-spacing: .1em; text-transform: uppercase; }
+.map-legend { display: flex; flex-wrap: wrap; gap: .6rem 1.2rem; align-items: center; padding: 1.1rem 0 .6rem; }
+.map-legend > span { display: inline-flex; align-items: center; gap: .45rem; font-size: .65rem; color: #c3c6ac; }
+.map-legend i { width: 9px; height: 9px; display: inline-block; border: 1px solid #c1ac78; border-radius: 50%; background: #7c7d50; }
+.map-legend .legend-known { border-style: dashed; background: transparent; }
+.map-legend .legend-base { border-radius: 1px; }
+.map-instruction { font-size: .7rem; color: #b4bca4; line-height: 1.65; margin: .5rem 0 1rem; }
+.map-location-list { display: grid; gap: .6rem; }
+.map-location-list > button { display: flex; align-items: center; gap: .8rem; padding: .6rem; min-width: 0; background: linear-gradient(120deg, #323926, #1e291f); border-color: #525e40; text-align: left; }
+.map-location-list > button[aria-pressed=true] { border-color: #c1a571; background: linear-gradient(120deg, #494a2f, #283322); }
+.map-location-list img { width: 80px; height: 66px; object-fit: cover; border-radius: 3px; border: 1px solid #75734e; }
+.map-location-list strong { display: block; font: 1rem Georgia, serif; color: #e6dab8; margin: .25rem 0; }
+.map-location-list small { display: block; color: #bdc3aa; font-size: .6rem; }
+.map-location-list .location-choice { color: #decb9d; }
+.location-choice-mark { margin-left: auto; padding: .3rem; color: #d7bc84; font-size: .8rem; }
+.location-details { overflow: hidden; border: 1px solid #726448; border-radius: 7px; background: linear-gradient(120deg, #353b28, #1d271f); min-width: 0; box-shadow: 0 12px 30px #0003; }
+.location-image { position: relative; }
+.location-image img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+.location-image::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, #15201099, transparent 60%); pointer-events: none; }
+.location-image > span { position: absolute; z-index: 1; bottom: .8rem; left: 1rem; padding: .3rem .55rem; color: #eee0bb; background: #1c2717db; border: 1px solid #ae986a77; border-radius: 3px; font-size: .6rem; }
+.location-description { padding: 1.25rem; }
+.location-description h2 { font: 1.6rem/1.2 Georgia, serif; color: #e9ddbd; margin: .5rem 0 .8rem; }
+.location-description > p { font-size: .8rem; color: #c7cdb6; line-height: 1.7; }
+.location-description dl { font-size: .75rem; margin: 1rem 0 .5rem; }
+.location-description dl > div { border-color: #576044; }
+.location-description dd { color: #e6d7b1; }
+.location-description .location-loot-note { font-size: .65rem; color: #aeb99e; }
+.map-kit-note { padding: .85rem 0; margin: .5rem 0; }
+.map-kit-note p { font-size: .85rem; color: #e3d0a4; margin: .3rem 0; }
+.map-kit-note small { display: block; font-size: .65rem; color: #c0c7ae; }
+.location-description .map-active-note { font-size: .7rem; padding: .8rem; border: 1px solid #8a7853; border-radius: 3px; color: #dccb9f; background: #8e784b16; }
+.map-prepare { display: flex; justify-content: space-between; gap: 1rem; align-items: center; width: 100%; background: linear-gradient(#706440, #4b5032); border-color: #c1a775; color: #fff0c8; font-size: .8rem; }
+.location-description .map-save-note { font-size: .65rem; margin: .7rem 0 0; color: #bfcaad; }
+@media (min-width: 680px) { .map-location-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } .map-location-list img { width: 64px; height: 70px; } .map-location-list strong { font-size: .9rem; } .location-image img { max-height: 320px; } }
+@media (min-width: 1180px) { .neighborhood-layout { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 1.4rem; } .location-details { margin-top: 1.8rem; } .map-location-list { grid-template-columns: 1fr; } .map-location-list img { width: 90px; height: 66px; } .location-description { padding: 1.3rem; } }
+@media (max-width: 359px) { .map-location-list img { width: 64px; } .field-marker { width: 86px; } .pin-caption { font-size: .58rem; } }

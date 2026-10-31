@@ -17,3 +17,9 @@ z czerwonym paskiem, bez czytelnych napisów i znaków towarowych.
 z posłaniem, zapasami, łatanym plecakiem, stołem i radiem pod ciepłą lampą.
 Wersja WebP źródłowego PNG. Ilustracja jest poglądowa, bez dynamicznych zmian
 wyposażenia pokoju i bez powiązania liczby narysowanych zapasów ze stanem magazynu.
+
+`neighborhood-map.webp`, `outskirts.webp`, `workshop.webp`: wygenerowane lokalne
+ilustracje planu okolicy, opuszczonego osiedla i starego warsztatu. Wersje WebP
+źródłowych PNG. Znaczniki i nazwy są renderowane jako przyciski HTML, nie są
+częścią ilustracji. Tło planu jest poglądowe: budynki i drogi nie tworzą
+dodatkowych lokacji ani symulacji podróży.

@@ -84,3 +84,7 @@ Ekran Ekwipunek jest wzorcem nowego wyglądu: wybierz filtr i kliknij przedmiot,
 ## Ilustrowana kryjówka
 
 Główny ekran przedstawia schronienie postapo. Pod ilustracją przejdziesz do przygotowania wyprawy lub mapy. Zwijany panel pokazuje bohatera i zdrowie, stan wyprawy oraz rzeczywiste ilości wody i racji w magazynie. Odliczanie zmienia się w „Raport czeka” po terminie; odbiór nadal następuje na ekranie Wyprawy. Stół prowadzi do istniejących receptur w Ekwipunku. Radio jest dekoracją oznaczoną jako funkcja w przygotowaniu. Ilustracja pokoju jest poglądowa; widoczne przedmioty nie oznaczają dodatkowych zasobów ani aktywnych pomieszczeń.
+
+## Mapa okolicy
+
+Na papierowym planie wybierz osiedle lub warsztat, albo użyj listy pod mapą. Wybór zapisuje się od razu; panel pokazuje ilustrację miejsca, czas, demonstracyjny łup i wybrany zestaw. Przycisk „Przygotuj wyprawę” przenosi do istniejącego planowania, nie rozpoczyna podróży. Znacznik kryjówki wraca do głównego ekranu. Podczas aktywnej wyprawy mapa wybiera tylko następny cel, bez zmiany trwającej wyprawy i bez pobierania zapasów.

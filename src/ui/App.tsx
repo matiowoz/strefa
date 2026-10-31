@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
+import { MapScreen } from './MapScreen';
 import { ShelterScreen } from './ShelterScreen';
 import { InventoryScreen } from './InventoryScreen';
 import { useGame } from '../app/useGame';
 import { getItem, locations, skillNames } from '../domain/catalog';
-import { expeditionRules, renameHero, selectLocation, startExpedition, settleExpedition } from '../domain/game';
+import { expeditionRules, renameHero, startExpedition, settleExpedition } from '../domain/game';
 import { kits, preparationError, prepareExpedition, quantity } from '../domain/preparation';
 import type { GameRepository, GameState, ResourceAmount } from '../domain/types';
 
@@ -16,21 +17,6 @@ const screens = [
 ] as const;
 type Screen = typeof screens[number]['id'];
 type Update = (change: (previous: GameState) => GameState) => Promise<boolean>;
-
-function MapScreen({ state, update, saving }: { state: GameState; update: Update; saving: boolean }) {
-  return <><p className="intro">Znana okolica. Wybierz punkt, do którego wrócisz podczas planowania wyprawy.</p>
-    <div className="map-preview" role="img" aria-label="Schemat okolicy: kryjówka, opuszczone osiedle i stary warsztat. Pełna lista punktów znajduje się poniżej.">
-      <span className="map-grid" aria-hidden="true" />
-      <span className="map-base">Kryjówka</span><span className="map-point one">Osiedle</span><span className="map-point two">Warsztat</span>
-      <span className="map-caption">Mapa poglądowa / bez symulacji podróży</span>
-    </div>
-    <div className="card-grid">{locations.map((location) => <article className={`card ${state.selectedLocationId === location.id ? 'selected' : ''}`} key={location.id}>
-      <span className="eyebrow">{location.discovery === 'visited' ? 'Odwiedzone' : 'Znane z informacji'}</span><h2>{location.name}</h2><p>{location.description}</p>
-      <button disabled={saving} aria-pressed={state.selectedLocationId === location.id} onClick={() => { void update((previous) => selectLocation(previous, location.id)); }}>
-        {state.selectedLocationId === location.id ? 'Wybrana lokacja' : 'Wybierz lokację'}
-      </button>
-    </article>)}</div></>;
-}
 
 function ResourceList({ resources }: { resources: readonly ResourceAmount[] }) {
   return <>{resources.map((entry) => `${getItem(entry.itemId)?.name} ×${entry.quantity}`).join(', ')}</>;
@@ -123,7 +109,7 @@ export function App({ repository }: { repository: GameRepository }) {
         {!state && !error && <p role="status">Otwieranie kryjówki…</p>}
         {state && <>
           {screen === 'shelter' && <ShelterScreen state={state} navigate={setScreen} />}
-          {screen === 'map' && <MapScreen state={state} update={update} saving={saving} />}
+          {screen === 'map' && <MapScreen state={state} update={update} saving={saving} navigate={setScreen} />}
           {screen === 'expeditions' && <ExpeditionsScreen state={state} update={update} saving={saving} />}
           {screen === 'inventory' && <InventoryScreen state={state} update={update} saving={saving} />}
           {screen === 'hero' && <HeroScreen state={state} update={update} saving={saving} />}
