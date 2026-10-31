@@ -71,7 +71,7 @@ export function ExpeditionsScreen({ state, update, saving, navigate }: Props) {
     {report && <section className="expedition-report" aria-labelledby="report-heading"><div className="report-header"><div><span className="eyebrow">Ostatni raport / rozliczony</span><h2 id="report-heading">Bezpieczny powrót</h2><p>{locations.find((entry) => entry.id === report.locationId)?.name}</p></div><span>Powrót: <time dateTime={new Date(report.returnedAt).toISOString()}>{new Date(report.returnedAt).toLocaleString('pl-PL')}</time></span></div>
       <h3>Przyniesione znaleziska</h3><ul className="report-findings">{report.cargo.loot.map((entry) => <li key={entry.itemId}><ItemArt itemId={entry.itemId} /><span>{getItem(entry.itemId)?.name}<strong>×{entry.quantity}</strong></span></li>)}</ul>
       <div className="report-accounting"><p><span className="eyebrow">Zużyte zapasy</span>Woda ×{report.cargo.water} · Racje ×{report.cargo.ration}<small>Pobrane raz, przy starcie.</small></p><p><span className="eyebrow">Stan po powrocie</span>Zdrowie i wyposażenie bez zmian.<small>Sprzęt jest znowu dostępny.</small></p></div>
-      <div className="report-footer"><p>Znaleziska dodano do ekwipunku. Ten raport jest już rozliczony.</p><button className="text-button" onClick={() => navigate('inventory')}>Zobacz ekwipunek →</button></div>
+      <div className="report-footer"><p>Znaleziska zapisano. Sprawdź ekwipunek, schowek i ewentualny odbiór. Raport jest już rozliczony.</p><button className="text-button" onClick={() => navigate('inventory')}>Zobacz ekwipunek →</button></div>
     </section>}
     <p className="expedition-footnote">Prototyp: lokalny zegar, bez walki i symulacji zdarzeń. Strategia zrównoważona nie ma jeszcze odrębnego działania.</p>
   </div>;

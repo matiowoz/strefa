@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { locations } from '../domain/catalog';
-import { kits, quantity } from '../domain/preparation';
+import { quantity } from '../domain/preparation';
 import type { GameState } from '../domain/types';
 import { ItemArt } from './ItemArt';
 import './shelter.css';
@@ -21,10 +21,8 @@ export function ShelterScreen({ state, navigate }: Props) {
   const remaining = active ? Math.max(0, Math.ceil((active.expectedReturnAt - now) / 1000)) : 0;
   const returned = !!active && remaining === 0;
   const location = locations.find((entry) => entry.id === (active?.plan.locationId ?? state.selectedLocationId));
-  const kit = kits[state.preparation.kit];
-  const water = quantity(state.inventory, 'water');
-  const ration = quantity(state.inventory, 'ration');
-  const supplied = water >= kit.water && ration >= kit.ration;
+  const water = quantity(state.stash, 'water');
+  const ration = quantity(state.stash, 'ration');
   const progress = active ? Math.min(100, Math.max(0, (now - active.startedAt) / Math.max(1, active.expectedReturnAt - active.startedAt) * 100)) : 0;
   const action = active ? returned ? 'Przejdź do raportu' : 'Sprawdź wyprawę' : 'Przygotuj wyprawę';
 
@@ -51,9 +49,9 @@ export function ShelterScreen({ state, navigate }: Props) {
             : <p className="shelter-trip-note">Jedna wyprawa naraz.<br />Przygotuj zapasy na całą drogę.</p>}
           <button className="shelter-card-link" onClick={() => navigate('expeditions')}>{active ? 'Zobacz wyprawę' : 'Zaplanuj wyprawę'} <span aria-hidden="true">→</span></button>
         </article>
-        <article className="shelter-card shelter-supplies"><span className="shelter-card-index" aria-hidden="true">03</span><span className="eyebrow">Magazyn kryjówki</span><h3>Zapasy na drogę</h3><p className="shelter-card-subtitle">{active ? 'Zapasy wyprawy są już pobrane.' : supplied ? 'Masz zapasy do wybranego zestawu.' : 'Przygotuj brakującą wodę lub racje.'}</p>
+        <article className="shelter-card shelter-supplies"><span className="shelter-card-index" aria-hidden="true">03</span><span className="eyebrow">Magazyn kryjówki</span><h3>Zapasy na drogę</h3><p className="shelter-card-subtitle">Przenieś potrzebne zapasy do ekwipunku postaci.</p>
           <div className="shelter-supply-counts"><div><ItemArt itemId="water" /><span>Woda<strong>×{water}</strong></span></div><div><ItemArt itemId="ration" /><span>Racje<strong>×{ration}</strong></span></div></div>
-          <button className="shelter-card-link" onClick={() => navigate('inventory')}>Otwórz ekwipunek <span aria-hidden="true">→</span></button>
+          <button className="shelter-card-link" onClick={() => navigate('inventory')}>Otwórz schowek <span aria-hidden="true">→</span></button>
         </article>
       </div>
       <div className="shelter-corners">

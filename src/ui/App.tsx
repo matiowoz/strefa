@@ -8,11 +8,11 @@ import { useGame } from '../app/useGame';
 import type { GameRepository } from '../domain/types';
 
 const screens = [
-  { id: 'shelter', label: 'Kryjówka', mark: '01' },
-  { id: 'map', label: 'Mapa', mark: '02' },
-  { id: 'expeditions', label: 'Wyprawy', mark: '03' },
-  { id: 'inventory', label: 'Ekwipunek', mark: '04' },
-  { id: 'hero', label: 'Bohater', mark: '05' },
+  { id: 'hero', label: 'Postać', mark: '01' },
+  { id: 'inventory', label: 'Ekwipunek', mark: '02' },
+  { id: 'shelter', label: 'Kryjówka', mark: '03' },
+  { id: 'expeditions', label: 'Wyprawy', mark: '04' },
+  { id: 'map', label: 'Mapa', mark: '05' },
 ] as const;
 type Screen = typeof screens[number]['id'];
 export function App({ repository }: { repository: GameRepository }) {
@@ -32,7 +32,7 @@ export function App({ repository }: { repository: GameRepository }) {
           {screen === 'map' && <MapScreen state={state} update={update} saving={saving} navigate={setScreen} />}
           {screen === 'expeditions' && <ExpeditionsScreen state={state} update={update} saving={saving} navigate={setScreen} />}
           {screen === 'inventory' && <InventoryScreen state={state} update={update} saving={saving} />}
-          {screen === 'hero' && <HeroScreen state={state} update={update} saving={saving} navigate={setScreen} />}
+          {screen === 'hero' && <HeroScreen state={state} navigate={setScreen} />}
         </>}
         <footer className="page-footer">Wersja robocza. Postęp jest zapisywany tylko w tej przeglądarce.</footer>
       </main></div>

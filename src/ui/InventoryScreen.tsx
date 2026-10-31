@@ -1,82 +1,52 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getItem } from '../domain/catalog';
 import { inventoryWeight } from '../domain/game';
+import { atShelter, itemSizes, moveItem } from '../domain/inventory';
 import { craft, prepareExpedition, quantity, recipes } from '../domain/preparation';
-import type { GameState, ItemCategory, ResourceAmount } from '../domain/types';
+import type { GameState } from '../domain/types';
 import { ItemArt } from './ItemArt';
+import { InventoryGrid } from './InventoryGrid';
 import './inventory.css';
+import './inventory-grid.css';
 
 type Props = { state: GameState; saving: boolean; update: (change: (state: GameState) => GameState) => Promise<boolean> };
-const categories: Record<ItemCategory, string> = { equipment: 'Wyposażenie', supply: 'Zapasy', material: 'Materiały' };
-const filters = [{ id: 'all', name: 'Wszystko' }, ...Object.entries(categories).map(([id, name]) => ({ id, name }))];
-const formatWeight = (weight: number) => weight.toLocaleString('pl-PL', { maximumFractionDigits: 1 });
-function Amounts({ values }: { values: readonly ResourceAmount[] }) {
-  return <>{values.map((value) => `${getItem(value.itemId)?.name} ×${value.quantity}`).join(', ')}</>;
-}
-
 export function InventoryScreen({ state, update, saving }: Props) {
-  const [filter, setFilter] = useState('all');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!state.activeExpedition) return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [state.activeExpedition]);
+  const [page, setPage] = useState(0);
+  const [selectedId, setSelectedId] = useState<string | null>(state.inventory[0]?.id ?? null);
+  const [moving, setMoving] = useState(false);
   const [notice, setNotice] = useState('');
-  const visible = state.inventory.filter((entry) => filter === 'all' || getItem(entry.itemId)?.category === filter);
-  const selected = visible.find((entry) => entry.id === selectedId) ?? visible[0];
+  const selected = [...state.inventory, ...state.stash, ...state.overflow].find((entry) => entry.id === selectedId);
   const item = selected && getItem(selected.itemId);
-  const chosenId = state.activeExpedition ? state.activeExpedition.cargo.equipmentId : state.preparation.equipmentId;
-  const backpack = state.inventory.find((entry) => entry.id === chosenId);
-  const reserved = !!selected && state.activeExpedition?.cargo.equipmentId === selected.id;
-  const chosen = !!selected && state.preparation.equipmentId === selected.id;
-  const status = state.activeExpedition ? 'Na wyprawie' : 'W kryjówce';
-
+  const home = atShelter(state, now);
+  const disabled = saving || !home;
+  const carried = selected && state.inventory.some((entry) => entry.id === selected.id);
+  function place(id: string, target: number, point?: { x: number; y: number }) {
+    setNotice(''); void update((previous) => moveItem(previous, id, target, point)).then((ok) => { if (ok) { setMoving(false); setNotice('Przedmiot przeniesiony i zapisany.'); } });
+  }
   return <div className="inventory-workbench">
-    <div className="inventory-intro"><div><span className="eyebrow">Przygotuj się na to, co za drzwiami</span><p>Każda rzecz ma swoje miejsce.</p></div><span className="pack-weight">Masa zapasów <strong>{formatWeight(inventoryWeight(state))} <small>kg</small></strong></span></div>
-    <div className="inventory-layout">
-      <section className="survivor-panel" aria-labelledby="survivor-heading">
-          <div className="survivor-name"><span className="eyebrow">Twój ocalały / poziom {state.hero.level}</span><h2 id="survivor-heading">{state.hero.name}</h2><span className="survivor-status"><i />{status}</span></div>
-        <div className="survivor-art"><img src="/art/survivor.png" alt="Ilustracja ocalałego w oliwkowym płaszczu, stojącego w świetle lampy w schronieniu." width="1024" height="1536" />
-
-          <div className="future-slots" aria-label="Planowane miejsca wyposażenia"><span>Głowa <small>Wkrótce</small></span><span>Tułów <small>Wkrótce</small></span><span>Obuwie <small>Wkrótce</small></span></div>
-          <span className="portrait-caption">Ilustracja poglądowa</span>
-        </div>
-        <div className="equipment-slot"><div className="slot-art"><ItemArt itemId="backpack" /></div><div><span className="eyebrow">Plecak na wyprawę</span><strong>{backpack ? getItem(backpack.itemId)?.name : 'Nie wybrano plecaka'}</strong><small>{state.activeExpedition && backpack ? 'Zarezerwowany do powrotu' : 'Wybierz plecak z magazynu'}</small></div></div>
-        <div className="hero-health"><span>Zdrowie <b>{state.hero.health} / {state.hero.maxHealth}</b></span><progress aria-label="Zdrowie bohatera" value={state.hero.health} max={state.hero.maxHealth} /></div>
-      </section>
-
-      <section className="stash-panel" aria-labelledby="stash-heading">
-        <div className="stash-heading"><div><span className="eyebrow">Twoja kryjówka</span><h2 id="stash-heading">Magazyn</h2></div><span>{state.inventory.length} stosów</span></div>
-        <div className="inventory-filters" role="group" aria-label="Filtr przedmiotów">{filters.map((category) => <button key={category.id} aria-pressed={category.id === filter} onClick={() => { setFilter(category.id); setSelectedId(null); }}>{category.name}</button>)}</div>
-        <ul className="stash-grid" aria-label="Przedmioty w magazynie">{visible.map((entry) => {
-          const definition = getItem(entry.itemId)!;
-          const locked = state.activeExpedition?.cargo.equipmentId === entry.id;
-          return <li key={entry.id}><button className={`item-tile ${selected?.id === entry.id ? 'is-selected' : ''}`} aria-pressed={selected?.id === entry.id} aria-controls="item-details" onClick={() => setSelectedId(entry.id)}>
-            <span className="tile-quantity">×{entry.quantity}</span><ItemArt itemId={entry.itemId} /><span className="tile-name">{definition.name}</span>
-            {entry.condition !== null && <span className="condition-line" aria-label={`Stan ${entry.condition}%`}><span style={{ width: `${entry.condition}%` }} /></span>}
-            {locked && <span className="tile-label">Na wyprawie</span>}
-          </button></li>;
-        })}</ul>
-        {visible.length === 0 && <div className="stash-empty"><span aria-hidden="true">◇</span><h3>Jeszcze tu pusto</h3><p>Przedmioty z tej kategorii pojawią się po zdobyciu ich na wyprawie.</p></div>}
-        <p className="stash-note">Wybierz przedmiot, aby zobaczyć szczegóły. Zapasy pobrane na wyprawę są już odjęte z magazynu.</p>
-        <section id="item-details" className="item-details" aria-label="Szczegóły przedmiotu">
-          {selected && item ? <><div className="detail-top"><div className="detail-art"><ItemArt itemId={selected.itemId} /></div><div><span className="eyebrow">{categories[item.category]}</span><h3>{item.name}</h3><p>{item.description}</p></div></div>
-            <dl><div><dt>Ilość</dt><dd>{selected.quantity}</dd></div><div><dt>Masa sztuki</dt><dd>{formatWeight(item.weightKg)} kg</dd></div><div><dt>Łącznie</dt><dd>{formatWeight(item.weightKg * selected.quantity)} kg</dd></div>{selected.condition !== null && <div><dt>Stan</dt><dd>{selected.condition}%</dd></div>}</dl>
-            {item.category === 'equipment' ? <><button className="inventory-action" disabled={saving || !!state.activeExpedition || selected.condition === 0} onClick={() => {
-              const equipmentId = chosen ? null : selected.id;
-              setNotice(''); void update((previous) => prepareExpedition(previous, { ...previous.preparation, equipmentId })).then((ok) => { if (ok) setNotice(equipmentId ? 'Plecak wybrany na następną wyprawę.' : 'Plecak odłożony do magazynu.'); });
-            }}>{reserved ? 'Zarezerwowany na wyprawę' : chosen ? 'Odłóż plecak' : 'Wybierz na wyprawę'}</button><p className="detail-help">{state.activeExpedition ? 'Zmiana wyposażenia będzie dostępna po odebraniu raportu.' : selected.condition === 0 ? 'Ten egzemplarz jest niesprawny.' : 'Plecak wraca bez uszkodzeń. Premia do udźwigu nie jest jeszcze dostępna.'}</p></>
-              : <p className="detail-help">{item.category === 'material' ? 'Surowiec do przygotowania zapasów w warsztacie poniżej.' : selected.itemId === 'bandage' ? 'Leczenie będzie dostępne w kolejnych etapach.' : 'Zestaw wody i racji wybierzesz na ekranie Wyprawy.'}</p>}
-          </> : <p>Wybierz kategorię z przedmiotami, aby zobaczyć ich szczegóły.</p>}
-        </section>
-      </section>
+    <div className="inventory-intro"><div><span className="eyebrow">To, co niesiesz. To, co zostawiasz.</span><p>Ekwipunek i schowek</p></div><span className="pack-weight">Przy postaci <strong>{inventoryWeight(state).toLocaleString('pl-PL', { maximumFractionDigits: 1 })} <small>kg</small></strong></span></div>
+    {!home && <p className="storage-warning">Postać jest na wyprawie. Przenoszenie przedmiotów będzie możliwe po powrocie do kryjówki.</p>}
+    <div className="storage-columns">
+      <section className="stash-panel"><div className="stash-heading"><h2>Ekwipunek postaci</h2><span>5 × 9</span></div><p className="stash-note">Zapasy na wyprawę są pobierane tylko stąd.</p><InventoryGrid state={state} page={-1} selectedId={selectedId} disabled={disabled} select={setSelectedId} place={place} moving={moving} /></section>
+      <section className="stash-panel"><div className="stash-heading"><h2>Schowek w kryjówce</h2><span>10 × 10</span></div><div className="storage-pages" role="group" aria-label="Strony schowka">{[0, 1].map((index) => <button key={index} aria-pressed={page === index} onClick={() => setPage(index)}>Strona {index + 1}</button>)}</div><p className="stash-note">Dwie dostępne strony. Przenoszenie tylko w kryjówce.</p><InventoryGrid state={state} page={page} selectedId={selectedId} disabled={disabled} select={setSelectedId} place={place} moving={moving} /></section>
     </div>
-    <section className="inventory-crafting" aria-labelledby="crafting-heading"><div className="crafting-heading"><div><span className="eyebrow">Chwila przed drogą</span><h2 id="crafting-heading">Przygotowanie zapasów</h2></div><p>Proste receptury. Pewny rezultat.</p></div>
-      <div className="crafting-grid">{recipes.map((recipe) => {
-        const available = recipe.costs.every((cost) => quantity(state.inventory, cost.itemId) >= cost.quantity);
-        return <article className="recipe-card" key={recipe.id}><div className="recipe-title"><ItemArt itemId={recipe.output[0].itemId} /><h3>{recipe.name}</h3></div>
-          <p>Koszt: <Amounts values={recipe.costs} /></p><p className="recipe-stock">Masz: {recipe.costs.map((cost) => `${quantity(state.inventory, cost.itemId)} × ${getItem(cost.itemId)?.name}`).join(', ')}</p>
-          <div className="recipe-result"><Amounts values={recipe.output} /><small>Natychmiast</small></div>
-          <button disabled={saving || !available} onClick={() => { setNotice(''); void update((previous) => craft(previous, recipe.id)).then((ok) => { if (ok) setNotice(`${recipe.name}: wykonano i zapisano.`); }); }}>{available ? recipe.name : 'Brak surowców'}</button>
-        </article>;
-      })}</div>
-      <p className="inventory-notice" role="status">{notice}</p>
-    </section>
+    <p className="stash-note">Przeciągnij przedmiot na puste pole lub wybierz go, kliknij „Zmień położenie” i wskaż pole. Na telefonie schowek można przewijać poziomo. Ilości pozostają stosami; rozmiar dotyczy całego stosu.</p>
+    <p className="inventory-notice" role="status">{notice}</p>
+    <section id="item-details" className="stash-panel storage-details" aria-label="Szczegóły przedmiotu">{selected && item ? <><div className="detail-top"><div className="detail-art"><ItemArt itemId={item.id} /></div><div><span className="eyebrow">{carried ? 'Przy postaci' : state.stash.some((entry) => entry.id === selected.id) ? `Schowek / strona ${state.positions[selected.id].page + 1}` : 'Odbiór'}</span><h3>{item.name}</h3><p>{item.description}</p></div></div>
+      <dl><div><dt>Ilość</dt><dd>{selected.quantity}</dd></div><div><dt>Rozmiar</dt><dd>{itemSizes[item.id].width} × {itemSizes[item.id].height}</dd></div><div><dt>Masa sztuki</dt><dd>{item.weightKg} kg</dd></div>{selected.condition !== null && <div><dt>Stan</dt><dd>{selected.condition}%</dd></div>}</dl>
+      <div className="storage-actions"><button disabled={disabled} onClick={() => place(selected.id, carried ? page : -1)}>{carried ? `Do schowka / strona ${page + 1}` : 'Do ekwipunku'}</button>{!carried && <button disabled={disabled} onClick={() => place(selected.id, page)}>Do schowka / strona {page + 1}</button>}<button disabled={disabled} aria-pressed={moving} onClick={() => setMoving(!moving)}>{moving ? 'Anuluj przenoszenie' : 'Zmień położenie'}</button>
+      {item.category === 'equipment' && carried && <button disabled={saving || !!state.activeExpedition || selected.condition === 0} onClick={() => { void update((previous) => prepareExpedition(previous, { ...previous.preparation, equipmentId: previous.preparation.equipmentId === selected.id ? null : selected.id })); }}>{state.preparation.equipmentId === selected.id ? 'Odłóż plecak' : 'Wybierz na wyprawę'}</button>}</div>{moving && <p>Wskaż puste pole w wybranej siatce. Nakładające się lub wystające przedmioty nie zostaną przeniesione.</p>}
+    </> : <p>Wybierz przedmiot w siatce, aby przenieść go lub zobaczyć szczegóły.</p>}</section>
+    {state.overflow.length > 0 && <section className="stash-panel storage-recovery"><h2>Przedmioty do odebrania</h2><p>Nie zmieściły się w siatkach. Są bezpieczne — zwolnij miejsce i przenieś je do ekwipunku lub schowka. Nie są to dodatkowe pola użytkowe.</p>{state.overflow.map((entry) => <button key={entry.id} onClick={() => setSelectedId(entry.id)}>{getItem(entry.itemId)?.name} ×{entry.quantity}</button>)}</section>}
+    <section className="inventory-crafting"><div className="crafting-heading"><h2>Przygotowanie zapasów</h2><p>Surowce muszą być w ekwipunku postaci. Wynik bez miejsca trafi do schowka lub odbioru.</p></div><div className="crafting-grid">{recipes.map((recipe) => {
+      const available = recipe.costs.every((cost) => quantity(state.inventory, cost.itemId) >= cost.quantity);
+      return <article className="recipe-card" key={recipe.id}><div className="recipe-title"><ItemArt itemId={recipe.output[0].itemId} /><h3>{recipe.name}</h3></div><p>Koszt: {recipe.costs.map((cost) => `${getItem(cost.itemId)?.name} ×${cost.quantity}`).join(', ')}</p><p>Wynik: {recipe.output.map((entry) => `${getItem(entry.itemId)?.name} ×${entry.quantity}`).join(', ')} · natychmiast</p><button disabled={saving || !home || !available} onClick={() => { void update((previous) => craft(previous, recipe.id)); }}>{available ? recipe.name : 'Brak surowców w ekwipunku'}</button></article>;
+    })}</div></section>
   </div>;
 }

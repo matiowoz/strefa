@@ -56,14 +56,14 @@ npm.cmd run preview
 ## Zapis i szybki test ręczny
 
 1. Domyślnie otwiera się Kryjówka. Można zwinąć jej panel i przejść do pozostałych ekranów.
-2. W Bohaterze zmień pseudonim, poczekaj na potwierdzenie zapisu.
-3. Na Mapie wybierz drugi punkt i odśwież stronę. Aplikacja wróci do Kryjówki, ale pseudonim i wybrany cel pozostaną.
+2. W Postaci sprawdź zachowaną nazwę i zdrowie. Zmiana nazwy jest wyłączona.
+3. Na Mapie wybierz drugi punkt i odśwież stronę. Aplikacja wróci do Kryjówki, ale nazwa i wybrany cel pozostaną.
 4. W Wyprawach sprawdź cel i czas, a wybierz zestaw zapasów i opcjonalnie plecak, następnie rozpocznij wyprawę. Osiedle trwa minutę, warsztat dwie; to parametry demonstracyjne.
 5. Odśwież lub zamknij grę i wróć po terminie. W Wyprawach odbierz raport i nagrodę. Znaleziska w Ekwipunku pojawią się raz; raport pozostanie po odświeżeniu. Następna wyprawa jest dostępna po odbiorze poprzedniej.
 6. Sprawdź, że woda i racje zostały pobrane raz przy starcie; plecak pozostaje bez zmian. W Ekwipunku z surowców z wyprawy uzdatnij wodę i przygotuj rację. Po dwóch wyprawach wystarczy tkaniny na bandaż. Widać koszt i wynik każdej receptury. Brak zasobów blokuje operację.
 7. Przy błędzie zapisu zmiana nie zostaje zastosowana; ponów odbiór. Przy konflikcie z inną kartą odśwież stronę.
 
-Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v3 (migracja poprawnych v1 i v2 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
+Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v4 (migracja poprawnych v1, v2 i v3 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
 
 Zapis jest osobny dla urządzenia, przeglądarki i adresu z portem. localhost i adres LAN mają różne zapisy; telefon nie współdzieli zapisu komputera. Czyszczenie danych witryny lub tryb prywatny może usunąć postęp. Brak synchronizacji, eksportu i kopii chmurowej. Nieaktualny zapis z drugiej karty jest odrzucany atomowo; odśwież ją przed kolejną zmianą. Czas wypraw opiera się na zegarze urządzenia, bez zabezpieczeń serwerowych.
 
@@ -86,9 +86,15 @@ PLAN.md określa dalsze etapy i ograniczenia względem GDD 1.1. AGENTS.md zawier
 
 Lekki zestaw kosztuje 1 wodę i 1 rację, z zapasem 2 i 2. Koszt obejmuje całą drogę i jest pobierany przy starcie. Wariant z zapasem nie daje jeszcze dodatkowej korzyści. Nie ma głodu ani pragnienia upływającego podczas nieobecności. Plecak jest rezerwowany do powrotu, bez premii i zużycia. Receptury wykonują się od razu: 1 woda do uzdatnienia → 1 woda, 1 składnik żywnościowy → 1 racja, 2 czyste tkaniny → 1 bandaż. Są to robocze parametry opisane w PLAN.md.
 
-## Ilustrowany ekwipunek
+## Ekwipunek i schowek
 
-Ekran Ekwipunek jest wzorcem nowego wyglądu: wybierz filtr i kliknij przedmiot, aby zobaczyć ilość, masę, stan i dostępne działanie. Plecak można wybrać na następną wyprawę lub odłożyć; w trakcie wyprawy zmiana jest zablokowana. Receptury znajdują się poniżej magazynu. Ilustracja bohatera jest poglądowa; miejsca na głowę, tułów i obuwie są planowane. Grafiki są lokalne, bez zewnętrznych serwisów.
+Ekwipunek postaci ma 5 kolumn i 9 rzędów. Schowek w kryjówce ma dwie przełączane strony po 10×10. Przedmioty zajmują prostokąty różnych rozmiarów; szczegóły pokazują ich wymiary i ilość. Ilość pozostaje stosem (bez nowych limitów stosowania).
+
+Przeciągnij rzecz na puste pole lub wybierz ją, kliknij „Zmień położenie” i wskaż pole. Przyciski pod szczegółami przenoszą do ekwipunku lub bieżącej strony schowka, szukając pierwszego wolnego miejsca. Za mało miejsca lub kolizja oznacza błąd bez przeniesienia. Na małych ekranach schowek przewija się poziomo. Przenoszenie wymaga powrotu do kryjówki; zarezerwowany plecak czeka dodatkowo na odbiór raportu. Odłożenie wybranego plecaka do schowka odznacza go w planie.
+
+Start i receptury korzystają wyłącznie z rzeczy przy postaci; surowce ze schowka trzeba najpierw przenieść. Znaleziska i wyniki receptur najpierw trafiają do ekwipunku, następnie do wolnych miejsc schowka, a przy braku miejsca do bezpiecznego odbioru. Odbiór służy wyłącznie zabezpieczeniu wyników i migracji — nie można odkładać tam rzeczy. Stare zapisy zachowują całą zawartość, nazwę i aktywną wyprawę. Wyprawy nadal nie pokazują przyszłych zdobyczy.
+
+Dodatkowe płatne strony są planem na przyszłość; obecnie nie ma zakupów, płatności ani dodatkowych stron.
 
 ## Ilustrowana kryjówka
 
@@ -104,4 +110,8 @@ Przygotowanie pokazuje cel, czas, wybrany sprzęt i jawny koszt zapasów. Mapa, 
 
 ## Bohater i tło strony
 
-Karta Bohatera pokazuje ilustrację poglądową, faktyczne zdrowie, poziom, pseudonim i osiem zapisanych wartości umiejętności. Rozwój i premie nie są jeszcze aktywne. Zmiana pseudonimu zachowuje dotychczasowe zasady zapisu. Podgląd plecaka odzwierciedla wybór na następną lub wyposażenie aktywnej wyprawy; przycisk prowadzi do Ekwipunku. Wszystkie ekrany mają wspólne tło zużytego betonu, bez zmiany danych gry.
+Karta Bohatera pokazuje ilustrację poglądową, faktyczne zdrowie, poziom, pseudonim i osiem zapisanych wartości umiejętności. Rozwój i premie nie są jeszcze aktywne. Zmiana pseudonimu jest wyłączona; dotychczasowa nazwa pozostaje. Podgląd plecaka odzwierciedla wybór na następną lub wyposażenie aktywnej wyprawy; przycisk prowadzi do Ekwipunku. Wszystkie ekrany mają wspólne tło zużytego betonu, bez zmiany danych gry.
+
+## Kolejność nawigacji
+
+Postać → Ekwipunek → Kryjówka → Wyprawy → Mapa. Kryjówka pozostaje ekranem początkowym. W kryjówce przycisk „Otwórz schowek” przechodzi do widoku z obiema siatkami.

@@ -1,5 +1,6 @@
 import { IDBFactory, IDBDatabase } from 'fake-indexeddb';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { arrange } from '../domain/inventory';
 import { createInitialState, renameHero } from '../domain/game';
 import { IndexedDbRepository } from './indexedDbRepository';
 
@@ -105,13 +106,13 @@ describe('transakcje wyprawy', () => {
     await repository.save(result, started);
     expect(await repository.load()).toEqual(result);
   });
-  it('wczytuje v1 i zapisuje v3 dopiero przy udanej zmianie', async () => {
+  it('wczytuje v1 i zapisuje v4 dopiero przy udanej zmianie', async () => {
     const factory = new IDBFactory();
     const { lastReport: _, ...legacy } = createInitialState(0);
     await writeRaw(factory, { ...legacy, schemaVersion: 1 });
     const repository = new IndexedDbRepository(factory, 'test');
     const loaded = (await repository.load())!;
-    expect(loaded.schemaVersion).toBe(3);
+    expect(loaded.schemaVersion).toBe(4);
     await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
     expect((await repository.load())!.hero.name).toBe('Kruk');
   });
@@ -123,7 +124,7 @@ describe('atomowe przygotowanie', () => {
     const factory = new IDBFactory();
     const repository = new IndexedDbRepository(factory, 'test');
     const initial = createInitialState(0);
-    const state = { ...initial, inventory: addResources(initial.inventory, [{ itemId: 'cloth', quantity: 2 }]) };
+    const state = arrange({ ...initial, inventory: addResources(initial.inventory, [{ itemId: 'cloth', quantity: 2 }]) });
     await repository.save(state, null);
     const result = craft(state, 'bandage', 1000);
     const outcomes = await Promise.allSettled([repository.save(result, state), repository.save(result, state)]);
@@ -149,5 +150,25 @@ describe('atomowe przygotowanie', () => {
     await repository.save(started, initial);
     await expect(repository.save(started, initial)).rejects.toThrow();
     expect(quantity((await repository.load())!.inventory, 'water')).toBe(2);
+  });
+});
+
+describe('atomowy transfer między siatkami', () => {
+  it('nie przenosi rzeczy przy przerwanej transakcji, a dwie karty nie duplikują transferu', async () => {
+    const { moveItem } = await import('../domain/inventory');
+    const factory = new IDBFactory();
+    const repository = new IndexedDbRepository(factory, 'test');
+    const initial = createInitialState(0);
+    await repository.save(initial, null);
+    const moved = moveItem(initial, initial.inventory[0].id, 1, undefined, 1000);
+    const original = IDBDatabase.prototype.transaction;
+    const spy = vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(function (this: IDBDatabase, ...args: Parameters<typeof original>) {
+      const tx = original.apply(this, args); queueMicrotask(() => tx.abort()); return tx;
+    });
+    await expect(repository.save(moved, initial)).rejects.toThrow(); spy.mockRestore();
+    expect(await repository.load()).toEqual(initial);
+    const outcomes = await Promise.allSettled([repository.save(moved, initial), repository.save(moved, initial)]);
+    expect(outcomes.filter((entry) => entry.status === 'fulfilled')).toHaveLength(1);
+    expect(await new IndexedDbRepository(factory, 'test').load()).toEqual(moved);
   });
 });

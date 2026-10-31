@@ -1,5 +1,6 @@
+import { arrange, fits } from './inventory';
 import { getItem, locations, skillNames } from './catalog';
-import type { Cargo, GameState } from './types';
+import type { Cargo, GameState, InventoryEntry, Placement } from './types';
 
 const record = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
 const number = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
@@ -67,7 +68,7 @@ function validCargo(value: unknown, inventory: unknown, requireEquipment: boolea
   }) && value.loot.some((entry: unknown) => record(entry) && entry.itemId === 'scrap');
 }
 
-export function isGameState(value: unknown): value is GameState {
+function isV3(value: unknown): boolean {
   if (!record(value) || value.schemaVersion !== 3 || !validStructure(value)
     || !record(value.preparation) || !['light', 'stocked'].includes(String(value.preparation.kit))) return false;
   const equipmentId = value.preparation.equipmentId;
@@ -82,8 +83,31 @@ export function isGameState(value: unknown): value is GameState {
     && report.cargo.loot.some((entry) => entry.itemId === 'scrap' && entry.quantity === report.scrap);
 }
 
+export function isGameState(value: unknown): value is GameState {
+  if (!record(value) || value.schemaVersion !== 4 || !Array.isArray(value.inventory) || !Array.isArray(value.stash) || !Array.isArray(value.overflow) || !record(value.positions)) return false;
+  const all = [...value.inventory, ...value.stash, ...value.overflow];
+  if (!isV3({ ...value, schemaVersion: 3, inventory: all })) return false;
+  const entries = [...value.inventory, ...value.stash] as InventoryEntry[];
+  if (Object.keys(value.positions).length !== entries.length) return false;
+  for (const entry of entries) {
+    const p = value.positions[entry.id];
+    if (!record(p) || !integer(p.x) || !integer(p.y) || !integer(p.page)) return false;
+    const point = p as unknown as Placement;
+    if ((value.inventory as InventoryEntry[]).some((item) => item.id === entry.id) ? point.page !== -1 : point.page < 0) return false;
+    if (!fits(entries, value.positions as Record<string, Placement>, entry, point)) return false;
+  }
+  const equipment = (value.preparation as unknown as GameState['preparation']).equipmentId;
+  if (equipment && !(value.inventory as InventoryEntry[]).some((entry) => entry.id === equipment)) return false;
+  const active = value.activeExpedition;
+  if (record(active) && record(active.cargo)) {
+    const id = active.cargo.equipmentId;
+    if (id && !(value.inventory as InventoryEntry[]).some((entry) => entry.id === id)) return false;
+  }
+  return true;
+}
+
 export function validateSave(value: unknown): GameState {
-  if (record(value) && ![1, 2, 3].includes(Number(value.schemaVersion))) {
+  if (record(value) && ![1, 2, 3, 4].includes(Number(value.schemaVersion))) {
     throw new Error('Nieobsługiwana wersja zapisu. Dane pozostawiono bez zmian.');
   }
   if (record(value) && value.schemaVersion === 1 && validStructure(value)) {
@@ -97,6 +121,12 @@ export function validateSave(value: unknown): GameState {
     return validateSave({ ...value, schemaVersion: 3, preparation: { kit: 'light', equipmentId: null },
       activeExpedition: record(active) && record(active.plan) ? { ...active, cargo: legacyCargo(active.plan.locationId === 'workshop' ? 4 : 2) } : null,
       lastReport: record(report) ? { ...report, cargo: legacyCargo(report.scrap as number) } : null });
+  }
+  if (record(value) && value.schemaVersion === 3 && isV3(value)) {
+    const next = { ...value, schemaVersion: 4, stash: [], overflow: [], positions: {} } as unknown as GameState;
+    const priority = [next.activeExpedition?.cargo.equipmentId, next.preparation.equipmentId];
+    next.inventory = [...next.inventory].sort((a, b) => Number(priority.includes(b.id)) - Number(priority.includes(a.id)));
+    return validateSave(arrange(next));
   }
   if (!isGameState(value)) throw new Error('Zapis jest nieprawidłowy. Dane pozostawiono bez zmian.');
   return value;

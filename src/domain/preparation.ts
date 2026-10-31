@@ -1,3 +1,4 @@
+import { arrange, atShelter } from './inventory';
 import { getItem } from './catalog';
 import type { GameState, InventoryEntry, Preparation, ResourceAmount } from './types';
 
@@ -67,7 +68,8 @@ export function prepareExpedition(state: GameState, preparation: Preparation, no
 }
 
 export function craft(state: GameState, recipeId: string, now = Date.now()): GameState {
+  if (!atShelter(state, now)) throw new Error('Przygotuj zapasy po powrocie do kryjówki.');
   const recipe = recipes.find((entry) => entry.id === recipeId);
   if (!recipe) throw new Error('Nieznana receptura.');
-  return { ...state, updatedAt: now, inventory: addResources(consume(state.inventory, recipe.costs), recipe.output) };
+  return arrange({ ...state, updatedAt: now, inventory: addResources(consume(state.inventory, recipe.costs), recipe.output) });
 }

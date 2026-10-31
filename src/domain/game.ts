@@ -1,10 +1,11 @@
+import { arrange } from './inventory';
 import { getItem, locations } from './catalog';
 import { consume, addResources, kits, preparationError } from './preparation';
 import type { GameState } from './types';
 
 export function createInitialState(now = Date.now()): GameState {
-  return {
-    schemaVersion: 3, preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
+  return arrange({
+    schemaVersion: 4, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
     hero: {
       id: 'survivor', name: 'Ocalały', level: 1, health: 100, maxHealth: 100,
       skills: { combat: 1, scouting: 1, survival: 1, medicine: 1, crafting: 1, electronics: 1, trade: 1, transport: 1 },
@@ -17,7 +18,7 @@ export function createInitialState(now = Date.now()): GameState {
       { id: 'starter-scrap', itemId: 'scrap', quantity: 4, condition: null },
     ],
     selectedLocationId: locations[0].id, activeExpedition: null,
-  };
+  });
 }
 
 export function renameHero(state: GameState, input: string, now = Date.now()): GameState {
@@ -53,12 +54,12 @@ export function startExpedition(state: GameState, now = Date.now()): GameState {
   if (problem) throw new Error(problem);
   const supplies = kits[state.preparation.kit];
   const inventory = consume(state.inventory, [{ itemId: 'water', quantity: supplies.water }, { itemId: 'ration', quantity: supplies.ration }]);
-  return { ...state, inventory, updatedAt: now, activeExpedition: {
+  return arrange({ ...state, inventory, updatedAt: now, activeExpedition: {
     cargo: { equipmentId: state.preparation.equipmentId, water: supplies.water, ration: supplies.ration,
       loot: [{ itemId: 'scrap', quantity: rule.scrap }, { itemId: 'raw-water', quantity: 2 }, { itemId: 'food', quantity: 2 }, { itemId: 'cloth', quantity: 1 }] },
     id: crypto.randomUUID(), plan: { locationId: state.selectedLocationId, strategy: 'balanced' },
     status: 'running', startedAt: now, expectedReturnAt: now + rule.durationMs,
-  } };
+  } });
 }
 
 export function settleExpedition(state: GameState, id: string, now = Date.now()): GameState {
@@ -68,6 +69,6 @@ export function settleExpedition(state: GameState, id: string, now = Date.now())
   if (!Number.isSafeInteger(now) || now < expedition.expectedReturnAt) throw new Error('Wyprawa jeszcze trwa.');
   const scrap = expedition.cargo.loot.find((entry) => entry.itemId === 'scrap')!.quantity;
   const inventory = addResources(state.inventory, expedition.cargo.loot);
-  return { ...state, inventory, updatedAt: now, activeExpedition: null,
-    lastReport: { cargo: structuredClone(expedition.cargo), expeditionId: id, locationId: expedition.plan.locationId, returnedAt: expedition.expectedReturnAt, scrap } };
+  return arrange({ ...state, inventory, updatedAt: now, activeExpedition: null,
+    lastReport: { cargo: structuredClone(expedition.cargo), expeditionId: id, locationId: expedition.plan.locationId, returnedAt: expedition.expectedReturnAt, scrap } });
 }
