@@ -59,9 +59,9 @@ export interface ExpeditionReport {
   scrap: number;
 }
 
-export interface Placement { x: number; y: number; page: number } // -1 = ekwipunek, 0/1 = schowek
+export interface Placement { x: number; y: number; page: number } // -1 = ekwipunek, 0 = schowek
 export interface GameState {
-  schemaVersion: 4;
+  schemaVersion: 5;
   positions: Record<string, Placement>;
   stash: InventoryEntry[];
   overflow: InventoryEntry[];

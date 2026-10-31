@@ -106,13 +106,13 @@ describe('transakcje wyprawy', () => {
     await repository.save(result, started);
     expect(await repository.load()).toEqual(result);
   });
-  it('wczytuje v1 i zapisuje v4 dopiero przy udanej zmianie', async () => {
+  it('wczytuje v1 i zapisuje v5 dopiero przy udanej zmianie', async () => {
     const factory = new IDBFactory();
     const { lastReport: _, ...legacy } = createInitialState(0);
     await writeRaw(factory, { ...legacy, schemaVersion: 1 });
     const repository = new IndexedDbRepository(factory, 'test');
     const loaded = (await repository.load())!;
-    expect(loaded.schemaVersion).toBe(4);
+    expect(loaded.schemaVersion).toBe(5);
     await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
     expect((await repository.load())!.hero.name).toBe('Kruk');
   });
@@ -160,7 +160,7 @@ describe('atomowy transfer między siatkami', () => {
     const repository = new IndexedDbRepository(factory, 'test');
     const initial = createInitialState(0);
     await repository.save(initial, null);
-    const moved = moveItem(initial, initial.inventory[0].id, 1, undefined, 1000);
+    const moved = moveItem(initial, initial.inventory[0].id, 0, undefined, 1000);
     const original = IDBDatabase.prototype.transaction;
     const spy = vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(function (this: IDBDatabase, ...args: Parameters<typeof original>) {
       const tx = original.apply(this, args); queueMicrotask(() => tx.abort()); return tx;
@@ -171,4 +171,18 @@ describe('atomowy transfer między siatkami', () => {
     expect(outcomes.filter((entry) => entry.status === 'fulfilled')).toHaveLength(1);
     expect(await new IndexedDbRepository(factory, 'test').load()).toEqual(moved);
   });
+});
+
+it('migruje starą drugą stronę schowka i zachowuje kontrolę poprzedniego stanu przy zapisie', async () => {
+  const { moveItem } = await import('../domain/inventory');
+  const factory = new IDBFactory();
+  const state = moveItem(createInitialState(0), 'starter-water', 0, undefined, 1000);
+  await writeRaw(factory, { ...state, schemaVersion: 4, positions: { ...state.positions, 'starter-water': { x: 9, y: 5, page: 1 } } });
+  const repository = new IndexedDbRepository(factory, 'test');
+  const loaded = (await repository.load())!;
+  expect(loaded.schemaVersion).toBe(5);
+  expect(loaded.positions['starter-water'].page).toBe(0);
+  const moved = moveItem(loaded, 'starter-water', -1, undefined, 2000);
+  await repository.save(moved, loaded);
+  expect(await repository.load()).toEqual(moved);
 });

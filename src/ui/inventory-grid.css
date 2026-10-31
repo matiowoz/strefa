@@ -1,18 +1,15 @@
 .storage-columns { display: grid; gap: 1rem; align-items: start; }
 .container-scroll { overflow-x: auto; padding-bottom: .5rem; }
-.bag-grid { display: grid; gap: 2px; width: 100%; background: #10190f; padding: 2px; border: 1px solid #82754e; border-radius: 4px; }
-.carried-grid { min-width: 240px; }
-.hideout-grid { min-width: 480px; }
+.bag-grid { display: grid; --bag-cell-size: 52px; gap: 2px; width: max-content; background: #10190f; padding: 2px; border: 1px solid #82754e; border-radius: 4px; }
+.carried-grid { min-width: 0; }
+.hideout-grid { min-width: 0; }
 .bag-cell { min-height: 0; min-width: 0; width: 100%; height: 100%; padding: 0; border: 1px solid #526043; border-radius: 0; background: #273322; }
 .bag-cell:disabled { opacity: 1; cursor: default; }
-.bag-item { display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; z-index: 1; min-height: 0; min-width: 0; padding: 1px; border: 1px solid #899267; border-radius: 2px; background: radial-gradient(#6c7147, #34432c); overflow: hidden; }
+.bag-item { display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; z-index: 1; min-height: 0; min-width: 0; padding: 1px; border: 2px solid #899267; border-radius: 2px; background: radial-gradient(#6c7147, #34432c); overflow: hidden; touch-action: none; user-select: none; }
 .bag-item.is-selected { border: 2px solid #f2cf85; box-shadow: inset 0 0 10px #d7bc5844; }
 .bag-item .item-art { width: min(85%, 145px); height: auto; aspect-ratio: 1; flex-shrink: 1; min-height: 0; }
 .bag-quantity { position: absolute; right: 3px; top: 1px; font-size: .6rem; color: #f5e4b8; text-shadow: 0 1px 3px #000; }
 .bag-item-name { display: block; max-width: 100%; font-size: .5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
-.storage-pages { display: flex; gap: .6rem; margin-top: 1rem; }
-.storage-pages button { min-height: 42px; font-size: .75rem; }
-.storage-pages button[aria-pressed=true] { border-color: #dbc084; background: #5a5d39; }
 .storage-details, .storage-recovery { margin-top: 1.2rem; }
 .storage-details dl { font-size: .8rem; }
 .storage-actions { display: flex; flex-wrap: wrap; gap: .6rem; }
@@ -20,3 +17,9 @@
 .storage-recovery button { margin: .3rem; font-size: .75rem; }
 .storage-warning { padding: 1rem; border: 1px solid #9c8559; background: #453e25; color: #e9dbb8; font-size: .8rem; }
 @media (min-width: 1180px) { .storage-columns { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); } }
+
+.bag-drag-layer { position: fixed; inset: 0; z-index: 100; pointer-events: none; }
+.bag-drag-preview { position: fixed; margin: 0; opacity: .9; transform: none; }
+.bag-drop-preview { position: fixed; border: 2px solid #cadb9c; background: #9bb77244; border-radius: 2px; }
+.bag-drop-preview.invalid { border-color: #e6a488; background: #ad503844; }
+.bag-item.drag-origin { opacity: .35; }

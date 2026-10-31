@@ -140,3 +140,13 @@ Robocze rozmiary: plecak 2×3, butelki 1×2, racja i bandaż 1×1, złom i skła
 Schemat v4 zachowuje układ, obie strony schowka i bezpieczny odbiór dla nadmiarowych przedmiotów z migracji/wyjść domeny. Odbiór nie jest miejscem do odkładania rzeczy. Wyniki nie mieszczące się przy postaci trafiają do schowka, a po jego zapełnieniu czekają bez utraty. Migracja poprawnych v1–v3 zachowuje rzeczy i ich ilości, nazwę, czas i wynik wyprawy; zarezerwowany/wybrany sprzęt ma pierwszeństwo przy rozmieszczaniu. Nieprawidłowe położenia, nakładanie lub powielone ID w v4 są odrzucane. IndexedDB nadal zapisuje całą zmianę atomowo z kontrolą poprzedniego stanu.
 
 55/55 testów oraz build. Testy: granice, kolizje, transfer między kontenerami/stronami, pełne siatki, zachowanie łupów, migracja przepełnionego zapisu z aktywną wyprawą, przerwany zapis i konflikt dwóch kart. Chromium: nowa kolejność, brak edycji nazwy, dokładnie 45/100 pól, obie strony, transfery i położenie po odświeżeniu, błędne położenie bez utraty, migracja v3 i zachowana nazwa; 320/390/768/1440 px bez przewijania całej strony w poziomie (schowek ma własny scroll).
+
+## Korekta przeciągania i jeden schowek
+
+Na najnowsze polecenie: po chwyceniu podgląd jest centrowany pod kursorem (bez zachowania punktu chwytu) i ma dokładnie rozmiar przedmiotu w siatce. Jednakowe kratki 52×52 px i odstępy 2 px w ekwipunku i schowku; bez dopasowywania grafiki do szerokości panelu. Zdarzenia wskaźnika obsługuje cała powierzchnia, z zaokrągleniem początku prostokąta do najbliższego pola. Linie i szczeliny nie są już obszarem wyłączonym z upuszczania. Podgląd miejsca pokazuje dozwoloną lub kolidującą pozycję; kolizje nadal odrzucane w domenie. Podgląd realizowany lokalnie zamiast natywnego obrazu drag-and-drop, bez jego powiększania.
+
+Jeden schowek 10×10, bez kart. W przyszłości kolejne budowane skrytki zamiast płatnych stron. Schemat v5 sprawdza poprawność starego v4 z obiema stronami przed migracją; zachowuje pierwszą stronę i przenosi zawartość drugiej na wolne miejsca albo do odbioru, nigdy nie usuwając rzeczy. Nazwa, wyposażenie i aktywna wyprawa bez zmian.
+
+62/62 testy i build. Przypadki testowe: środek 1×2 i 2×3, szczeliny, granice, kolizje, pełna stara druga strona i kontrola poprzedniego stanu przy zapisie po migracji. Chromium: rzeczywiste ruchy myszą, chwyt za brzeg i centrowanie pod kursorem, zachowane rozmiary ramki i grafiki podczas przeciągania, transfer między siatkami, kolizja bez zmiany zapisu, odświeżenie i identyczne kratki przy 320/390/768/1440 px. Bez fizycznego telefonu.
+
+Dodatkowo sprawdzono w Chromium odkładanie 1×1 w środek pola i transfer emulowanym dotykiem, z zachowaniem wymiarów i położenia.

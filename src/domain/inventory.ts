@@ -2,7 +2,7 @@ import type { GameState, InventoryEntry, Placement } from './types';
 
 export const GRID_COLUMNS = 5;
 export const GRID_ROWS = 9;
-export const STASH_PAGES = 2;
+export const STASH_PAGES = 1;
 export const gridSize = (page: number) => page === -1 ? { columns: GRID_COLUMNS, rows: GRID_ROWS } : { columns: 10, rows: 10 };
 // Demonstracyjne rozmiary jednego stosu (ilości zachowują dotychczasowy model).
 export const itemSizes: Record<string, { width: number; height: number }> = {
@@ -12,11 +12,11 @@ export const itemSizes: Record<string, { width: number; height: number }> = {
   food: { width: 2, height: 2 }, cloth: { width: 2, height: 1 },
 };
 
-export function fits(entries: InventoryEntry[], positions: Record<string, Placement>, entry: InventoryEntry, point: Placement): boolean {
+export function fits(entries: InventoryEntry[], positions: Record<string, Placement>, entry: InventoryEntry, point: Placement, pageCount = STASH_PAGES): boolean {
   const size = itemSizes[entry.itemId];
   const bounds = gridSize(point.page);
   if (!size || !Number.isInteger(point.x) || !Number.isInteger(point.y) || !Number.isInteger(point.page)
-    || point.page < -1 || point.page >= STASH_PAGES || point.x < 0 || point.y < 0
+    || point.page < -1 || point.page >= pageCount || point.x < 0 || point.y < 0
     || point.x + size.width > bounds.columns || point.y + size.height > bounds.rows) return false;
   return entries.every((other) => {
     if (other.id === entry.id) return true;
@@ -60,7 +60,7 @@ export function arrange(state: GameState, inventory = state.inventory): GameStat
   }
   for (const entry of all) {
     if (positions[entry.id]) continue;
-    const preferred = state.stash.some((other) => other.id === entry.id) ? [0, 1] : [-1, 0, 1];
+    const preferred = state.stash.some((other) => other.id === entry.id) ? [0] : [-1, 0];
     const point = preferred.map((page) => firstFree(all, positions, entry, page)).find((point) => point !== null);
     if (point) { positions[entry.id] = point; (point.page === -1 ? carried : stash).push(entry); }
     else overflow.push(entry);
