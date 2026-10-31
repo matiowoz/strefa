@@ -42,8 +42,8 @@
 .item-tile:hover:not(:disabled) { background: radial-gradient(ellipse at 50% 35%, #72704d88, #30392a 75%); border-color: #b2a16e; }
 .item-tile.is-selected { border-color: #d8b67a; background: radial-gradient(ellipse at 50% 35%, #79704a88, #343b28 75%); box-shadow: inset 0 0 0 1px #b9975d66, 0 0 15px #baa16a0c; }
 .item-tile.is-selected::after { content: ''; width: 5px; height: 5px; transform: rotate(45deg); background: #dfc185; position: absolute; bottom: -3px; }
-.item-art { display: block; width: 100%; height: 100%; }
-.item-tile .item-art { width: 83px; height: 83px; filter: drop-shadow(2px 5px 3px #0005); transition: transform .18s ease; }
+.item-art { display: block; width: 100%; height: 100%; background-image: url('/art/items-worn.webp'); background-size: 400% 200%; background-repeat: no-repeat; }
+.item-tile .item-art { width: 94px; height: 94px; filter: drop-shadow(2px 5px 3px #0005); transition: transform .18s ease; }
 .item-tile:hover .item-art { transform: translateY(-3px) rotate(-3deg); }
 .tile-name { font-size: .68rem; line-height: 1.3; text-align: center; min-height: 1.7em; }
 .tile-quantity { position: absolute; right: .5rem; top: .35rem; font-size: .74rem; color: #e6d4ac; font-variant-numeric: tabular-nums; }
@@ -53,7 +53,7 @@
 .stash-note { margin: 1rem 0; font-size: .7rem; color: #b1b7a1; line-height: 1.6; }
 .item-details { border-top: 1px solid #676348; padding-top: 1.2rem; }
 .detail-top { display: flex; gap: 1rem; align-items: center; }
-.detail-art { width: 80px; height: 80px; flex: 0 0 80px; background: radial-gradient(#7f715b33, transparent 75%); }
+.detail-art { width: 100px; height: 100px; flex: 0 0 100px; background: radial-gradient(#7f715b33, transparent 75%); }
 .detail-top h3 { font: 1.2rem Georgia, serif; color: #ecdfbb; margin: .3rem 0 .5rem; }
 .detail-top p { font-size: .75rem; margin: 0; }
 .item-details dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem 1rem; margin: .9rem 0; }
