@@ -88,3 +88,9 @@ Weryfikacja: 44/44 testy, TypeScript i Vite build zaliczone. Chromium przy szero
 Osobno zlecony ilustrowany ekran ekwipunku przed etapem 4. Panel ocalałego ma lokalną wygenerowaną ilustrację poglądową (nie odzwierciedla dynamicznego ubioru). Osiem autorskich ilustracji SVG przedmiotów, siatka z ilościami i stanem, filtry oraz szczegóły po wybraniu. Plecak można wybrać lub odłożyć bezpośrednio w tym ekranie za pomocą istniejących reguł przygotowania; miejsca głowy, tułowia i obuwia są wyraźnie oznaczonymi, nieaktywnymi propozycjami. Crafting zachowuje koszty i wyniki. Pozostałe ekrany czekają na akceptację kierunku graficznego; nie rozszerzamy etapu 4 ani schematu zapisu.
 
 Weryfikacja: 44/44 testy i build zaliczone; Chromium 320/390/768/1440 px bez poziomego przewijania, ilustracja ładuje się lokalnie, wybór klawiaturą, filtry, szczegóły, zapamiętanie i odłożenie plecaka po odświeżeniu, blokada sprzętu na aktywnej wyprawie, odbiór i crafting. Bez testu fizycznego telefonu.
+
+## Uruchamianie Windows jednym kliknięciem
+
+Dodano `Uruchom STREFĘ.cmd` i skrypt PowerShell: weryfikacja narzędzi i wersji Node, blokada równoległych uruchomień, kontrola czystości `main`, fetch i tylko fast-forward, instalacja z lockfile, Vite na stałym localhost:5173 i otwarcie przeglądarki. Zajęty port blokuje instalację przed zmianą node_modules. Brak resetu, usuwania plików użytkownika i wyłączania TLS; błąd zatrzymuje kolejne kroki i pozostawia komunikat. Nie zmienia mechanik gry ani globalnej polityki wykonywania skryptów.
+
+44/44 testy i kompilacja gry przechodzą. W środowisku Linux brak Windows/PowerShell — uruchomienie samego pliku CMD i ścieżki logowania GitHub wymaga sprawdzenia na komputerze użytkownika.

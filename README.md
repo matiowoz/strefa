@@ -15,6 +15,16 @@ npm.cmd run dev
 
 Otwórz adres wypisany przez Vite, zwykle http://localhost:5173. `npm.cmd` omija ewentualną blokadę skryptu npm.ps1 bez zmieniania polityki PowerShell. Nie uruchamiaj index.html dwuklikiem.
 
+## Windows — aktualizacja i start dwuklikiem
+
+W folderze projektu otwórz **Uruchom STREFĘ.cmd**. Potrzebujesz Git for Windows, Node.js (polecany 24 LTS), Internetu i dostępu do prywatnego repozytorium GitHub. Przy pierwszym logowaniu Git może otworzyć przeglądarkę.
+
+Plik wymaga gałęzi `main` i czystego katalogu (także bez dodatkowych nieignorowanych plików). Pobiera `origin/main` i aktualizuje tylko przez fast-forward; nie usuwa Twoich zmian ani lokalnych commitów. Po udanej aktualizacji wykonuje `npm ci --include=optional`, a następnie uruchamia Vite i otwiera **http://localhost:5173**. Błąd na dowolnym kroku zatrzymuje dalszą pracę; okno pozostaje z komunikatem. Nie omija weryfikacji TLS. Skrypt PowerShell uruchamia się z polityką ustawioną tylko dla tego procesu, bez zmiany ustawień systemu.
+
+Zanim uruchomisz plik ponownie, zakończ poprzedni serwer przez Ctrl+C. Drugie uruchomienie tego samego pliku jest blokowane, dopóki pierwsze działa. Serwer uruchomiony ręcznie trzeba zatrzymać samodzielnie. Zajęty port 5173 powoduje błąd zamiast przełączenia portu i otwarcia innego zapisu gry. Wcześniejszy zapis spod `127.0.0.1:5173` nie jest tym samym zapisem co `localhost:5173`.
+
+Plik trzeba pobrać jednorazowo poleceniem `git pull --ff-only` z folderu `strefa-aktualna`. Później wystarczy dwuklik po każdym wysłaniu zmian na GitHub. Sam plik nie publikuje gry w Internecie.
+
 ## Telefon w tej samej sieci
 
 1. Połącz komputer i telefon z tą samą zaufaną siecią Wi-Fi.
