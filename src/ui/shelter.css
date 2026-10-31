@@ -70,3 +70,6 @@
   .shelter-supplies { grid-column: auto; }
   .shelter-card { padding: 1.4rem; }
 }
+
+.shelter-goals { margin:1.2rem 0; padding:1.2rem; border:1px solid #565d40; border-radius:8px; background:#242b1f; }
+.shelter-goals li { margin:.6rem 0; }

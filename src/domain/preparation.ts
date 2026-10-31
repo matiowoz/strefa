@@ -1,15 +1,12 @@
 import { arrange, atShelter } from './inventory';
 import { getItem } from './catalog';
-import type { GameState, InventoryEntry, Preparation, ResourceAmount } from './types';
+import type { GameState, InventoryEntry, ResourceAmount } from './types';
 
-export const kits = {
-  light: { name: 'Lekki', water: 1, ration: 1 },
-  stocked: { name: 'Z zapasem', water: 2, ration: 2 },
-} as const;
 export const recipes = [
   { id: 'water', name: 'Uzdatnij wodę', costs: [{ itemId: 'raw-water', quantity: 1 }], output: [{ itemId: 'water', quantity: 1 }] },
   { id: 'ration', name: 'Przygotuj rację', costs: [{ itemId: 'food', quantity: 1 }], output: [{ itemId: 'ration', quantity: 1 }] },
   { id: 'bandage', name: 'Przygotuj bandaż', costs: [{ itemId: 'cloth', quantity: 2 }], output: [{ itemId: 'bandage', quantity: 1 }] },
+  { id: 'dressings', name: 'Zestaw opatrunków', costs: [{ itemId: 'cloth', quantity: 2 }, { itemId: 'water', quantity: 1 }], output: [{ itemId: 'bandage', quantity: 3 }] },
 ] as const;
 
 export function quantity(inventory: InventoryEntry[], itemId: string): number {
@@ -52,24 +49,23 @@ export function addResources(inventory: InventoryEntry[], rewards: readonly Reso
 
 export function preparationError(state: GameState): string | null {
   if (state.activeExpedition) return 'Najpierw odbierz raport aktywnej wyprawy.';
-  const kit = kits[state.preparation.kit];
-  if (!kit) return 'Nieznany zestaw.';
-  if (state.preparation.equipmentId !== null && !state.inventory.some((entry) => entry.id === state.preparation.equipmentId && getItem(entry.itemId)?.category === 'equipment' && (entry.condition ?? 0) > 0)) return 'Wybrany sprzęt jest niedostępny lub niesprawny.';
-  if (quantity(state.inventory, 'water') < kit.water || quantity(state.inventory, 'ration') < kit.ration) return 'Brakuje wody lub racji. Przygotuj je w Ekwipunku albo wybierz lżejszy zestaw.';
   return null;
-}
-
-export function prepareExpedition(state: GameState, preparation: Preparation, now = Date.now()): GameState {
-  if (state.activeExpedition) throw new Error('Nie można zmieniać zestawu podczas wyprawy.');
-  const next = { ...state, preparation: { ...preparation }, updatedAt: now };
-  // Niedobór zapasów nie blokuje zapisania planu, ale blokuje start.
-  if (!kits[preparation.kit] || (preparation.equipmentId !== null && !state.inventory.some((entry) => entry.id === preparation.equipmentId && getItem(entry.itemId)?.category === 'equipment' && (entry.condition ?? 0) > 0))) throw new Error('Nieprawidłowy zestaw lub sprzęt.');
-  return next;
 }
 
 export function craft(state: GameState, recipeId: string, now = Date.now()): GameState {
   if (!atShelter(state, now)) throw new Error('Przygotuj zapasy po powrocie do kryjówki.');
   const recipe = recipes.find((entry) => entry.id === recipeId);
+  if (recipeId === 'dressings' && !state.progress.workbenchRepaired) throw new Error('Najpierw napraw stół roboczy.');
   if (!recipe) throw new Error('Nieznana receptura.');
   return arrange({ ...state, updatedAt: now, inventory: addResources(consume(state.inventory, recipe.costs), recipe.output) });
+}
+
+export const workbenchCosts = [{ itemId: 'scrap', quantity: 6 }, { itemId: 'cloth', quantity: 2 }] as const;
+export function repairWorkbench(state: GameState, now = Date.now()): GameState {
+  if (state.progress.workbenchRepaired) return state;
+  if (state.activeExpedition || !state.progress.workshopVisited) throw new Error('Najpierw wróć z warsztatu i odbierz raport.');
+  const inventoryIds = new Set(state.inventory.map((entry) => entry.id));
+  const remaining = consume([...state.inventory, ...state.stash], workbenchCosts);
+  return arrange({ ...state, updatedAt: now, progress: { ...state.progress, workbenchRepaired: true },
+    inventory: remaining.filter((entry) => inventoryIds.has(entry.id)), stash: remaining.filter((entry) => !inventoryIds.has(entry.id)) });
 }

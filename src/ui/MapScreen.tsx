@@ -1,6 +1,5 @@
 import { locations } from '../domain/catalog';
 import { expeditionRules, selectLocation } from '../domain/game';
-import { kits } from '../domain/preparation';
 import type { GameState } from '../domain/types';
 import './map.css';
 
@@ -18,7 +17,6 @@ const pins: Record<string, { x: number; y: number; label: string }> = {
 export function MapScreen({ state, update, saving, navigate }: Props) {
   const selected = locations.find((location) => location.id === state.selectedLocationId)!;
   const rule = expeditionRules[selected.id];
-  const kit = kits[state.preparation.kit];
   const activeLocation = locations.find((location) => location.id === state.activeExpedition?.plan.locationId);
   function choose(id: string) {
     if (id !== state.selectedLocationId) void update((previous) => selectLocation(previous, id));
@@ -50,7 +48,7 @@ export function MapScreen({ state, update, saving, navigate }: Props) {
         <div className="location-description"><span className="eyebrow">Cel następnej wyprawy</span><h2 id="location-heading">{selected.name}</h2><p>{selected.description}</p>
           <dl><div><dt>Czas wyprawy</dt><dd>{rule.durationMs / 60000} min</dd></div></dl>
           <p className="location-loot-note">Nie wiesz, co znajdziesz na miejscu. Zdobycze poznasz dopiero z raportu po powrocie.</p>
-          <div className="map-kit-note"><span className="eyebrow">Wybrany zestaw: {kit.name}</span><p>Woda ×{kit.water} · Racje ×{kit.ration}</p><small>Zapasy pobierane dopiero przy rozpoczęciu wyprawy.</small></div>
+          <div className="map-kit-note"><span className="eyebrow">Twój obecny ekwipunek</span><p>Wyruszasz z tym, co niesiesz przy postaci.</p><small>Przedmioty w skrytce pozostają w kryjówce.</small></div>
           {state.activeExpedition && <p className="map-active-note">Trwa już wyprawa do: <strong>{activeLocation?.name}</strong>. Zmiana celu na mapie nie zmieni jej planu.</p>}
           <button className="map-prepare" disabled={saving} onClick={() => navigate('expeditions')}>{state.activeExpedition ? 'Zobacz aktywną wyprawę' : 'Przygotuj wyprawę'} <span aria-hidden="true">→</span></button>
           <p className="map-save-note" role="status">{saving ? 'Zapisywanie celu…' : `Wybrany cel: ${selected.name}`}</p>

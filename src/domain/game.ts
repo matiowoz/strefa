@@ -1,17 +1,16 @@
 import { arrange } from './inventory';
 import { getItem, locations } from './catalog';
-import { consume, addResources, kits, preparationError } from './preparation';
+import { addResources, preparationError } from './preparation';
 import type { GameState } from './types';
 
 export function createInitialState(now = Date.now()): GameState {
   return arrange({
-    schemaVersion: 6, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
+    schemaVersion: 7, backpack: { id: 'starter-backpack', itemId: 'backpack', quantity: 1, condition: 100 }, progress: { workshopVisited: false, workbenchRepaired: false }, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
     hero: {
       id: 'survivor', name: 'Ocalały', level: 1, health: 100, maxHealth: 100,
       skills: { combat: 1, scouting: 1, survival: 1, medicine: 1, crafting: 1, electronics: 1, trade: 1, transport: 1 },
     },
     inventory: [
-      { id: 'starter-backpack', itemId: 'backpack', quantity: 1, condition: 100 },
       { id: 'starter-water', itemId: 'water', quantity: 3, condition: null },
       { id: 'starter-ration', itemId: 'ration', quantity: 2, condition: null },
       { id: 'starter-bandage', itemId: 'bandage', quantity: 2, condition: null },
@@ -40,11 +39,11 @@ export function inventoryWeight(state: GameState): number {
 
 // Demonstracyjne parametry; wynik jest utrwalany przy starcie.
 export const expeditionRules = {
-  outskirts: { durationMs: 60_000, scrap: 2 },
-  workshop: { durationMs: 120_000, scrap: 4 },
+  outskirts: { durationMs: 60_000 },
+  workshop: { durationMs: 120_000 },
 } as const;
 
-export function startExpedition(state: GameState, now = Date.now()): GameState {
+export function startExpedition(state: GameState, now = Date.now(), random: () => number = () => crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32): GameState {
   if (state.activeExpedition) throw new Error('Najpierw zakończ i rozlicz aktywną wyprawę.');
   const rule = expeditionRules[state.selectedLocationId as keyof typeof expeditionRules];
   if (!rule || !Number.isSafeInteger(now) || now < 0 || !Number.isSafeInteger(now + rule.durationMs)) {
@@ -52,11 +51,16 @@ export function startExpedition(state: GameState, now = Date.now()): GameState {
   }
   const problem = preparationError(state);
   if (problem) throw new Error(problem);
-  const supplies = kits[state.preparation.kit];
-  const inventory = consume(state.inventory, [{ itemId: 'water', quantity: supplies.water }, { itemId: 'ration', quantity: supplies.ration }]);
-  return arrange({ ...state, inventory, updatedAt: now, activeExpedition: {
-    cargo: { equipmentId: state.preparation.equipmentId, water: supplies.water, ration: supplies.ration,
-      loot: [{ itemId: 'scrap', quantity: rule.scrap }, { itemId: 'raw-water', quantity: 2 }, { itemId: 'food', quantity: 2 }, { itemId: 'cloth', quantity: 1 }] },
+  const loot = [
+    { itemId: 'scrap', maximum: state.selectedLocationId === 'workshop' ? 6 : 4 },
+    { itemId: 'raw-water', maximum: 3 }, { itemId: 'food', maximum: 3 }, { itemId: 'cloth', maximum: 2 },
+  ].map(({ itemId, maximum }) => {
+    const roll = random();
+    if (!Number.isFinite(roll) || roll < 0 || roll >= 1) throw new Error('Nieprawidłowe losowanie.');
+    return { itemId, quantity: Math.floor(roll * (maximum + 1)) };
+  }).filter((entry) => entry.quantity > 0);
+  return arrange({ ...state, updatedAt: now, activeExpedition: {
+    cargo: { equipmentId: state.backpack.id, water: 0, ration: 0, loot },
     id: crypto.randomUUID(), plan: { locationId: state.selectedLocationId, strategy: 'balanced' },
     status: 'running', startedAt: now, expectedReturnAt: now + rule.durationMs,
   } });
@@ -67,8 +71,9 @@ export function settleExpedition(state: GameState, id: string, now = Date.now())
   // Powtórzenie tej samej komendy po sukcesie niczego nie przyznaje.
   if (!expedition || expedition.id !== id) return state;
   if (!Number.isSafeInteger(now) || now < expedition.expectedReturnAt) throw new Error('Wyprawa jeszcze trwa.');
-  const scrap = expedition.cargo.loot.find((entry) => entry.itemId === 'scrap')!.quantity;
+  const scrap = expedition.cargo.loot.find((entry) => entry.itemId === 'scrap')?.quantity ?? 0;
   const inventory = addResources(state.inventory, expedition.cargo.loot);
   return arrange({ ...state, inventory, updatedAt: now, activeExpedition: null,
+    progress: { ...state.progress, workshopVisited: state.progress.workshopVisited || expedition.plan.locationId === 'workshop' },
     lastReport: { cargo: structuredClone(expedition.cargo), expeditionId: id, locationId: expedition.plan.locationId, returnedAt: expedition.expectedReturnAt, scrap } });
 }

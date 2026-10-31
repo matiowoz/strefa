@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { arrange, fits, gridSize, itemSizes, moveItem } from './inventory';
 import { createInitialState, settleExpedition, startExpedition } from './game';
-import { preparationError, prepareExpedition, quantity } from './preparation';
+import { preparationError, quantity } from './preparation';
 import { isGameState, validateSave } from './validation';
 
 const filled = (count: number) => arrange({ ...createInitialState(0), inventory: Array.from({ length: count }, (_, index) => ({ id: `b-${index}`, itemId: 'bandage', quantity: 1, condition: null })), positions: {} });
@@ -43,7 +43,7 @@ describe('siatki i schowek', () => {
     expect(totals(state)).toHaveLength(250);
   });
   it('rozmieszcza wynik wyprawy bez utraty łupów, nawet przy pełnych kontenerach', () => {
-    const started = startExpedition(createInitialState(0), 1000);
+    const started = startExpedition(createInitialState(0), 1000, () => 0.5);
     const crowded = filled(117);
     const state = { ...crowded, activeExpedition: started.activeExpedition };
     const result = settleExpedition(state, started.activeExpedition!.id, 61000);
@@ -52,21 +52,16 @@ describe('siatki i schowek', () => {
     expect(isGameState(result)).toBe(true);
     expect(settleExpedition(result, started.activeExpedition!.id, 999999)).toBe(result);
   });
-  it('zapasy w schowku nie wystarczają do startu; wybrany plecak jest odznaczany przy odłożeniu', () => {
+  it('nie pozwala odłożyć założonego plecaka, a brak wody nie blokuje startu', () => {
     const initial = createInitialState(0);
-    const prepared = prepareExpedition(initial, { kit: 'light', equipmentId: initial.inventory[0].id }, 100);
-    const moved = moveItem(prepared, initial.inventory[0].id, 0);
-    expect(moved.preparation.equipmentId).toBeNull();
-    const noWater = moveItem(moved, initial.inventory.find((entry) => entry.itemId === 'water')!.id, 0);
-    expect(preparationError(noWater)).toContain('Brakuje');
-    expect(() => startExpedition(noWater)).toThrow();
+    expect(() => moveItem(initial, initial.backpack.id, 0)).toThrow();
+    const noWater = moveItem(initial, 'starter-water', 0);
+    expect(preparationError(noWater)).toBeNull();
+    expect(startExpedition(noWater).backpack).toEqual(initial.backpack);
   });
-  it('transfer jest zablokowany w drodze, a sprzęt do odbioru raportu', () => {
-    const initial = createInitialState(0);
-    const equipped = prepareExpedition(initial, { kit: 'light', equipmentId: initial.inventory[0].id }, 0);
-    const running = startExpedition(equipped, 1000);
+  it('transfer jest zablokowany w drodze', () => {
+    const running = startExpedition(createInitialState(0), 1000);
     expect(() => moveItem(running, running.inventory[1].id, 0, undefined, 2000)).toThrow('po powrocie');
-    expect(() => moveItem(running, initial.inventory[0].id, 0, undefined, 61000)).toThrow('raport');
   });
 });
 
@@ -76,7 +71,7 @@ describe('migracja i walidacja siatki', () => {
     const old = { ...state, schemaVersion: 3, inventory: [...state.inventory, ...state.stash, ...state.overflow], hero: { ...state.hero, name: 'Kruk' } };
     const migrated = validateSave(old);
     expect(totals(migrated)).toEqual(totals(state)); expect(migrated.hero.name).toBe('Kruk');
-    expect(migrated.schemaVersion).toBe(6); expect(isGameState(migrated)).toBe(true);
+    expect(migrated.schemaVersion).toBe(7); expect(isGameState(migrated)).toBe(true);
   });
   it('odrzuca uszkodzone położenia i powielony ID między kontenerami', () => {
     const state = createInitialState(0); const id = state.inventory[0].id;
@@ -89,14 +84,13 @@ describe('migracja i walidacja siatki', () => {
 
 it('migracja pełnego zapisu zachowuje aktywną wyprawę i jej zarezerwowany plecak', () => {
   const initial = createInitialState(0);
-  const equipped = prepareExpedition(initial, { kit: 'light', equipmentId: initial.inventory[0].id }, 0);
-  const running = startExpedition(equipped, 1000);
-  const old = { ...running, schemaVersion: 3, inventory: [...filled(250).inventory, ...filled(250).stash, ...filled(250).overflow, ...running.inventory] };
+  const running = startExpedition(initial, 1000, () => 0.5);
+  const old = { ...running, schemaVersion: 3, preparation: { kit: 'light', equipmentId: initial.backpack.id }, inventory: [...filled(250).inventory, ...filled(250).stash, ...filled(250).overflow, initial.backpack, ...running.inventory] };
   const migrated = validateSave(old);
   expect(migrated.activeExpedition).toEqual(running.activeExpedition);
-  expect(migrated.inventory.some((entry) => entry.id === initial.inventory[0].id)).toBe(true);
-  expect(migrated.preparation.equipmentId).toBe(initial.inventory[0].id);
-  expect(migrated.inventory.length + migrated.stash.length + migrated.overflow.length).toBe(old.inventory.length);
+  expect(migrated.backpack).toEqual(initial.backpack);
+  expect(migrated.preparation.equipmentId).toBeNull();
+  expect(migrated.inventory.length + migrated.stash.length + migrated.overflow.length + 1).toBe(old.inventory.length);
 });
 
 it('migruje pełne dwie strony v4 do mniejszego schowka bez utraty rzeczy', () => {
@@ -107,7 +101,7 @@ it('migruje pełne dwie strony v4 do mniejszego schowka bez utraty rzeczy', () =
   const result = validateSave(old);
   expect(totals(result)).toEqual(entries.map((entry) => entry.id).sort());
   expect(result.stash).toHaveLength(72); expect(result.overflow).toHaveLength(128);
-  expect(result.schemaVersion).toBe(6);
+  expect(result.schemaVersion).toBe(7);
 });
 
 it('przenosi przedmiot z dawnej drugiej strony na wolne miejsce, ale nie naprawia uszkodzonego zapisu v4', () => {

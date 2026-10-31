@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { locations } from '../domain/catalog';
-import { quantity } from '../domain/preparation';
+import { quantity, repairWorkbench, workbenchCosts } from '../domain/preparation';
 import type { GameState } from '../domain/types';
 import { ItemArt } from './ItemArt';
 import './shelter.css';
 
 type Destination = 'hero' | 'expeditions' | 'inventory' | 'map' | 'storage';
-type Props = { state: GameState; navigate: (screen: Destination) => void };
+type Props = { saving: boolean; update: (change: (state: GameState) => GameState) => Promise<boolean>; state: GameState; navigate: (screen: Destination) => void };
 
-export function ShelterScreen({ state, navigate }: Props) {
+export function ShelterScreen({ state, navigate, saving, update }: Props) {
   const [panel, setPanel] = useState(true);
   const [now, setNow] = useState(Date.now());
   const active = state.activeExpedition;
@@ -28,7 +28,7 @@ export function ShelterScreen({ state, navigate }: Props) {
 
   return <div className="shelter-home">
     <section className="shelter-illustration" aria-labelledby="shelter-title">
-      <img className="shelter-background" src="/art/shelter.webp" width="1672" height="941" alt="Zużyte wnętrze schronienia: posłanie pod oknem, półki z zapasami i łatanym plecakiem, stół z radiem oraz ciepła lampa na popękanej ścianie." fetchPriority="high" />
+      <img className="shelter-background" src={state.progress.workbenchRepaired ? "/art/shelter-repaired.webp" : "/art/shelter.webp"} width="1672" height="941" alt="Zużyte wnętrze schronienia: posłanie pod oknem, półki z zapasami i łatanym plecakiem, stół z radiem oraz ciepła lampa na popękanej ścianie." fetchPriority="high" />
       <span className="shelter-scene-tag"><i aria-hidden="true" />Twoje schronienie</span>
       <div className="shelter-welcome"><span className="eyebrow">Mały kawałek własnego świata</span><h2 id="shelter-title">Tutaj wracasz.</h2><p>Za drzwiami zostały ruiny.<br />Tutaj jest miejsce na następny dzień.</p></div>
       <span className="shelter-art-caption">Ilustracja poglądowa</span>
@@ -37,6 +37,10 @@ export function ShelterScreen({ state, navigate }: Props) {
       <div><button className="shelter-primary" onClick={() => navigate('expeditions')}>{action}<span aria-hidden="true"> →</span></button><button className="shelter-secondary" onClick={() => navigate('map')}>Mapa okolicy</button></div>
     </div>
 
+    <section className="shelter-goals" aria-label="Odbudowa kryjówki"><span className="eyebrow">Pierwszy cel · Miejsce do pracy</span><h2>{state.progress.workbenchRepaired ? 'Stół roboczy naprawiony' : 'Przywróć stół do użytku'}</h2>
+      <ol><li>{state.progress.workshopVisited ? '✓' : '○'} Wróć z wyprawy do starego warsztatu i odbierz raport.</li><li>{state.progress.workbenchRepaired ? '✓' : '○'} Zbierz 6 złomu i 2 tkaniny, aby naprawić stół.</li><li>{state.progress.workbenchRepaired ? '✓' : '○'} Odblokuj recepturę „Zestaw opatrunków”.</li></ol>
+      {state.progress.workbenchRepaired ? <p>Nowa receptura jest dostępna w Ekwipunku. Z 2 tkanin i 1 wody przygotujesz 3 bandaże.</p> : <><p>Materiały pobierane z ekwipunku i skrytki: złom {quantity([...state.inventory, ...state.stash], 'scrap')}/6 · tkanina {quantity([...state.inventory, ...state.stash], 'cloth')}/2.</p><button disabled={saving || !!active || !state.progress.workshopVisited || !workbenchCosts.every((cost) => quantity([...state.inventory, ...state.stash], cost.itemId) >= cost.quantity)} onClick={() => { void update((previous) => repairWorkbench(previous)); }}>Napraw stół roboczy</button></>}
+    </section>
     <div className="shelter-panel-heading"><div><span className="eyebrow">Zanim znów wyruszysz</span><h2>Wszystko na swoim miejscu</h2></div><button className="text-button" aria-expanded={panel} aria-controls="shelter-panel" onClick={() => setPanel(!panel)}>{panel ? 'Zwiń panel' : 'Rozwiń panel'}</button></div>
     <div id="shelter-panel" hidden={!panel}>
       <div className="shelter-dashboard">
@@ -55,7 +59,7 @@ export function ShelterScreen({ state, navigate }: Props) {
         </article>
       </div>
       <div className="shelter-corners">
-        <article><span className="shelter-corner-mark" aria-hidden="true">◇</span><div><span className="eyebrow">Stół roboczy</span><h3>Małe przygotowania. Dłuższa droga.</h3><p>Wodę, racje i bandaże przygotujesz w Ekwipunku. Każda receptura pokazuje koszt i wynik.</p><button className="shelter-card-link" onClick={() => navigate('inventory')}>Przygotuj zapasy <span aria-hidden="true">→</span></button></div></article>
+        <article><span className="shelter-corner-mark" aria-hidden="true">◇</span><div><span className="eyebrow">Stół roboczy</span><h3>{state.progress.workbenchRepaired ? 'Gotowy do pracy.' : 'Wymaga naprawy.'}</h3><p>Wodę, racje i bandaże przygotujesz w Ekwipunku. Każda receptura pokazuje koszt i wynik.</p><button className="shelter-card-link" onClick={() => navigate('inventory')}>Przygotuj zapasy <span aria-hidden="true">→</span></button></div></article>
         <article><span className="shelter-corner-mark" aria-hidden="true">⌁</span><div><span className="eyebrow">Radio</span><h3>Na razie tylko szum.</h3><p>Transmisje i zadania pojawią się w kolejnych etapach. Dziś czeka na Ciebie znana okolica.</p><span className="shelter-future-note">Nasłuch — w przygotowaniu</span></div></article>
       </div>
     </div>

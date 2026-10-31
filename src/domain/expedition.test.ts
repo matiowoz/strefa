@@ -14,7 +14,7 @@ describe('minimalna wyprawa', () => {
   });
   it('zachowuje cel mimo zmiany mapy i rozlicza dokładnie na granicy czasu', () => {
     const initial = createInitialState(0);
-    const started = startExpedition(initial, 1000);
+    const started = startExpedition(initial, 1000, () => 0.5);
     const changed = selectLocation(started, 'workshop', 2000);
     const settled = settleExpedition(changed, started.activeExpedition!.id, 61000);
     expect(settled.lastReport).toMatchObject({ locationId: 'outskirts', returnedAt: 61000, scrap: 2 });
@@ -27,7 +27,7 @@ describe('minimalna wyprawa', () => {
     expect(settleExpedition(second, started.activeExpedition!.id, 300000)).toBe(second);
   });
   it('ma ten sam wynik po nieobecności i nie nalicza wielu cykli', () => {
-    const started = startExpedition(selectLocation(createInitialState(0), 'workshop', 0), 1000);
+    const started = startExpedition(selectLocation(createInitialState(0), 'workshop', 0), 1000, () => 0.6);
     const reopened = validateSave(JSON.parse(JSON.stringify(started)));
     const immediate = settleExpedition(started, started.activeExpedition!.id, 121000);
     const later = settleExpedition(reopened, reopened.activeExpedition!.id, 9000000);
@@ -38,7 +38,7 @@ describe('minimalna wyprawa', () => {
   it('migruje poprawny v1 bez utraty postępu i odrzuca uszkodzone raporty', () => {
     const current = createInitialState(1000);
     const { lastReport: _, ...legacy } = current;
-    expect(validateSave({ ...legacy, schemaVersion: 1 })).toEqual(current);
+    expect(validateSave({ ...legacy, schemaVersion: 1, inventory: [current.backpack, ...current.inventory] })).toMatchObject({ inventory: current.inventory, backpack: current.backpack, hero: current.hero });
     expect(() => validateSave({ ...legacy, schemaVersion: 1, inventory: [] , hero: null })).toThrow();
     expect(() => validateSave({ ...current, lastReport: { expeditionId: 'e', locationId: 'workshop', returnedAt: 100, scrap: -1 } })).toThrow();
   });

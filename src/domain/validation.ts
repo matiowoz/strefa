@@ -45,19 +45,19 @@ function validStructure(value: unknown): boolean {
   return true;
 }
 
-function isV2(value: unknown): boolean {
+function isV2(value: unknown, modern = false): boolean {
   if (!record(value) || value.schemaVersion !== 2 || !validStructure(value)) return false;
   const report = value.lastReport;
   return report === null || (record(report) && nonempty(report.expeditionId)
     && locations.some((location) => location.id === report.locationId)
-    && timestamp(report.returnedAt) && integer(report.scrap) && report.scrap > 0
+    && timestamp(report.returnedAt) && integer(report.scrap) && (modern ? report.scrap >= 0 : report.scrap > 0)
     && (!record(value.activeExpedition) || value.activeExpedition.id !== report.expeditionId));
 }
 
-function validCargo(value: unknown, inventory: unknown, requireEquipment: boolean): value is Cargo {
+function validCargo(value: unknown, inventory: unknown, requireEquipment: boolean, modern = false): value is Cargo {
   if (!record(value) || !(value.equipmentId === null || nonempty(value.equipmentId))
     || !integer(value.water) || value.water < 0 || !integer(value.ration) || value.ration < 0
-    || !Array.isArray(value.loot) || value.loot.length === 0) return false;
+    || !Array.isArray(value.loot) || (!modern && value.loot.length === 0)) return false;
   if (requireEquipment && value.equipmentId !== null && (!Array.isArray(inventory) || !inventory.some((entry: unknown) => record(entry) && entry.id === value.equipmentId && typeof entry.itemId === 'string' && getItem(entry.itemId)?.category === 'equipment'))) return false;
   const ids = new Set();
   return value.loot.every((entry: unknown) => {
@@ -65,28 +65,28 @@ function validCargo(value: unknown, inventory: unknown, requireEquipment: boolea
       || getItem(entry.itemId)?.category === 'equipment' || ids.has(entry.itemId)
       || !integer(entry.quantity) || entry.quantity < 1) return false;
     ids.add(entry.itemId); return true;
-  }) && value.loot.some((entry: unknown) => record(entry) && entry.itemId === 'scrap');
+  }) && (modern || value.loot.some((entry: unknown) => record(entry) && entry.itemId === 'scrap'));
 }
 
-function isV3(value: unknown): boolean {
+function isV3(value: unknown, modern = false): boolean {
   if (!record(value) || value.schemaVersion !== 3 || !validStructure(value)
     || !record(value.preparation) || !['light', 'stocked'].includes(String(value.preparation.kit))) return false;
   const equipmentId = value.preparation.equipmentId;
   if (equipmentId !== null && (!nonempty(equipmentId) || !Array.isArray(value.inventory)
     || !value.inventory.some((entry: unknown) => record(entry) && entry.id === equipmentId && typeof entry.itemId === 'string' && getItem(entry.itemId)?.category === 'equipment'))) return false;
-  if (record(value.activeExpedition) && !validCargo(value.activeExpedition.cargo, value.inventory, true)) return false;
+  if (record(value.activeExpedition) && !validCargo(value.activeExpedition.cargo, value.inventory, true, modern)) return false;
   // Reuse the v2 report checks without mutating the source.
-  if (!isV2({ ...value, schemaVersion: 2 })) return false;
+  if (!isV2({ ...value, schemaVersion: 2 }, modern)) return false;
   const report = value.lastReport;
   if (report === null) return true;
-  return record(report) && validCargo(report.cargo, value.inventory, false)
-    && report.cargo.loot.some((entry) => entry.itemId === 'scrap' && entry.quantity === report.scrap);
+  return record(report) && validCargo(report.cargo, value.inventory, false, modern)
+    && (report.cargo.loot.find((entry) => entry.itemId === 'scrap')?.quantity ?? 0) === report.scrap;
 }
 
 function validGridState(value: unknown, version: number, pages: number, bounds = { columns: 8, rows: 9 }): boolean {
   if (!record(value) || value.schemaVersion !== version || !Array.isArray(value.inventory) || !Array.isArray(value.stash) || !Array.isArray(value.overflow) || !record(value.positions)) return false;
   const all = [...value.inventory, ...value.stash, ...value.overflow];
-  if (!isV3({ ...value, schemaVersion: 3, inventory: all })) return false;
+  if (!isV3({ ...value, schemaVersion: 3, inventory: version === 7 ? [...all, value.backpack] : all }, version === 7)) return false;
   const entries = [...value.inventory, ...value.stash] as InventoryEntry[];
   if (Object.keys(value.positions).length !== entries.length) return false;
   for (const entry of entries) {
@@ -101,17 +101,21 @@ function validGridState(value: unknown, version: number, pages: number, bounds =
   const active = value.activeExpedition;
   if (record(active) && record(active.cargo)) {
     const id = active.cargo.equipmentId;
-    if (id && !(value.inventory as InventoryEntry[]).some((entry) => entry.id === id)) return false;
+    if (id && !(version === 7 && record(value.backpack) && value.backpack.id === id) && !(value.inventory as InventoryEntry[]).some((entry) => entry.id === id)) return false;
   }
   return true;
 }
 
 export function isGameState(value: unknown): value is GameState {
-  return validGridState(value, 6, 1);
+  if (!record(value) || !record(value.backpack) || value.backpack.itemId !== 'backpack'
+    || !record(value.progress) || typeof value.progress.workshopVisited !== 'boolean' || typeof value.progress.workbenchRepaired !== 'boolean'
+    || (value.progress.workbenchRepaired && !value.progress.workshopVisited)
+    || !record(value.preparation) || value.preparation.equipmentId !== null) return false;
+  return validGridState(value, 7, 1);
 }
 
 export function validateSave(value: unknown): GameState {
-  if (record(value) && ![1, 2, 3, 4, 5, 6].includes(Number(value.schemaVersion))) {
+  if (record(value) && ![1, 2, 3, 4, 5, 6, 7].includes(Number(value.schemaVersion))) {
     throw new Error('Nieobsługiwana wersja zapisu. Dane pozostawiono bez zmian.');
   }
   if (record(value) && value.schemaVersion === 1 && validStructure(value)) {
@@ -137,6 +141,21 @@ export function validateSave(value: unknown): GameState {
   }
   if (record(value) && value.schemaVersion === 5 && validGridState(value, 5, 1, { columns: 10, rows: 10 })) {
     return validateSave(arrange({ ...value, schemaVersion: 6 } as unknown as GameState));
+  }
+  if (record(value) && value.schemaVersion === 6 && validGridState(value, 6, 1)) {
+    const old = value as unknown as GameState;
+    const all = [...old.inventory, ...old.stash, ...old.overflow];
+    const preferred = old.activeExpedition?.cargo.equipmentId ?? old.preparation.equipmentId;
+    let backpack = all.find((entry) => entry.id === preferred && entry.itemId === 'backpack') ?? all.find((entry) => entry.itemId === 'backpack');
+    if (!backpack) {
+      let id = 'equipped-backpack';
+      while (all.some((entry) => entry.id === id)) id += '-new';
+      backpack = { id, itemId: 'backpack', quantity: 1, condition: 100 };
+    }
+    const positions = { ...old.positions }; delete positions[backpack.id];
+    return validateSave({ ...old, schemaVersion: 7, backpack, positions,
+      inventory: old.inventory.filter((entry) => entry.id !== backpack.id), stash: old.stash.filter((entry) => entry.id !== backpack.id), overflow: old.overflow.filter((entry) => entry.id !== backpack.id),
+      preparation: { kit: 'light', equipmentId: null }, progress: { workshopVisited: old.lastReport?.locationId === 'workshop', workbenchRepaired: false } });
   }
   if (!isGameState(value)) throw new Error('Zapis jest nieprawidłowy. Dane pozostawiono bez zmian.');
   return value;

@@ -106,13 +106,13 @@ describe('transakcje wyprawy', () => {
     await repository.save(result, started);
     expect(await repository.load()).toEqual(result);
   });
-  it('wczytuje v1 i zapisuje v6 dopiero przy udanej zmianie', async () => {
+  it('wczytuje v1 i zapisuje v7 dopiero przy udanej zmianie', async () => {
     const factory = new IDBFactory();
     const { lastReport: _, ...legacy } = createInitialState(0);
     await writeRaw(factory, { ...legacy, schemaVersion: 1 });
     const repository = new IndexedDbRepository(factory, 'test');
     const loaded = (await repository.load())!;
-    expect(loaded.schemaVersion).toBe(6);
+    expect(loaded.schemaVersion).toBe(7);
     await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
     expect((await repository.load())!.hero.name).toBe('Kruk');
   });
@@ -133,7 +133,7 @@ describe('atomowe przygotowanie', () => {
     expect(quantity(loaded.inventory, 'bandage')).toBe(3);
     expect(quantity(loaded.inventory, 'cloth')).toBe(0);
   });
-  it('przerwany start nie pobiera zapasów; ponowienie pobiera je tylko raz', async () => {
+  it('przerwany start nie zmienia ekwipunku; ponowienie zapisuje wyprawę tylko raz', async () => {
     const { startExpedition } = await import('../domain/game');
     const { quantity } = await import('../domain/preparation');
     const repository = new IndexedDbRepository(new IDBFactory(), 'test');
@@ -149,7 +149,7 @@ describe('atomowe przygotowanie', () => {
     expect(await repository.load()).toEqual(initial);
     await repository.save(started, initial);
     await expect(repository.save(started, initial)).rejects.toThrow();
-    expect(quantity((await repository.load())!.inventory, 'water')).toBe(2);
+    expect(quantity((await repository.load())!.inventory, 'water')).toBe(3);
   });
 });
 
@@ -180,7 +180,7 @@ it('migruje starą drugą stronę schowka i zachowuje kontrolę poprzedniego sta
   await writeRaw(factory, { ...state, schemaVersion: 4, positions: { ...state.positions, 'starter-water': { x: 9, y: 5, page: 1 } } });
   const repository = new IndexedDbRepository(factory, 'test');
   const loaded = (await repository.load())!;
-  expect(loaded.schemaVersion).toBe(6);
+  expect(loaded.schemaVersion).toBe(7);
   expect(loaded.positions['starter-water'].page).toBe(0);
   const moved = moveItem(loaded, 'starter-water', -1, undefined, 2000);
   await repository.save(moved, loaded);
@@ -209,4 +209,43 @@ it('przerwany zapis ostatniej użytej sztuki zachowuje przedmiot i jego pola', a
   });
   await expect(repository.save(next, state)).rejects.toThrow();spy.mockRestore();
   expect(await repository.load()).toEqual(state);
+});
+
+it('naprawa stołu jest atomowa i nie pobiera materiałów po przerwaniu lub ponowieniu w drugiej karcie', async () => {
+  const { addResources, quantity, repairWorkbench } = await import('../domain/preparation');
+  const factory = new IDBFactory();
+  const repository = new IndexedDbRepository(factory, 'test');
+  const initial = createInitialState(0);
+  const state = arrange({ ...initial, progress: { workshopVisited: true, workbenchRepaired: false }, inventory: addResources(initial.inventory, [{ itemId: 'scrap', quantity: 2 }, { itemId: 'cloth', quantity: 2 }]) });
+  await repository.save(state, null);
+  const repaired = repairWorkbench(state, 1000);
+  const original = IDBDatabase.prototype.transaction;
+  const spy = vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(function (this: IDBDatabase, ...args: Parameters<typeof original>) {
+    const tx = original.apply(this, args); queueMicrotask(() => tx.abort()); return tx;
+  });
+  await expect(repository.save(repaired, state)).rejects.toThrow(); spy.mockRestore();
+  expect(await repository.load()).toEqual(state);
+  const results = await Promise.allSettled([repository.save(repaired, state), repository.save(repaired, state)]);
+  expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+  const loaded = (await new IndexedDbRepository(factory, 'test').load())!;
+  expect(loaded.progress.workbenchRepaired).toBe(true);
+  expect(quantity(loaded.inventory, 'scrap')).toBe(0);
+  expect(quantity(loaded.inventory, 'cloth')).toBe(0);
+  expect(repairWorkbench(loaded)).toBe(loaded);
+});
+
+it('migruje v6 z plecakiem poza siatkę i zapisuje nowy stan z kontrolą współbieżności', async () => {
+  const initial = createInitialState(0);
+  const old = arrange({ ...initial, inventory: [initial.backpack, ...initial.inventory], positions: {} });
+  const factory = new IDBFactory();
+  await writeRaw(factory, { ...old, schemaVersion: 6 });
+  const repository = new IndexedDbRepository(factory, 'test');
+  const loaded = (await repository.load())!;
+  expect(loaded.backpack).toEqual(initial.backpack);
+  expect(loaded.inventory.some((entry) => entry.itemId === 'backpack')).toBe(false);
+  await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
+  const reopened = (await new IndexedDbRepository(factory, 'test').load())!;
+  expect(reopened.hero.name).toBe('Kruk');
+  expect(reopened.backpack).toEqual(initial.backpack);
+  expect(reopened.inventory).toEqual(initial.inventory);
 });

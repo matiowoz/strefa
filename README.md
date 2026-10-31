@@ -63,7 +63,7 @@ npm.cmd run preview
 6. Sprawdź, że woda i racje zostały pobrane raz przy starcie; plecak pozostaje bez zmian. W Ekwipunku z surowców z wyprawy uzdatnij wodę i przygotuj rację. Po dwóch wyprawach wystarczy tkaniny na bandaż. Widać koszt i wynik każdej receptury. Brak zasobów blokuje operację.
 7. Przy błędzie zapisu zmiana nie zostaje zastosowana; ponów odbiór. Przy konflikcie z inną kartą odśwież stronę.
 
-Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v6 (migracja poprawnych v1, v2, v3, v4 i v5 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
+Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v7 (migracja poprawnych v1, v2, v3, v4, v5 i v6 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
 
 Zapis jest osobny dla urządzenia, przeglądarki i adresu z portem. localhost i adres LAN mają różne zapisy; telefon nie współdzieli zapisu komputera. Czyszczenie danych witryny lub tryb prywatny może usunąć postęp. Brak synchronizacji, eksportu i kopii chmurowej. Nieaktualny zapis z drugiej karty jest odrzucany atomowo; odśwież ją przed kolejną zmianą. Czas wypraw opiera się na zegarze urządzenia, bez zabezpieczeń serwerowych.
 
@@ -84,29 +84,29 @@ PLAN.md określa dalsze etapy i ograniczenia względem GDD 1.1. AGENTS.md zawier
 
 ## Uproszczenia przygotowania
 
-Lekki zestaw kosztuje 1 wodę i 1 rację, z zapasem 2 i 2. Koszt obejmuje całą drogę i jest pobierany przy starcie. Wariant z zapasem nie daje jeszcze dodatkowej korzyści. Nie ma głodu ani pragnienia upływającego podczas nieobecności. Plecak jest rezerwowany do powrotu, bez premii i zużycia. Receptury wykonują się od razu: 1 woda do uzdatnienia → 1 woda, 1 składnik żywnościowy → 1 racja, 2 czyste tkaniny → 1 bandaż. Są to robocze parametry opisane w PLAN.md.
+Postać wyrusza ze wszystkimi przedmiotami z obecnego ekwipunku. Nie wybiera zestawu ani ilości zapasów, a start niczego nie zużywa. Zawartość skrytki zostaje w kryjówce. Brak głodu i pragnienia upływającego podczas nieobecności. Podstawowy plecak jest założony na stałe poza siatką i nie można go zdjąć; wymiana na większy to przyszły etap. Receptury wykonują się od razu: 1 woda do uzdatnienia → 1 woda, 1 składnik żywnościowy → 1 racja, 2 czyste tkaniny → 1 bandaż. Naprawiony stół odblokowuje zestaw opatrunków: 2 tkaniny + 1 woda → 3 bandaże. Są to robocze parametry opisane w PLAN.md.
 
 ## Ekwipunek i schowek
 
 Ekwipunek postaci ma 5 kolumn i 9 rzędów. Schowek w kryjówce ma jedną siatkę 8×9. Obie siatki mają identyczne kratki 52 px. Przedmioty zajmują prostokąty różnych rozmiarów; szczegóły pokazują ich wymiary i ilość. Maksymalny rozmiar przedmiotu to 2×3. Ilość pozostaje stosem (bez nowych limitów stosowania).
 
-Przeciągnij rzecz na siatkę: podgląd centruje się pod kursorem bez zmiany wymiarów, a upuszczanie działa też na liniach i między kratkami. Alternatywnie wybierz rzecz, kliknij „Zmień położenie” i wskaż pole. Przyciski pod szczegółami przenoszą do ekwipunku lub schowka, szukając pierwszego wolnego miejsca. Za mało miejsca lub kolizja pozostawia przedmiot na miejscu bez komunikatu o błędzie. Błędy rzeczywistego zapisu lub odczytu nadal są zgłaszane. Na małych ekranach schowek przewija się poziomo. Przenoszenie wymaga powrotu do kryjówki; zarezerwowany plecak czeka dodatkowo na odbiór raportu. Odłożenie wybranego plecaka do schowka odznacza go w planie.
+Przeciągnij rzecz na siatkę: podgląd centruje się pod kursorem bez zmiany wymiarów, a upuszczanie działa też na liniach i między kratkami. Alternatywnie wybierz rzecz, kliknij „Zmień położenie” i wskaż pole. Przyciski pod szczegółami przenoszą do ekwipunku lub schowka, szukając pierwszego wolnego miejsca. Za mało miejsca lub kolizja pozostawia przedmiot na miejscu bez komunikatu o błędzie. Błędy rzeczywistego zapisu lub odczytu nadal są zgłaszane. Na małych ekranach schowek przewija się poziomo. Przenoszenie wymaga powrotu do kryjówki. Założony plecak nie jest przedmiotem do przenoszenia.
 
-Start i receptury korzystają wyłącznie z rzeczy przy postaci; surowce ze schowka trzeba najpierw przenieść. Znaleziska i wyniki receptur najpierw trafiają do ekwipunku, następnie do wolnych miejsc schowka, a przy braku miejsca do bezpiecznego odbioru. Odbiór służy wyłącznie zabezpieczeniu wyników i migracji — nie można odkładać tam rzeczy. Stare zapisy zachowują całą zawartość, nazwę i aktywną wyprawę. Wyprawy nadal nie pokazują przyszłych zdobyczy.
+Receptury korzystają wyłącznie z rzeczy przy postaci; surowce ze schowka trzeba najpierw przenieść. Znaleziska i wyniki receptur najpierw trafiają do ekwipunku, następnie do wolnych miejsc schowka, a przy braku miejsca do bezpiecznego odbioru. Odbiór służy wyłącznie zabezpieczeniu wyników i migracji — nie można odkładać tam rzeczy. Stare zapisy zachowują całą zawartość, nazwę i aktywną wyprawę. Wyprawy nadal nie pokazują przyszłych zdobyczy.
 
 W przyszłości będzie możliwość budowania kolejnych skrytek. Obecnie jest jedna; nie ma stron, zakupów ani płatności. Rzeczy z dawnej drugiej strony są przenoszone do wolnych miejsc schowka, a jeśli się nie mieszczą, pozostają w bezpiecznym odbiorze.
 
 ## Ilustrowana kryjówka
 
-Główny ekran przedstawia schronienie postapo. Pod ilustracją przejdziesz do przygotowania wyprawy lub mapy. Zwijany panel pokazuje bohatera i zdrowie, stan wyprawy oraz rzeczywiste ilości wody i racji w magazynie. Odliczanie zmienia się w „Raport czeka” po terminie; odbiór nadal następuje na ekranie Wyprawy. Stół prowadzi do istniejących receptur w Ekwipunku. Radio jest dekoracją oznaczoną jako funkcja w przygotowaniu. Ilustracja pokoju jest poglądowa; widoczne przedmioty nie oznaczają dodatkowych zasobów ani aktywnych pomieszczeń.
+Główny ekran przedstawia schronienie postapo. Pod ilustracją przejdziesz do przygotowania wyprawy lub mapy. Zwijany panel pokazuje bohatera i zdrowie, stan wyprawy oraz rzeczywiste ilości wody i racji w magazynie. Odliczanie zmienia się w „Raport czeka” po terminie; odbiór nadal następuje na ekranie Wyprawy. Po powrocie z warsztatu i odbiorze raportu naprawisz stół za 6 złomu i 2 tkaniny z ekwipunku lub skrytki. Naprawa zmienia ilustrację pokoju i odblokowuje recepturę zestawu opatrunków w Ekwipunku. Radio jest dekoracją oznaczoną jako funkcja w przygotowaniu. Ilustracja pokoju jest poglądowa; widoczne przedmioty nie oznaczają dodatkowych zasobów ani aktywnych pomieszczeń.
 
 ## Mapa okolicy
 
-Na papierowym planie wybierz osiedle lub warsztat, albo użyj listy pod mapą. Wybór zapisuje się od razu; panel pokazuje ilustrację miejsca, czas i wybrany zestaw. Przycisk „Przygotuj wyprawę” przenosi do istniejącego planowania, nie rozpoczyna podróży. Znacznik kryjówki wraca do głównego ekranu. Podczas aktywnej wyprawy mapa wybiera tylko następny cel, bez zmiany trwającej wyprawy i bez pobierania zapasów.
+Na papierowym planie wybierz osiedle lub warsztat, albo użyj listy pod mapą. Wybór zapisuje się od razu; panel pokazuje ilustrację miejsca, czas oraz informację o zabieranym ekwipunku. Przycisk „Przygotuj wyprawę” przenosi do istniejącego planowania, nie rozpoczyna podróży. Znacznik kryjówki wraca do głównego ekranu. Podczas aktywnej wyprawy mapa wybiera tylko następny cel, bez zmiany trwającej wyprawy i bez pobierania zapasów.
 
 ## Wyprawa i raport
 
-Przygotowanie pokazuje cel, czas, wybrany sprzęt i jawny koszt zapasów. Mapa, plan oraz trwająca wyprawa nie pokazują przyszłych zdobyczy. Odbiór po terminie zapisuje znaleziska i rozliczony raport z ilustracjami przedmiotów oraz zestawieniem zużycia. Ostatni rozliczony raport pozostaje dostępny jako historia, również podczas kolejnej wyprawy; nie jest prognozą nowych nagród. To zmiana prezentacji, bez zmiany dotychczasowego modelu wyników i zapisu.
+Przygotowanie pokazuje cel, czas oraz informację o zabraniu obecnego ekwipunku. Mapa, plan oraz trwająca wyprawa nie pokazują przyszłych zdobyczy. Odbiór po terminie zapisuje znaleziska i rozliczony raport z ilustracjami przedmiotów oraz zestawieniem zużycia. Ostatni rozliczony raport pozostaje dostępny jako historia, również podczas kolejnej wyprawy; nie jest prognozą nowych nagród. Wynik jest losowany i zapisywany raz przy starcie: ilości znalezisk są zmienne, a powrót może być pusty. Odświeżanie i późniejszy odbiór nie zmieniają wyniku. Wcześniej rozpoczęte wyprawy zachowują dawne łupy i koszty.
 
 ## Bohater i tło strony
 

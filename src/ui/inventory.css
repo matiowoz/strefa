@@ -84,3 +84,6 @@
 @media (min-width: 1180px) { .inventory-layout { grid-template-columns: minmax(280px, .85fr) minmax(0, 1.4fr); gap: 1.5rem; } .survivor-art { height: 420px; } .stash-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .item-tile { height: 160px; } .recipe-title { flex-direction: row; align-items: center; } }
 @media (max-width: 359px) { .stash-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .inventory-intro .eyebrow { letter-spacing: .04em; } }
 @media (prefers-reduced-motion: reduce) { .item-tile .item-art { transition: none; } .item-tile:hover .item-art { transform: none; } }
+
+.equipped-backpack { display:flex; align-items:center; gap:1rem; margin-bottom:1rem; }
+.equipped-backpack > .item-art { width:64px; height:90px; flex:none; }

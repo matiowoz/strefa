@@ -21,6 +21,6 @@ it('używa ze skrytki, ale odrzuca materiały, sprzęt i używanie w drodze', ()
   const state = createInitialState(0);const water = state.inventory.find((entry) => entry.itemId === 'water')!;
   const stored = moveItem(state, water.id, 0, undefined, 100);
   expect(useItem(stored, water.id, 200).stash[0].quantity).toBe(2);
-  expect(() => useItem(state, state.inventory[0].id)).toThrow();
+  expect(() => useItem(state, state.backpack.id)).toThrow();
   const running = startExpedition(state, 1000);expect(() => useItem(running, water.id, 2000)).toThrow();
 });

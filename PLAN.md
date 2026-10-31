@@ -164,3 +164,19 @@ Usunięto podpisy z ikon siatki i podglądu przeciągania. Interaktywne okienko 
 Na doprecyzowane polecenie użytkownika Użyj zużywa jedną wodę, rację albo bandaż; bez dodawania efektów zdrowia, głodu i pragnienia. Dostępne po powrocie, ze stosu w ekwipunku lub otwartej skrytce. Wynik zapisywany atomowo, ostatnia sztuka zwalnia pola; blokada powtórzenia podczas zapisu i konfliktu kart zachowana. Nie zmieniono schematu zapisu.
 
 72/72 testy i build. Nowe testy zużycia trzech rodzajów, ostatniej sztuki, użycia ze skrytki, blokad w drodze i nieużywalnych rzeczy, konfliktu dwóch kart i przerwanej transakcji. Chromium: realna mysz przechodzi z ikony na okienko i klika Użyj/transfer, ilości zapisane po odświeżeniu, brak Użyj na materiałach, brak podpisów, brak transferu w Ekwipunku, oddzielny widok skrytki, okienko mieści się w 320/390/768/1440 px. Ponownie sprawdzono przeciąganie z centrowaniem bez zmiany wielkości, kolizje i emulowany dotyk. Bez fizycznego telefonu.
+
+
+## Etap 4 — pierwszy ciąg celów i zmiana zasad wypraw (31 października 2026)
+
+- [x] Wyprawa do starego warsztatu, odbiór raportu, zebranie materiałów i jednokrotna naprawa stołu w kryjówce.
+- [x] Koszt naprawy: roboczo 6 złomu i 2 tkaniny, pobierane atomowo z ekwipunku, potem skrytki. Odbiór nadmiaru nie służy jako magazyn materiałów.
+- [x] Naprawa zmienia ilustrację kryjówki i odblokowuje recepturę „Zestaw opatrunków”: 2 tkaniny + 1 woda → 3 bandaże. Pozostałe receptury pozostają dostępne wcześniej.
+- [x] Nowe wyprawy biorą pod uwagę obecny ekwipunek. Usunięto wybór zestawu i sprzętu; start nie pobiera wody ani racji. Przedmioty skrytki pozostają w domu.
+- [x] Podstawowy plecak jest oddzielnym, stale założonym wyposażeniem poza siatką 5×9. Nie można go przenosić ani używać. Większe plecaki i ich wymiana pozostają na przyszłość.
+- [x] Zmienne ilości łupu, losowanie raz przy starcie i trwały wynik; brak prognozy nagród w interfejsie. Roboczo jednostajny rozkład: złom 0–4 na osiedlu / 0–6 w warsztacie, woda do uzdatnienia 0–3, żywność 0–3, tkanina 0–2. Zero pomija dany przedmiot; możliwy pusty powrót. Kolejne wyniki mogą przypadkowo się powtórzyć. Brak zależności od umiejętności/sprzętu — to nadal prototyp balansu.
+- [x] Schemat v7. Migracja poprawnych v1–v6 zachowuje rzeczy, położenia pozostałych przedmiotów, trwającą wyprawę, termin, dawne koszty i wynik. Jeden dotychczasowy plecak przenosi do wyposażenia (pozostałe zachowuje); przy braku plecaka dodaje podstawowy. Nie nadpisuje błędnych ani nowszych danych. Dawny raport warsztatu zalicza odwiedziny; naprawa wymaga osobnej akcji.
+- [x] Drugi wariant ilustracji `/art/shelter-repaired.webp` powstał przez wygenerowaną edycję własnego obrazu kryjówki; bez materiałów z cudzych gier.
+
+Zakres nie obejmuje walki, backendu, płatności ani rozbudowanego silnika zdarzeń. Nowe reguły zastępują wcześniejsze demonstracyjne zestawy i stałe nagrody, zgodnie z bieżącym zleceniem.
+
+Weryfikacja tego etapu: 81/81 testów Vitest, kompilacja TypeScript strict i Vite. Chromium: pełny ciąg wyprawa → raport → naprawa → nowa receptura, wynik i postęp po odświeżeniu, założony plecak poza siatką, brak wyboru zestawów i zużycia przy starcie; szerokości 320, 390, 768 i 1440 px bez poziomego przepełnienia strony. Materiały naprawy w izolowanym profilu przeglądarki dodano do testu; losowe i puste wyniki sprawdzono testami domeny. Testy adaptera obejmują przerwanie naprawy, dwie karty i migrację plecaka v6 przy zapisie.

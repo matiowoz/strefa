@@ -61,11 +61,13 @@ export interface ExpeditionReport {
 
 export interface Placement { x: number; y: number; page: number } // -1 = ekwipunek, 0 = schowek
 export interface GameState {
-  schemaVersion: 6;
+  schemaVersion: 7;
+  backpack: InventoryEntry;
+  progress: { workshopVisited: boolean; workbenchRepaired: boolean };
   positions: Record<string, Placement>;
   stash: InventoryEntry[];
   overflow: InventoryEntry[];
-  preparation: Preparation;
+  preparation: Preparation; // Metadane dawnych zapisów; nowe wyprawy korzystają z inventory i backpack.
   lastReport: ExpeditionReport | null;
   updatedAt: number;
   hero: Hero;

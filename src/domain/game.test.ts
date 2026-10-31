@@ -32,14 +32,14 @@ describe('reguły podstawowego stanu', () => {
   });
   it('liczy rzeczywistą masę przedmiotów z ilościami', () => {
     const state = createInitialState();
-    expect(inventoryWeight(state)).toBeCloseTo(7.2);
+    expect(inventoryWeight(state)).toBeCloseTo(6);
     expect(inventoryWeight({ ...state, inventory: [] })).toBe(0);
   });
 });
 
 describe('walidacja wersjonowanego zapisu', () => {
   it('odrzuca nowszą wersję zamiast tworzyć nowy stan', () => {
-    expect(() => validateSave({ ...createInitialState(), schemaVersion: 7 })).toThrow('wersja');
+    expect(() => validateSave({ ...createInitialState(), schemaVersion: 8 })).toThrow('wersja');
   });
   it.each([
     null,
