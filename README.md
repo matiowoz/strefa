@@ -21,7 +21,16 @@ W folderze projektu otwórz **Uruchom STREFĘ.cmd**. Potrzebujesz Git for Window
 
 Plik wymaga gałęzi `main` i czystego katalogu (także bez dodatkowych nieignorowanych plików). Pobiera `origin/main` i aktualizuje tylko przez fast-forward; nie usuwa Twoich zmian ani lokalnych commitów. Po udanej aktualizacji wykonuje `npm ci --include=optional`, a następnie uruchamia Vite i otwiera **http://localhost:5173**. Błąd na dowolnym kroku zatrzymuje dalszą pracę; okno pozostaje z komunikatem. Nie omija weryfikacji TLS. Skrypt PowerShell uruchamia się z polityką ustawioną tylko dla tego procesu, bez zmiany ustawień systemu.
 
-Zanim uruchomisz plik ponownie, zakończ poprzedni serwer przez Ctrl+C. Drugie uruchomienie tego samego pliku jest blokowane, dopóki pierwsze działa. Serwer uruchomiony ręcznie trzeba zatrzymać samodzielnie. Zajęty port 5173 powoduje błąd zamiast przełączenia portu i otwarcia innego zapisu gry. Wcześniejszy zapis spod `127.0.0.1:5173` nie jest tym samym zapisem co `localhost:5173`.
+W nowej wersji **Ctrl+C** zatrzymuje serwer i pokazuje menu w tym samym oknie:
+
+- **U + Enter** — sprawdź aktualizacje, zainstaluj zależności i uruchom grę ponownie.
+- **Z + Enter** — zamknij program.
+
+Przy błędzie aktualizacji lub instalacji menu również pozostaje dostępne; kolejne kroki nie są wykonywane. Inne odpowiedzi ponawiają pytanie. Serwer działa jako własny proces Node, a jego wejście jest odłączone od klawiatury; Ctrl+C obsługuje launcher, zatrzymując tylko ten proces i jego potomków. Nie ma pytania CMD o zakończenie całego pliku wsadowego. Kontrola lokalnych zmian i zajętego portu powtarza się przed każdym U. Blokada drugiego launchera obejmuje całą sesję, także menu.
+
+**Pierwsze wczytanie menu:** pobierz aktualizację dotychczasowym plikiem, zamknij go i otwórz ponownie — kod PowerShell jest wczytywany do pamięci na początku. Dotyczy to również przyszłych zmian samego launchera. Zwykłe aktualizacje gry wymagają już tylko Ctrl+C, U i Enter.
+
+Zanim uruchomisz osobne okno programu, zakończ poprzednią sesję przez Ctrl+C, a następnie Z. Drugie uruchomienie tego samego pliku jest blokowane, dopóki pierwsze działa. Serwer uruchomiony ręcznie trzeba zatrzymać samodzielnie. Zajęty port 5173 powoduje błąd zamiast przełączenia portu i otwarcia innego zapisu gry. Wcześniejszy zapis spod `127.0.0.1:5173` nie jest tym samym zapisem co `localhost:5173`.
 
 Plik trzeba pobrać jednorazowo poleceniem `git pull --ff-only` z folderu `strefa-aktualna`. Później wystarczy dwuklik po każdym wysłaniu zmian na GitHub. Sam plik nie publikuje gry w Internecie.
 

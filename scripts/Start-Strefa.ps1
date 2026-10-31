@@ -12,27 +12,7 @@ function Invoke-Checked {
     }
 }
 
-try {
-    Set-Location -LiteralPath $ProjectRoot
-    $root = (Get-Location).Path
-    foreach ($command in @('git.exe', 'node.exe', 'npm.cmd')) {
-        if (-not (Get-Command $command -ErrorAction SilentlyContinue)) {
-            throw "Brakuje $command. Zainstaluj Git for Windows i Node.js 24 LTS, potem otworz plik ponownie."
-        }
-    }
-    Invoke-Checked 'node.exe' @('-e', "const [a,b]=process.versions.node.split('.').map(Number); if(a<22||(a===22&&b<12)){console.error('Wymagany Node.js 22.12 lub nowszy; polecany 24 LTS.');process.exit(1)}")
-
-    # A per-checkout lock prevents a second launcher from replacing dependencies
-    # while the first launcher is still serving the game. No repository files used.
-    $sha = [System.Security.Cryptography.SHA256]::Create()
-    try {
-        $hash = [BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($root.ToLowerInvariant()))).Replace('-', '')
-    } finally { $sha.Dispose() }
-    $lockPath = Join-Path ([IO.Path]::GetTempPath()) "strefa-$hash.lock"
-    try {
-        $lock = [IO.File]::Open($lockPath, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
-    } catch { throw 'STREFA jest juz uruchomiona przez ten plik. Zamknij poprzednie okno gry przed aktualizacja.' }
-
+function Update-Strefa {
     $gitRoot = & git.exe rev-parse --show-toplevel
     if ($LASTEXITCODE -ne 0) { throw 'Ten folder nie jest repozytorium Git. Uzyj folderu strefa-aktualna pobranego przez git clone.' }
     if ([IO.Path]::GetFullPath($gitRoot.Trim()) -ne $root) { throw 'Uruchom plik z glownego folderu STREFY.' }
@@ -62,16 +42,102 @@ try {
     Write-Host "`n[2/3] Instalacja zaleznosci..." -ForegroundColor Yellow
     Invoke-Checked 'npm.cmd' @('ci', '--include=optional')
 
-    Write-Host "`n[3/3] Uruchamianie gry. Przegladarka otworzy sie po starcie." -ForegroundColor Green
-    Write-Host 'Zostaw to okno otwarte. Aby zatrzymac gre, nacisnij Ctrl+C.'
-    Write-Host 'Jesli port 5173 jest zajety, zatrzymaj poprzednio uruchomiony serwer.'
-    Invoke-Checked 'npm.cmd' @('run', 'dev', '--', '--host', 'localhost', '--port', '5173', '--strictPort', '--open')
+}
+
+function Start-StrefaServer {
+    # Redirect only stdin so Vite cannot consume the launcher's Ctrl+C key.
+    # stdout/stderr still appear in this window. Run Node directly: no nested CMD.
+    $process = [Diagnostics.Process]::new()
+    $process.StartInfo.FileName = (Get-Command 'node.exe').Source
+    $vitePath = Join-Path $root 'node_modules\vite\bin\vite.js'
+    if (-not (Test-Path -LiteralPath $vitePath)) { throw 'Brakuje Vite po instalacji zaleznosci.' }
+    $process.StartInfo.Arguments = '"' + $vitePath + '" --host localhost --port 5173 --strictPort --open'
+    $process.StartInfo.WorkingDirectory = $root
+    $process.StartInfo.UseShellExecute = $false
+    $process.StartInfo.RedirectStandardInput = $true
+    $started = $false
+    $oldControlMode = [Console]::TreatControlCAsInput
+    $stoppedByUser = $false
+    try {
+        [Console]::TreatControlCAsInput = $true
+        Write-Host "`n[3/3] Uruchamianie gry..." -ForegroundColor Green
+        Write-Host 'Zostaw to okno otwarte. Ctrl+C zatrzymuje gre i otwiera menu.'
+        $started = $process.Start()
+        if (-not $started) { throw 'Nie udalo sie uruchomic serwera.' }
+        $process.StandardInput.Close()
+        while (-not $process.HasExited) {
+            if ([Console]::KeyAvailable) {
+                $key = [Console]::ReadKey($true)
+                if ($key.Key -eq [ConsoleKey]::C -and ($key.Modifiers -band [ConsoleModifiers]::Control)) {
+                    $stoppedByUser = $true
+                    break
+                }
+            }
+            Start-Sleep -Milliseconds 100
+        }
+        if (-not $stoppedByUser -and $process.ExitCode -ne 0) {
+            throw "Serwer zakonczyl sie bledem (kod $($process.ExitCode)). Sprawdz komunikat powyzej."
+        }
+    } finally {
+        try {
+            if ($started -and -not $process.HasExited) {
+                # Kill only this owned server and its child processes, never by name/port.
+                & taskkill.exe /PID $process.Id /T /F
+                if ($LASTEXITCODE -ne 0 -and -not $process.HasExited) {
+                    throw 'Nie udalo sie zatrzymac serwera. Zamknij to okno przed ponownym uruchomieniem.'
+                }
+                $process.WaitForExit()
+            }
+        } finally {
+            [Console]::TreatControlCAsInput = $oldControlMode
+            $process.Dispose()
+        }
+    }
+}
+
+try {
+    Set-Location -LiteralPath $ProjectRoot
+    $root = (Get-Location).Path
+    foreach ($command in @('git.exe', 'node.exe', 'npm.cmd')) {
+        if (-not (Get-Command $command -ErrorAction SilentlyContinue)) {
+            throw "Brakuje $command. Zainstaluj Git for Windows i Node.js 24 LTS, potem otworz plik ponownie."
+        }
+    }
+    Invoke-Checked 'node.exe' @('-e', "const [a,b]=process.versions.node.split('.').map(Number); if(a<22||(a===22&&b<12)){console.error('Wymagany Node.js 22.12 lub nowszy; polecany 24 LTS.');process.exit(1)}")
+
+    # A per-checkout lock prevents a second launcher from replacing dependencies
+    # while the first launcher is still serving the game. No repository files used.
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $hash = [BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($root.ToLowerInvariant()))).Replace('-', '')
+    } finally { $sha.Dispose() }
+    $lockPath = Join-Path ([IO.Path]::GetTempPath()) "strefa-$hash.lock"
+    try {
+        $lock = [IO.File]::Open($lockPath, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
+    } catch { throw 'STREFA jest juz uruchomiona przez ten plik. Zamknij poprzednie okno gry przed aktualizacja.' }
+
+
+    while ($true) {
+        try {
+            Update-Strefa
+            Start-StrefaServer
+        } catch {
+            Write-Host "`nZatrzymano: $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host 'Nie usuwaj plikow ani lokalnych zmian. W razie problemu skopiuj komunikat do czatu.'
+        }
+        do {
+            Write-Host "`nSTREFA - co dalej?" -ForegroundColor Yellow
+            Write-Host '[U] Aktualizuj i uruchom ponownie'
+            Write-Host '[Z] Zamknij'
+            $choice = (Read-Host 'Wpisz U lub Z i nacisnij Enter').Trim().ToUpperInvariant()
+        } while ($choice -ne 'U' -and $choice -ne 'Z')
+        if ($choice -eq 'Z') { break }
+    }
 } catch {
     $exitCode = 1
     Write-Host "`nZatrzymano: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host 'Nie uruchamiaj kolejnych polecen na slepo. Skopiuj komunikat do czatu.'
+    [void](Read-Host 'Nacisnij Enter, aby zamknac okno')
 } finally {
     if ($null -ne $lock) { $lock.Dispose() }
 }
-if ($exitCode -ne 0) { [void](Read-Host 'Nacisnij Enter, aby zamknac okno') }
 exit $exitCode
