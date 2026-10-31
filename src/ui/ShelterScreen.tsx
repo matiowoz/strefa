@@ -5,7 +5,7 @@ import type { GameState } from '../domain/types';
 import { ItemArt } from './ItemArt';
 import './shelter.css';
 
-type Destination = 'hero' | 'expeditions' | 'inventory' | 'map';
+type Destination = 'hero' | 'expeditions' | 'inventory' | 'map' | 'storage';
 type Props = { state: GameState; navigate: (screen: Destination) => void };
 
 export function ShelterScreen({ state, navigate }: Props) {
@@ -51,7 +51,7 @@ export function ShelterScreen({ state, navigate }: Props) {
         </article>
         <article className="shelter-card shelter-supplies"><span className="shelter-card-index" aria-hidden="true">03</span><span className="eyebrow">Magazyn kryjówki</span><h3>Zapasy na drogę</h3><p className="shelter-card-subtitle">Przenieś potrzebne zapasy do ekwipunku postaci.</p>
           <div className="shelter-supply-counts"><div><ItemArt itemId="water" /><span>Woda<strong>×{water}</strong></span></div><div><ItemArt itemId="ration" /><span>Racje<strong>×{ration}</strong></span></div></div>
-          <button className="shelter-card-link" onClick={() => navigate('inventory')}>Otwórz schowek <span aria-hidden="true">→</span></button>
+          <button className="shelter-card-link" onClick={() => navigate('storage')}>Otwórz skrytkę <span aria-hidden="true">→</span></button>
         </article>
       </div>
       <div className="shelter-corners">

@@ -9,7 +9,6 @@
 .bag-item.is-selected { border: 2px solid #f2cf85; box-shadow: inset 0 0 10px #d7bc5844; }
 .bag-item .item-art { width: min(85%, 145px); height: auto; aspect-ratio: 1; flex-shrink: 1; min-height: 0; }
 .bag-quantity { position: absolute; right: 3px; top: 1px; font-size: .6rem; color: #f5e4b8; text-shadow: 0 1px 3px #000; }
-.bag-item-name { display: block; max-width: 100%; font-size: .5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
 .storage-details, .storage-recovery { margin-top: 1.2rem; }
 .storage-details dl { font-size: .8rem; }
 .storage-actions { display: flex; flex-wrap: wrap; gap: .6rem; }
@@ -23,3 +22,12 @@
 .bag-drop-preview { position: fixed; border: 2px solid #cadb9c; background: #9bb77244; border-radius: 2px; }
 .bag-drop-preview.invalid { border-color: #e6a488; background: #ad503844; }
 .bag-item.drag-origin { opacity: .35; }
+.storage-columns.inventory-only { grid-template-columns: minmax(0, 380px); }
+.item-popover { position: fixed; z-index: 80; width: min(280px, calc(100vw - 16px)); max-height: calc(100vh - 16px); overflow-y: auto; padding: 1rem; border: 1px solid #b39b68; border-radius: 5px; background: linear-gradient(135deg, #39422c, #19251c); color: #e8d9b4; box-shadow: 0 10px 35px #0009; }
+.item-popover h3 { font: 1.15rem Georgia, serif; margin: 0 1.5rem .7rem 0; }
+.item-popover p { font-size: .75rem; line-height: 1.65; margin-bottom: .8rem; }
+.item-popover-close { position: absolute; right: .25rem; top: .15rem; background: transparent; border: 0; padding: .2rem; min-height: 32px; min-width: 32px; font-size: 1.2rem; }
+.item-popover-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.item-popover-actions button { font-size: .75rem; padding: .5rem .75rem; }
+.selected-item-details { margin-top: 1rem; }
+.selected-item-details summary { cursor: pointer; color: #c4b38c; font-size: .8rem; padding: .6rem 0; }

@@ -115,3 +115,9 @@ Karta Bohatera pokazuje ilustrację poglądową, faktyczne zdrowie, poziom, pseu
 ## Kolejność nawigacji
 
 Postać → Ekwipunek → Kryjówka → Wyprawy → Mapa. Kryjówka pozostaje ekranem początkowym. W kryjówce przycisk „Otwórz schowek” przechodzi do widoku z obiema siatkami.
+
+## Opisy po najechaniu i używanie
+
+Siatki nie pokazują nazw pod ilustracjami — nazwa i opis pojawiają się w interaktywnym okienku po najechaniu, ustawieniu fokusu lub dotknięciu przedmiotu. Woda, racje i bandaże mają przycisk „Użyj”: na tym etapie zużywa on jedną sztukę, bez zmiany zdrowia ani innych statystyk. Po ostatniej sztuce pola zostają zwolnione. Używanie jest dostępne po powrocie do kryjówki.
+
+„Ekwipunek” w nawigacji pokazuje wyłącznie rzeczy przy postaci, bez przycisku „Do skrytki”. Skrytkę otworzysz z Kryjówki przyciskiem „Otwórz skrytkę”; w jej widoku widać obie siatki, a obok „Użyj” dostępny jest transfer „Do skrytki” (dla rzeczy przy postaci) lub „Do ekwipunku” (dla rzeczy w skrytce). Przenoszenie i centrowany podgląd zachowują dotychczasowe rozmiary. Szczegóły z układaniem klawiaturą pozostały w zwijanej sekcji.

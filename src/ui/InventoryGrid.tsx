@@ -1,20 +1,29 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { PointerEvent } from 'react';
+import type { PointerEvent, ReactNode } from 'react';
 import type { GameState, InventoryEntry } from '../domain/types';
 import { getItem } from '../domain/catalog';
 import { fits, gridSize, itemSizes } from '../domain/inventory';
+import { ItemPopover } from './ItemPopover';
 import { ItemArt } from './ItemArt';
 import { snapDrop } from './gridDrag';
 
-type Props = { state: GameState; page: number; selectedId: string | null; disabled: boolean; select: (id: string) => void; place: (id: string, page: number, point: { x: number; y: number }) => void; moving: boolean };
+type Props = { state: GameState; page: number; selectedId: string | null; disabled: boolean; select: (id: string) => void; place: (id: string, page: number, point: { x: number; y: number }) => void; moving: boolean; actions: (entry: InventoryEntry) => ReactNode };
 type Drag = { entry: InventoryEntry; grab: { x: number; y: number }; start: { x: number; y: number }; width: number; height: number; active: boolean };
 type Target = { page: number; point: { x: number; y: number }; valid: boolean; left: number; top: number };
 function contents(entry: InventoryEntry) {
-  return <><span className="bag-quantity">×{entry.quantity}</span><ItemArt itemId={entry.itemId} /><span className="bag-item-name">{getItem(entry.itemId)?.name}</span></>;
+  return <><span className="bag-quantity">×{entry.quantity}</span><ItemArt itemId={entry.itemId} /></>;
 }
-export function InventoryGrid({ state, page, selectedId, disabled, select, place, moving }: Props) {
+export function InventoryGrid({ state, page, selectedId, disabled, select, place, moving, actions }: Props) {
   const size = gridSize(page);
+  const popoverId = useId();
+  const [hover, setHover] = useState<{ id: string; anchor: DOMRect } | null>(null);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const keep = () => { if (hideTimer.current) clearTimeout(hideTimer.current); };
+  const close = () => { keep(); setHover(null); };
+  const leave = () => { keep(); hideTimer.current = setTimeout(() => setHover(null), 250); };
+  const open = (id: string, element: HTMLElement) => { keep(); if (!drag.current?.active) setHover({ id, anchor: element.getBoundingClientRect() }); };
+  useEffect(() => () => { if (hideTimer.current) clearTimeout(hideTimer.current); }, []);
   const drag = useRef<Drag | null>(null);
   const cleanup = useRef<(() => void) | null>(null);
   useEffect(() => () => cleanup.current?.(), []);
@@ -37,6 +46,7 @@ export function InventoryGrid({ state, page, selectedId, disabled, select, place
   function begin(event: PointerEvent<HTMLButtonElement>, entry: InventoryEntry) {
     if (disabled || !event.isPrimary || event.button !== 0) return;
     event.preventDefault();
+    close();
     cleanup.current?.();
     const rect = event.currentTarget.getBoundingClientRect();
     drag.current = { entry, grab: { x: rect.width / 2, y: rect.height / 2 }, start: { x: event.clientX, y: event.clientY }, width: rect.width, height: rect.height, active: false };
@@ -83,9 +93,9 @@ export function InventoryGrid({ state, page, selectedId, disabled, select, place
     })}
     {entries.map((entry) => {
       const position = state.positions[entry.id]; const dimensions = itemSizes[entry.itemId];
-      return <button key={entry.id} className={`bag-item ${selectedId === entry.id ? 'is-selected' : ''} ${preview?.drag.entry.id === entry.id ? 'drag-origin' : ''}`} style={{ gridColumn: `${position.x + 1} / span ${dimensions.width}`, gridRow: `${position.y + 1} / span ${dimensions.height}` }} aria-label={`${getItem(entry.itemId)?.name}, ilość ${entry.quantity}, rozmiar ${dimensions.width} na ${dimensions.height}`} aria-pressed={selectedId === entry.id} aria-controls="item-details" title={getItem(entry.itemId)?.name} aria-disabled={disabled || state.activeExpedition?.cargo.equipmentId === entry.id} onPointerDown={(event) => { if (state.activeExpedition?.cargo.equipmentId !== entry.id) begin(event, entry); }} onClick={() => select(entry.id)}>
+      return <button key={entry.id} className={`bag-item ${selectedId === entry.id ? 'is-selected' : ''} ${preview?.drag.entry.id === entry.id ? 'drag-origin' : ''}`} style={{ gridColumn: `${position.x + 1} / span ${dimensions.width}`, gridRow: `${position.y + 1} / span ${dimensions.height}` }} aria-label={`${getItem(entry.itemId)?.name}, ilość ${entry.quantity}, rozmiar ${dimensions.width} na ${dimensions.height}`} aria-pressed={selectedId === entry.id} aria-controls={hover?.id === entry.id ? popoverId : undefined} aria-expanded={hover?.id === entry.id} onPointerEnter={(event) => { if (event.pointerType !== 'touch') open(entry.id, event.currentTarget); }} onPointerLeave={leave} onFocus={(event) => open(entry.id, event.currentTarget)} onBlur={leave} aria-disabled={disabled || state.activeExpedition?.cargo.equipmentId === entry.id} onPointerDown={(event) => { if (state.activeExpedition?.cargo.equipmentId !== entry.id) begin(event, entry); }} onClick={(event) => { select(entry.id); open(entry.id, event.currentTarget); }}>
         {contents(entry)}
       </button>;
     })}
-  </div>{preview && createPortal(<div className="bag-drag-layer" aria-hidden="true">{preview.target && <div className={`bag-drop-preview ${preview.target.valid ? 'valid' : 'invalid'}`} style={{ left: preview.target.left, top: preview.target.top, width: preview.drag.width, height: preview.drag.height }} />}<div className="bag-item bag-drag-preview" style={{ left: preview.left, top: preview.top, width: preview.drag.width, height: preview.drag.height }}>{contents(preview.drag.entry)}</div></div>, document.body)}</div>;
+  </div>{hover && !preview && entries.some((entry) => entry.id === hover.id) && <ItemPopover id={popoverId} entry={entries.find((entry) => entry.id === hover.id)!} anchor={hover.anchor} keep={keep} leave={leave} close={close}>{actions(entries.find((entry) => entry.id === hover.id)!)}</ItemPopover>}{preview && createPortal(<div className="bag-drag-layer" aria-hidden="true">{preview.target && <div className={`bag-drop-preview ${preview.target.valid ? 'valid' : 'invalid'}`} style={{ left: preview.target.left, top: preview.target.top, width: preview.drag.width, height: preview.drag.height }} />}<div className="bag-item bag-drag-preview" style={{ left: preview.left, top: preview.top, width: preview.drag.width, height: preview.drag.height }}>{contents(preview.drag.entry)}</div></div>, document.body)}</div>;
 }

@@ -186,3 +186,27 @@ it('migruje starą drugą stronę schowka i zachowuje kontrolę poprzedniego sta
   await repository.save(moved, loaded);
   expect(await repository.load()).toEqual(moved);
 });
+
+it('dwie karty nie zużywają tej samej sztuki i nie duplikują skutku', async () => {
+  const { useItem } = await import('../domain/useItem');
+  const repository = new IndexedDbRepository(new IDBFactory(), 'test');
+  const initial = createInitialState(0);await repository.save(initial, null);
+  const next = useItem(initial, 'starter-water', 1000);
+  const outcomes = await Promise.allSettled([repository.save(next, initial), repository.save(next, initial)]);
+  expect(outcomes.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+  expect((await repository.load())!.inventory.find((item) => item.id === 'starter-water')!.quantity).toBe(2);
+});
+
+it('przerwany zapis ostatniej użytej sztuki zachowuje przedmiot i jego pola', async () => {
+  const { useItem } = await import('../domain/useItem');
+  const repository = new IndexedDbRepository(new IDBFactory(), 'test');
+  const state = createInitialState(0); state.inventory.find((entry) => entry.id === 'starter-water')!.quantity = 1;
+  await repository.save(state, null);
+  const next = useItem(state, 'starter-water', 1000);
+  const original = IDBDatabase.prototype.transaction;
+  const spy = vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(function (this: IDBDatabase, ...args: Parameters<typeof original>) {
+    const tx = original.apply(this, args);queueMicrotask(() => tx.abort());return tx;
+  });
+  await expect(repository.save(next, state)).rejects.toThrow();spy.mockRestore();
+  expect(await repository.load()).toEqual(state);
+});
