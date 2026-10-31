@@ -23,3 +23,7 @@ ilustracje planu okolicy, opuszczonego osiedla i starego warsztatu. Wersje WebP
 źródłowych PNG. Znaczniki i nazwy są renderowane jako przyciski HTML, nie są
 częścią ilustracji. Tło planu jest poglądowe: budynki i drogi nie tworzą
 dodatkowych lokacji ani symulacji podróży.
+
+`bunker-wall.webp`: wygenerowana na potrzeby STREFY tekstura zużytego betonu
+z pęknięciami i śladami rdzy, tło wspólne dla wszystkich ekranów. WebP
+źródłowego PNG, wyłącznie dekoracja; przy braku obrazu pozostaje ciemne tło CSS.

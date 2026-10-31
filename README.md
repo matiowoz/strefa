@@ -92,3 +92,7 @@ Na papierowym planie wybierz osiedle lub warsztat, albo użyj listy pod mapą. W
 ## Wyprawa i raport
 
 Przygotowanie pokazuje cel, czas, wybrany sprzęt i jawny koszt zapasów. Mapa, plan oraz trwająca wyprawa nie pokazują przyszłych zdobyczy. Odbiór po terminie zapisuje znaleziska i rozliczony raport z ilustracjami przedmiotów oraz zestawieniem zużycia. Ostatni rozliczony raport pozostaje dostępny jako historia, również podczas kolejnej wyprawy; nie jest prognozą nowych nagród. To zmiana prezentacji, bez zmiany dotychczasowego modelu wyników i zapisu.
+
+## Bohater i tło strony
+
+Karta Bohatera pokazuje ilustrację poglądową, faktyczne zdrowie, poziom, pseudonim i osiem zapisanych wartości umiejętności. Rozwój i premie nie są jeszcze aktywne. Zmiana pseudonimu zachowuje dotychczasowe zasady zapisu. Podgląd plecaka odzwierciedla wybór na następną lub wyposażenie aktywnej wyprawy; przycisk prowadzi do Ekwipunku. Wszystkie ekrany mają wspólne tło zużytego betonu, bez zmiany danych gry.
