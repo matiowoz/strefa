@@ -66,3 +66,7 @@ PLAN.md określa dalsze etapy i ograniczenia względem GDD 1.1. AGENTS.md zawier
 ## Uproszczenia przygotowania
 
 Lekki zestaw kosztuje 1 wodę i 1 rację, z zapasem 2 i 2. Koszt obejmuje całą drogę i jest pobierany przy starcie. Wariant z zapasem nie daje jeszcze dodatkowej korzyści. Nie ma głodu ani pragnienia upływającego podczas nieobecności. Plecak jest rezerwowany do powrotu, bez premii i zużycia. Receptury wykonują się od razu: 1 woda do uzdatnienia → 1 woda, 1 składnik żywnościowy → 1 racja, 2 czyste tkaniny → 1 bandaż. Są to robocze parametry opisane w PLAN.md.
+
+## Ilustrowany ekwipunek
+
+Ekran Ekwipunek jest wzorcem nowego wyglądu: wybierz filtr i kliknij przedmiot, aby zobaczyć ilość, masę, stan i dostępne działanie. Plecak można wybrać na następną wyprawę lub odłożyć; w trakcie wyprawy zmiana jest zablokowana. Receptury znajdują się poniżej magazynu. Ilustracja bohatera jest poglądowa; miejsca na głowę, tułów i obuwie są planowane. Grafiki są lokalne, bez zewnętrznych serwisów.

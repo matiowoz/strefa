@@ -82,3 +82,9 @@ Robocze uproszczenia i balans, nie nowe ustalone reguły GDD:
 - Brak odwrotu i porażek; bezpieczny powrót oznacza ukończenie po terminie bez strat własnego wyposażenia. Zegar nadal lokalny.
 
 Weryfikacja: 44/44 testy, TypeScript i Vite build zaliczone. Chromium przy szerokości 390 px: zapis zestawu i sprzętu, odświeżenie, start, odtworzenie wyprawy, odbiór, blokada braku zapasów, wytworzenie wody i racji, odświeżenie i kolejny start. Brak poziomego przewijania. Czas przesunięty tylko w izolowanym profilu testowym. Bez fizycznego telefonu i Safari.
+
+## Przebudowa wyglądu — wzorzec ekwipunku
+
+Osobno zlecony ilustrowany ekran ekwipunku przed etapem 4. Panel ocalałego ma lokalną wygenerowaną ilustrację poglądową (nie odzwierciedla dynamicznego ubioru). Osiem autorskich ilustracji SVG przedmiotów, siatka z ilościami i stanem, filtry oraz szczegóły po wybraniu. Plecak można wybrać lub odłożyć bezpośrednio w tym ekranie za pomocą istniejących reguł przygotowania; miejsca głowy, tułowia i obuwia są wyraźnie oznaczonymi, nieaktywnymi propozycjami. Crafting zachowuje koszty i wyniki. Pozostałe ekrany czekają na akceptację kierunku graficznego; nie rozszerzamy etapu 4 ani schematu zapisu.
+
+Weryfikacja: 44/44 testy i build zaliczone; Chromium 320/390/768/1440 px bez poziomego przewijania, ilustracja ładuje się lokalnie, wybór klawiaturą, filtry, szczegóły, zapamiętanie i odłożenie plecaka po odświeżeniu, blokada sprzętu na aktywnej wyprawie, odbiór i crafting. Bez testu fizycznego telefonu.

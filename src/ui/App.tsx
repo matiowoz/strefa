@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { InventoryScreen } from './InventoryScreen';
 import { useGame } from '../app/useGame';
 import { getItem, locations, skillNames } from '../domain/catalog';
-import { expeditionRules, inventoryWeight, renameHero, selectLocation, startExpedition, settleExpedition } from '../domain/game';
-import { craft, kits, preparationError, prepareExpedition, quantity, recipes } from '../domain/preparation';
+import { expeditionRules, renameHero, selectLocation, startExpedition, settleExpedition } from '../domain/game';
+import { kits, preparationError, prepareExpedition, quantity } from '../domain/preparation';
 import type { GameRepository, GameState, ResourceAmount } from '../domain/types';
 
 const screens = [
@@ -115,29 +116,6 @@ function ExpeditionsScreen({ state, update, saving }: { state: GameState; update
       <p>Powrót: {new Date(report.returnedAt).toLocaleString('pl-PL')}</p>
     </article>}
   </>;
-}
-
-function InventoryScreen({ state, update, saving }: { state: GameState; update: Update; saving: boolean }) {
-  const [notice, setNotice] = useState('');
-  return <><div className="section-heading"><p className="intro">Zapasy w kryjówce</p><span className="badge">Masa: {inventoryWeight(state).toLocaleString('pl-PL', { maximumFractionDigits: 1 })} kg</span></div>
-    <ul className="inventory-list">{state.inventory.map((entry) => {
-      const item = getItem(entry.itemId);
-      return <li className="inventory-item" key={entry.id}><span className="item-mark" aria-hidden="true">{item?.category === 'equipment' ? 'E' : item?.category === 'material' ? 'M' : 'Z'}</span>
-        <div><h2>{item?.name}</h2><p>{item?.description}</p>{entry.condition !== null && <small>Stan: {entry.condition}%</small>}</div><span className="quantity">×{entry.quantity}</span>{entry.id === state.activeExpedition?.cargo.equipmentId && <small>Zarezerwowany na wyprawę</small>}
-      </li>;
-    })}</ul><p className="muted">Zarezerwowany sprzęt pozostaje w ewidencji; zapasy wyprawy są już odjęte. Sprzedaż nie jest dostępna.</p>
-    <h2>Przygotowanie zapasów</h2><p>Surowce znajdziesz na wyprawach. Receptury demonstracyjne, wykonywane od razu w kryjówce.</p>
-    <div className="card-grid">{recipes.map((recipe) => {
-      const available = recipe.costs.every((cost) => quantity(state.inventory, cost.itemId) >= cost.quantity);
-      return <article className="card" key={recipe.id}><h3>{recipe.name}</h3>
-        <p>Koszt: <ResourceList resources={recipe.costs} />.</p>
-        <p>W magazynie: {recipe.costs.map((cost) => `${getItem(cost.itemId)?.name} ×${quantity(state.inventory, cost.itemId)}`).join(', ')}.</p>
-        <p>Wynik: <ResourceList resources={recipe.output} />. Czas: natychmiast.</p>
-        <button disabled={saving || !available} onClick={() => {
-          setNotice(''); void update((previous) => craft(previous, recipe.id)).then((ok) => { if (ok) setNotice(`${recipe.name}: wykonano i zapisano.`); });
-        }}>{recipe.name}</button>{!available && <p className="muted">Brak surowców.</p>}
-      </article>;
-    })}</div><p role="status">{notice}</p></>;
 }
 
 function HeroScreen({ state, update, saving }: { state: GameState; update: Update; saving: boolean }) {

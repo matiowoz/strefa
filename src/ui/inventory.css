@@ -1,0 +1,87 @@
+.inventory-workbench { --brass: #c5aa74; --panel: #20271e; --line: #53583f; --ink: #eee8d6; color: var(--ink); }
+.inventory-intro { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: 1.5rem; }
+.inventory-intro p { margin: .3rem 0 0; font-family: Georgia, serif; font-size: 1.2rem; color: #d2cfbb; }
+.inventory-workbench .eyebrow { color: #bfad82; font-size: .65rem; letter-spacing: .13em; }
+.pack-weight { flex-shrink: 0; text-align: right; font-size: .7rem; color: #aaa995; }
+.pack-weight strong { display: block; color: #e3d1a5; font: 1.7rem Georgia, serif; margin-top: .25rem; }
+.pack-weight small { font: .85rem system-ui, sans-serif; }
+.inventory-layout { display: grid; gap: 1.2rem; align-items: start; }
+.survivor-panel { border: 1px solid #70664a; background: #20271f; border-radius: 8px; overflow: hidden; box-shadow: 0 14px 40px #0004; }
+.survivor-art { position: relative; isolation: isolate; height: 300px; background: radial-gradient(ellipse at 45% 40%, #545039, #1b241a 85%); overflow: hidden; }
+.survivor-art::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(#0c110a88, transparent 35%, #11190b22 65%, #171e15); pointer-events: none; }
+.survivor-art > img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: contain; object-position: center; }
+.survivor-name { position: relative; padding: 1.1rem 1.4rem; border-bottom: 1px solid #514d36; background: linear-gradient(115deg, #3a3b29, #1c251b); }
+.survivor-name h2 { margin: .3rem 0 .5rem; font: 2rem Georgia, serif; letter-spacing: -.02em; }
+.survivor-status { display: inline-flex; gap: .45rem; align-items: center; color: #dfdfc9; font-size: .7rem; }
+.survivor-status i { width: 6px; height: 6px; border-radius: 50%; background: #b1c18c; box-shadow: 0 0 8px #b1c18c66; }
+.future-slots { position: absolute; right: .8rem; top: 25%; display: grid; gap: .7rem; }
+.future-slots > span { display: block; padding: .55rem; min-width: 68px; border: 1px dashed #a3946e88; border-radius: 3px; background: #1b241bbd; font-size: .67rem; color: #dfd9c3; text-align: center; }
+.future-slots small { display: block; font-size: .55rem; color: #b6b4a0; }
+.portrait-caption { position: absolute; left: 1.25rem; bottom: .5rem; color: #c1baa2; font-size: .6rem; }
+.equipment-slot { display: flex; gap: .8rem; padding: 1rem 1.1rem; border-top: 1px solid #726143; align-items: center; background: linear-gradient(120deg, #3b3b28, #20271f); }
+.slot-art { width: 62px; height: 62px; flex-shrink: 0; border: 1px solid #8b7952; border-radius: 4px; background: radial-gradient(#655c3b77, #22291f); }
+.equipment-slot strong { display: block; font-size: .85rem; font-weight: 550; margin: .25rem 0; }
+.equipment-slot small { color: #b9b8a1; font-size: .65rem; }
+.hero-health { padding: .2rem 1.2rem 1.1rem; }
+.hero-health > span { display: flex; justify-content: space-between; font-size: .7rem; color: #c1c3ad; }
+.hero-health b { font-weight: 400; }
+.hero-health progress { display: block; width: 100%; height: 5px; margin-top: .5rem; accent-color: #91a171; border: 0; border-radius: 3px; background: #10170f; }
+.hero-health progress::-webkit-progress-bar { background: #10170f; }
+.hero-health progress::-webkit-progress-value { background: linear-gradient(90deg, #5e724b, #aaba83); }
+.stash-panel { background: linear-gradient(145deg, #2d3225, #1b231c 65%); border: 1px solid var(--line); border-radius: 8px; padding: 1.1rem; min-width: 0; box-shadow: 0 14px 40px #0003; }
+.stash-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #575a40; }
+.stash-heading h2 { margin: .25rem 0 0; font: 1.65rem Georgia, serif; }
+.stash-heading > span { color: #b5baa4; font-size: .7rem; }
+.inventory-filters { display: flex; flex-wrap: wrap; gap: .25rem; padding: .8rem 0 1rem; }
+.inventory-filters button { flex: 1 1 auto; padding: .5rem .6rem; min-height: 42px; background: transparent; border: 1px solid transparent; border-radius: 4px; color: #c0c3ad; font-size: .74rem; }
+.inventory-filters button[aria-pressed=true] { color: #f2e1b9; background: #53503977; border-color: #8d7952; box-shadow: inset 0 -2px #c4aa73; }
+.inventory-filters button:hover { background: #454a3477; }
+.stash-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; list-style: none; margin: 0; padding: 0; }
+.stash-grid > li { min-width: 0; }
+.item-tile { display: flex; position: relative; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 155px; padding: .6rem .35rem .8rem; border: 1px solid #5a6047; border-radius: 5px; background: radial-gradient(ellipse at 50% 35%, #56583c88, #242c21 75%); color: #dedcc8; box-shadow: inset 0 0 18px #0003; }
+.item-tile:hover:not(:disabled) { background: radial-gradient(ellipse at 50% 35%, #72704d88, #30392a 75%); border-color: #b2a16e; }
+.item-tile.is-selected { border-color: #d8b67a; background: radial-gradient(ellipse at 50% 35%, #79704a88, #343b28 75%); box-shadow: inset 0 0 0 1px #b9975d66, 0 0 15px #baa16a0c; }
+.item-tile.is-selected::after { content: ''; width: 5px; height: 5px; transform: rotate(45deg); background: #dfc185; position: absolute; bottom: -3px; }
+.item-art { display: block; width: 100%; height: 100%; }
+.item-tile .item-art { width: 83px; height: 83px; filter: drop-shadow(2px 5px 3px #0005); transition: transform .18s ease; }
+.item-tile:hover .item-art { transform: translateY(-3px) rotate(-3deg); }
+.tile-name { font-size: .68rem; line-height: 1.3; text-align: center; min-height: 1.7em; }
+.tile-quantity { position: absolute; right: .5rem; top: .35rem; font-size: .74rem; color: #e6d4ac; font-variant-numeric: tabular-nums; }
+.condition-line { width: 65%; height: 3px; background: #111a11; position: absolute; bottom: .35rem; left: 17.5%; }
+.condition-line > span { display: block; height: 100%; background: #a3b37c; }
+.tile-label { position: absolute; left: 0; right: 0; top: 1.6rem; background: #242b20e8; color: #e2c58e; font-size: .55rem; padding: .15rem; }
+.stash-note { margin: 1rem 0; font-size: .7rem; color: #b1b7a1; line-height: 1.6; }
+.item-details { border-top: 1px solid #676348; padding-top: 1.2rem; }
+.detail-top { display: flex; gap: 1rem; align-items: center; }
+.detail-art { width: 80px; height: 80px; flex: 0 0 80px; background: radial-gradient(#7f715b33, transparent 75%); }
+.detail-top h3 { font: 1.2rem Georgia, serif; color: #ecdfbb; margin: .3rem 0 .5rem; }
+.detail-top p { font-size: .75rem; margin: 0; }
+.item-details dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem 1rem; margin: .9rem 0; }
+.item-details dl > div { font-size: .72rem; padding: .45rem 0; gap: .5rem; border-color: #424d37; }
+.item-details dd { color: #e8dcc0; text-align: right; }
+.inventory-action { width: 100%; background: linear-gradient(#6c6442, #494e32); border-color: #b09b65; color: #f6e8c5; font-size: .8rem; }
+.detail-help { font-size: .7rem; margin: .8rem 0 0; color: #b6bca6; }
+.stash-empty { text-align: center; padding: 2.5rem .5rem; border: 1px dashed #66704c; border-radius: 5px; }
+.stash-empty > span { font-size: 2rem; color: #c2a778; }
+.stash-empty h3 { font: 1.2rem Georgia, serif; margin: .5rem; }
+.stash-empty p { font-size: .8rem; }
+.inventory-crafting { margin-top: 2rem; }
+.crafting-heading { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: .5rem; margin-bottom: 1.2rem; }
+.crafting-heading h2 { font: 1.5rem Georgia, serif; margin: .3rem 0 0; }
+.crafting-heading p { font-size: .8rem; color: #b8bda7; margin: 0; }
+.crafting-grid { display: grid; gap: .8rem; }
+.recipe-card { border: 1px solid #565e44; padding: 1rem; border-radius: 6px; background: linear-gradient(130deg, #343827, #1d271e); }
+.recipe-title { display: flex; align-items: center; gap: .5rem; }
+.recipe-title .item-art { width: 55px; height: 55px; flex-shrink: 0; }
+.recipe-title h3 { margin: 0; font: 1.1rem Georgia, serif; }
+.recipe-card p { font-size: .75rem; margin: .6rem 0; }
+.recipe-card .recipe-stock { color: #c0c4ab; font-size: .68rem; }
+.recipe-result { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .8rem 0; margin: .5rem 0; border-top: 1px solid #535b3e; font-size: .8rem; color: #e7d7ac; }
+.recipe-result small { font-size: .6rem; color: #b6bea7; }
+.recipe-card button { width: 100%; font-size: .75rem; border-color: #8e815a; background: #454d32; }
+.recipe-card button:disabled { cursor: not-allowed; background: #262e22; border-color: #596047; }
+.inventory-notice { min-height: 1.5rem; margin: 1rem 0 0; color: #e2ce9f; font-size: .85rem; }
+@media (min-width: 680px) { .inventory-layout { grid-template-columns: minmax(230px, .85fr) minmax(0, 1.4fr); } .survivor-art { height: 390px; } .crafting-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .recipe-title { align-items: start; flex-direction: column; } .stash-panel { padding: 1.25rem; } }
+@media (min-width: 1180px) { .inventory-layout { grid-template-columns: minmax(280px, .85fr) minmax(0, 1.4fr); gap: 1.5rem; } .survivor-art { height: 420px; } .stash-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .item-tile { height: 160px; } .recipe-title { flex-direction: row; align-items: center; } }
+@media (max-width: 359px) { .stash-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .inventory-intro .eyebrow { letter-spacing: .04em; } }
+@media (prefers-reduced-motion: reduce) { .item-tile .item-art { transition: none; } .item-tile:hover .item-art { transform: none; } }
