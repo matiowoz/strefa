@@ -34,7 +34,7 @@ Szczegółowe wnętrze, jedna dopracowana lokacja i krótki ciąg celów; dalsze
 ## Ograniczenia i propozycje względem GDD
 
 - Jedna kryjówka, 2 poglądowe punkty mapy i 8 definicji przedmiotów; to dane testowe, nie finalny scenariusz ani balans.
-- Widok kryjówki jest kompozycją CSS. Nie udaje docelowej szczegółowej grafiki.
+- Widok kryjówki jest lokalną, wygenerowaną ilustracją poglądową. Nie odwzorowuje dynamicznie urządzenia pokoju ani liczby zapasów.
 - Brak fabuły, walki, kolejek produkcji, badań, energii, x4 i transportu. Nie zmienia to ich ustalonej wizji.
 - Lokalny zapis zamiast serwera jest świadomym ograniczeniem zlecenia. Nie zapewnia synchronizacji ani ochrony przed edycją danych i zmianą zegara.
 - Adapter zapisuje snapshot z atomowym sprawdzeniem oczekiwanego stanu. Nieaktualna karta nie może nadpisać nowszego zapisu; przy konflikcie odśwież stronę. Brak scalania zmian i synchronizacji urządzeń.
@@ -100,3 +100,9 @@ Dodano `Uruchom STREFĘ.cmd` i skrypt PowerShell: weryfikacja narzędzi i wersji
 Zastąpiono gładkie wektory wspólnym, wygenerowanym atlasem malowanych ilustracji: łatany i przetarty plecak, porysowana manierka, pognieciona racja z taśmą, bandaż w zużytym opakowaniu, skorodowany złom, ponownie użyta butelka z wodą do uzdatnienia, puszka z workiem składników i cerowana tkanina. Warstwa opatrunkowa pozostaje czysta. Wizualne zużycie nie zmienia zapisanej kondycji ani użyteczności przedmiotów. Atlas WebP z przezroczystością (około 493 KiB) obsługuje siatkę, szczegóły, plecak i crafting, bez osobnych pobrań dla każdego przedmiotu. Reguły, katalog ID, zapis i zależności bez zmian.
 
 Weryfikacja: 44/44 testy, build i kontrola Chromium 320/390/768/1440 px — filtry, klawiatura, szczegóły, rezerwacja sprzętu, wyprawa i crafting; bez poziomego przewijania i wyjątków JS. Sprawdzono wygląd w zrzucie ekranu.
+
+## Ilustrowana kryjówka — przebudowa wyglądu
+
+Zastąpiono scenę z prostych kształtów lokalną ilustracją WebP: popękane ściany, przetarte posłanie, zapasy, łatany plecak, zużyty stół, radio i ciepła lampa. Spójna z nowym ekwipunkiem kolorystyka oliwki, rdzy i mosiądzu. Pod ilustracją skróty do wyprawy i mapy; zwijany panel zawiera zdrowie i poziom bohatera, stan wyprawy z odliczaniem i informacją o gotowym raporcie oraz liczbę wody i racji. Stół prowadzi do istniejących receptur; radio pozostaje wyraźnie oznaczoną dekoracją, bez nowych zadań, produkcji, mechanik i migracji zapisu. Ilustracja nie zmienia się wraz z zapasami.
+
+44/44 testy i kompilacja przechodzą. Chromium: 320/390/768/1440 px bez poziomego przewijania, obraz załadowany, zwijanie klawiaturą z aria-expanded, nawigacja do bohatera, mapy i ekwipunku, brak zapisu stanu przy samej nawigacji; pusty magazyn, długi pseudonim, odtworzenie aktywnej wyprawy po odświeżeniu, aktualizacja odliczania, przejście po gotowy raport i odbiór. Czas przesunięty tylko w izolowanej przeglądarce testowej. Bez fizycznego telefonu.

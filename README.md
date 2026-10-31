@@ -80,3 +80,7 @@ Lekki zestaw kosztuje 1 wodę i 1 rację, z zapasem 2 i 2. Koszt obejmuje całą
 ## Ilustrowany ekwipunek
 
 Ekran Ekwipunek jest wzorcem nowego wyglądu: wybierz filtr i kliknij przedmiot, aby zobaczyć ilość, masę, stan i dostępne działanie. Plecak można wybrać na następną wyprawę lub odłożyć; w trakcie wyprawy zmiana jest zablokowana. Receptury znajdują się poniżej magazynu. Ilustracja bohatera jest poglądowa; miejsca na głowę, tułów i obuwie są planowane. Grafiki są lokalne, bez zewnętrznych serwisów.
+
+## Ilustrowana kryjówka
+
+Główny ekran przedstawia schronienie postapo. Pod ilustracją przejdziesz do przygotowania wyprawy lub mapy. Zwijany panel pokazuje bohatera i zdrowie, stan wyprawy oraz rzeczywiste ilości wody i racji w magazynie. Odliczanie zmienia się w „Raport czeka” po terminie; odbiór nadal następuje na ekranie Wyprawy. Stół prowadzi do istniejących receptur w Ekwipunku. Radio jest dekoracją oznaczoną jako funkcja w przygotowaniu. Ilustracja pokoju jest poglądowa; widoczne przedmioty nie oznaczają dodatkowych zasobów ani aktywnych pomieszczeń.

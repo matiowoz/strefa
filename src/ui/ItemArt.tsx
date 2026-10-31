@@ -1,3 +1,5 @@
+import './item-art.css';
+
 // One local, transparent atlas keeps all eight illustrations in the same style.
 // The order follows the atlas: four columns, two rows. No game-state changes.
 const atlas: Record<string, readonly [number, number]> = {

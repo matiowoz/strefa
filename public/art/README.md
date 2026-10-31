@@ -12,3 +12,8 @@ Ilustracje zużycia są dekoracyjne i nie wyznaczają mechanicznego stanu przedm
 
 Butelka wody do uzdatnienia ma dodaną przez edycję AI wyblakłą, podartą etykietę
 z czerwonym paskiem, bez czytelnych napisów i znaków towarowych.
+
+`shelter.webp`: wygenerowana na potrzeby STREFY ilustracja wnętrza schronienia
+z posłaniem, zapasami, łatanym plecakiem, stołem i radiem pod ciepłą lampą.
+Wersja WebP źródłowego PNG. Ilustracja jest poglądowa, bez dynamicznych zmian
+wyposażenia pokoju i bez powiązania liczby narysowanych zapasów ze stanem magazynu.

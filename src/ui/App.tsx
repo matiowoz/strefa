@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ShelterScreen } from './ShelterScreen';
 import { InventoryScreen } from './InventoryScreen';
 import { useGame } from '../app/useGame';
 import { getItem, locations, skillNames } from '../domain/catalog';
@@ -15,31 +16,6 @@ const screens = [
 ] as const;
 type Screen = typeof screens[number]['id'];
 type Update = (change: (previous: GameState) => GameState) => Promise<boolean>;
-
-function Shelter({ state, navigate }: { state: GameState; navigate: (screen: Screen) => void }) {
-  const [panel, setPanel] = useState(true);
-  return <>
-    <div className="shelter-scene">
-      <div className="scene-grain" aria-hidden="true" />
-      <div className="scene-copy"><span className="eyebrow">Schronienie / 01</span>
-        <h2>Za tymi drzwiami<br />jest bezpiecznie.</h2>
-        <p>Twoje miejsce w świecie po upadku.</p>
-        <span className="scene-note">Roboczy widok kryjówki</span>
-      </div>
-      <div className="scene-window" aria-hidden="true"><i /><i /></div>
-      <div className="scene-table" aria-hidden="true" />
-    </div>
-    <div className="section-heading"><h2>Panel informacji</h2>
-      <button className="text-button" aria-expanded={panel} aria-controls="shelter-panel" onClick={() => setPanel(!panel)}>{panel ? 'Zwiń panel' : 'Rozwiń panel'}</button>
-    </div>
-    {panel && <div className="card-grid" id="shelter-panel">
-      <article className="card"><span className="eyebrow">Ocalały</span><h3>{state.hero.name}</h3><p>Zdrowie {state.hero.health} / {state.hero.maxHealth}</p><button onClick={() => navigate('hero')}>Zobacz bohatera</button></article>
-      <article className="card"><span className="eyebrow">Ekspedycja</span><h3>{state.activeExpedition ? 'W toku' : 'W kryjówce'}</h3><p>Wyrusz po materiały i odbierz raport po powrocie.</p><button onClick={() => navigate('expeditions')}>Zobacz wyprawy</button></article>
-      <article className="card"><span className="eyebrow">Warsztat</span><h3>Brak aktywnej produkcji</h3><p>W Ekwipunku przygotujesz wodę, racje i bandaże.</p></article>
-      <article className="card"><span className="eyebrow">Radio i zadania</span><h3>Cisza w eterze</h3><p>Na razie poznaj kryjówkę, mapę i zapasy. Fabuła nie została uruchomiona.</p></article>
-    </div>}
-  </>;
-}
 
 function MapScreen({ state, update, saving }: { state: GameState; update: Update; saving: boolean }) {
   return <><p className="intro">Znana okolica. Wybierz punkt, do którego wrócisz podczas planowania wyprawy.</p>
@@ -146,7 +122,7 @@ export function App({ repository }: { repository: GameRepository }) {
         {error && <div className="error" role="alert"><strong>Nie udało się zapisać lub odczytać danych.</strong><p>{error}</p>{!state ? <button onClick={retry}>Ponów odczyt</button> : <p>Zmiana nie została zastosowana. Możesz spróbować ponownie.</p>}</div>}
         {!state && !error && <p role="status">Otwieranie kryjówki…</p>}
         {state && <>
-          {screen === 'shelter' && <Shelter state={state} navigate={setScreen} />}
+          {screen === 'shelter' && <ShelterScreen state={state} navigate={setScreen} />}
           {screen === 'map' && <MapScreen state={state} update={update} saving={saving} />}
           {screen === 'expeditions' && <ExpeditionsScreen state={state} update={update} saving={saving} />}
           {screen === 'inventory' && <InventoryScreen state={state} update={update} saving={saving} />}
