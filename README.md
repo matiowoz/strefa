@@ -88,6 +88,8 @@ Postać wyrusza ze wszystkimi przedmiotami z obecnego ekwipunku. Nie wybiera zes
 
 ## Ekwipunek i schowek
 
+Zakładka Ekwipunek łączy postać i przedmioty w jednej karcie: po lewej ten sam portret, nazwa, poziom i zdrowie co w zakładce Postać, pod nimi założony plecak; po prawej siatka. Na wąskich ekranach siatka znajduje się pod postacią. Zakładanie ubrań i uzbrojenia zostaje na przyszły etap.
+
 Ekwipunek postaci ma 5 kolumn i 9 rzędów. Schowek w kryjówce ma jedną siatkę 8×9. Obie siatki mają identyczne kratki 52 px. Przedmioty zajmują prostokąty różnych rozmiarów; szczegóły pokazują ich wymiary i ilość. Maksymalny rozmiar przedmiotu to 2×3. Ilość pozostaje stosem (bez nowych limitów stosowania).
 
 Przeciągnij rzecz na siatkę: podgląd centruje się pod kursorem bez zmiany wymiarów, a upuszczanie działa też na liniach i między kratkami. Alternatywnie wybierz rzecz, kliknij „Zmień położenie” i wskaż pole. Przyciski pod szczegółami przenoszą do ekwipunku lub schowka, szukając pierwszego wolnego miejsca. Za mało miejsca lub kolizja pozostawia przedmiot na miejscu bez komunikatu o błędzie. Błędy rzeczywistego zapisu lub odczytu nadal są zgłaszane. Na małych ekranach schowek przewija się poziomo. Przenoszenie wymaga powrotu do kryjówki. Założony plecak nie jest przedmiotem do przenoszenia.

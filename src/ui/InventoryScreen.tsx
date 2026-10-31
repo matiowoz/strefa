@@ -5,6 +5,7 @@ import { consumableIds, useItem } from '../domain/useItem';
 import { atShelter, itemSizes, splitStack, tryMoveItem } from '../domain/inventory';
 import { craft, quantity, recipes } from '../domain/preparation';
 import type { GameState, InventoryEntry } from '../domain/types';
+import { HeroPortrait } from './HeroPortrait';
 import { ItemArt } from './ItemArt';
 import { SplitStackDialog } from './SplitStackDialog';
 import { InventoryGrid } from './InventoryGrid';
@@ -62,12 +63,14 @@ export function InventoryScreen({ state, update, saving, storage }: Props) {
       {entry.quantity > 1 && <button disabled={locked} onClick={() => openSplit(entry)}>Rozdziel</button>}
     </>;
   }
+  const backpackCard = <section className="stash-panel equipped-backpack"><ItemArt itemId="backpack" /><div><span className="eyebrow">Założony na stałe</span><h2>{getItem(state.backpack.itemId)?.name}</h2><p>Podstawowy plecak · 5 × 9 pól. W przyszłości wymienisz go na większy.</p></div></section>;
   return <div className="inventory-workbench">
     {splitEntry && <SplitStackDialog entry={splitEntry} disabled={disabled} close={() => setSplitId(null)} submit={divide} />}
     <div className="inventory-intro"><div><span className="eyebrow">To, co niesiesz. To, co zostawiasz.</span><p>{storage ? 'Ekwipunek i skrytka' : 'Ekwipunek postaci'}</p></div><span className="pack-weight">Przy postaci <strong>{inventoryWeight(state).toLocaleString('pl-PL', { maximumFractionDigits: 1 })} <small>kg</small></strong></span></div>
-    <section className="stash-panel equipped-backpack"><ItemArt itemId="backpack" /><div><span className="eyebrow">Założony na stałe</span><h2>{getItem(state.backpack.itemId)?.name}</h2><p>Podstawowy plecak · 5 × 9 pól. W przyszłości wymienisz go na większy.</p></div></section>
+    {storage && backpackCard}
     {!home && <p className="storage-warning">Postać jest na wyprawie. Przenoszenie przedmiotów będzie możliwe po powrocie do kryjówki.</p>}
-    <div className={`storage-columns ${storage ? '' : 'inventory-only'}`}>
+    <div className={storage ? 'storage-columns' : 'inventory-character-sheet'}>
+      {!storage && <HeroPortrait hero={state.hero}>{backpackCard}</HeroPortrait>}
       <section className="stash-panel"><div className="stash-heading"><h2>Ekwipunek postaci</h2><span>5 × 9</span></div><p className="stash-note">Z tymi przedmiotami wyruszasz na wyprawę.</p><InventoryGrid state={state} page={-1} selectedId={selectedId} disabled={disabled} select={setSelectedId} place={place} moving={moving} actions={actions} /></section>
       {storage && <section className="stash-panel"><div className="stash-heading"><h2>Skrytka w kryjówce</h2><span>8 × 9</span></div><p className="stash-note">Jeden schowek. Kolejne skrytki będzie można budować w przyszłości.</p><InventoryGrid state={state} page={page} selectedId={selectedId} disabled={disabled} select={setSelectedId} place={place} moving={moving} actions={actions} /></section>}
     </div>

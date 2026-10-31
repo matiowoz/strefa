@@ -94,3 +94,21 @@
 .split-stack-dialog p, .split-stack-dialog label { font-size:.85rem; line-height:1.6; }
 .split-stack-dialog label { display:block; margin-bottom:.4rem; }
 .split-stack-dialog input { width:100%; margin-bottom:.4rem; }
+
+/* One sheet joins the survivor and carried items; storage keeps its two grids. */
+.inventory-character-sheet { display:grid; min-width:0; border:1px solid #897450; border-radius:8px; background:linear-gradient(120deg, #303827, #1b251c); box-shadow:0 14px 40px #0004; }
+.inventory-character-sheet > .hero-portrait { border:0; border-radius:7px 7px 0 0; box-shadow:none; }
+.inventory-character-sheet > .stash-panel { border:0; border-top:1px solid #616444; border-radius:0 0 7px 7px; background:transparent; box-shadow:none; }
+.inventory-character-sheet .hero-portrait-image { height:420px; }
+.inventory-character-sheet .equipped-backpack { margin:0; border:0; border-top:1px solid #616444; border-radius:0; box-shadow:none; gap:.75rem; }
+.inventory-character-sheet .equipped-backpack > .item-art { width:54px; height:72px; }
+.inventory-character-sheet .equipped-backpack h2 { margin:.3rem 0; font:1.1rem Georgia,serif; }
+.inventory-character-sheet .equipped-backpack p { margin:.4rem 0 0; font-size:.75rem; line-height:1.6; }
+.inventory-character-sheet .carried-grid { margin-inline:auto; }
+@media (min-width:760px) {
+  .inventory-character-sheet { grid-template-columns:minmax(0, 1fr) minmax(320px, .85fr); }
+  .inventory-character-sheet > .hero-portrait { border-radius:7px 0 0 7px; }
+  .inventory-character-sheet > .stash-panel { border-top:0; border-left:1px solid #616444; border-radius:0 7px 7px 0; }
+  .inventory-character-sheet .hero-portrait-image { height:460px; }
+}
+@media (min-width:1180px) { .inventory-character-sheet .hero-portrait-image { height:520px; } }

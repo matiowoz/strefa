@@ -188,3 +188,9 @@ Na polecenie użytkownika dodano „Rozdziel” dla stosów większych niż 1 w 
 Weryfikacja: 101/101 testów Vitest i build. Nowe przypadki sprawdzają sumę sztuk, osobne ID i pozycje, podział w obu kontenerach, niepoprawne ilości, brak całego prostokąta, pełne siatki bez przenoszenia do innej, blokadę w drodze, trwałość, konflikt kart i przerwanie transakcji.
 
 Chromium: rzeczywista mysz od ikony do przycisku, podział w ekwipunku i skrytce, brak akcji dla 1 sztuki, walidacja ilości, Enter/Escape, anulowanie bez zapisu, trwałość po odświeżeniu, pełny kontener bez podziału i bez błędu danych. Okienko mieści się w szerokościach 320/390/768/1440 px.
+
+## Postać połączona z ekwipunkiem — 1 listopada 2026
+
+Na polecenie użytkownika zakładka Ekwipunek pokazuje jedną wspólną kartę z postacią po lewej i siatką 5×9 po prawej. Wspólny komponent HeroPortrait zapewnia tę samą ilustrację, nazwę, poziom i zdrowie co w Postaci. Założony plecak znajduje się pod portretem. Na wąskim ekranie części są ułożone pionowo. To podstawa późniejszego zakładania odzieży i uzbrojenia; sam mechanizm wyposażania nie jest częścią tej zmiany. Skrytka zachowuje dotychczasowe dwie siatki. Brak zmian w regułach, wymiarach kratek, danych i schemacie zapisu.
+
+Weryfikacja: 101/101 istniejących testów i build. Chromium: zgodność portretu, nazwy i zdrowia między zakładkami, jeden plecak, połączenie paneli, układ poziomy/pionowy i kratki 52 px przy szerokościach 320, 390, 768, 1024 i 1440 px bez przepełnienia strony. Sprawdzono rzeczywistą myszą Rozdziel, Użyj, przeciąganie bez zmiany wielkości, transfer w skrytce i trwałość po odświeżeniu. Nawigacja i nowy widok nie zmieniają stanu zapisu.
