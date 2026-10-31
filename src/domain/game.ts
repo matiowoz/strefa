@@ -5,7 +5,7 @@ import type { GameState } from './types';
 
 export function createInitialState(now = Date.now()): GameState {
   return arrange({
-    schemaVersion: 5, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
+    schemaVersion: 6, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
     hero: {
       id: 'survivor', name: 'Ocalały', level: 1, health: 100, maxHealth: 100,
       skills: { combat: 1, scouting: 1, survival: 1, medicine: 1, crafting: 1, electronics: 1, trade: 1, transport: 1 },

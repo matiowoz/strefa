@@ -61,7 +61,7 @@ export interface ExpeditionReport {
 
 export interface Placement { x: number; y: number; page: number } // -1 = ekwipunek, 0 = schowek
 export interface GameState {
-  schemaVersion: 5;
+  schemaVersion: 6;
   positions: Record<string, Placement>;
   stash: InventoryEntry[];
   overflow: InventoryEntry[];

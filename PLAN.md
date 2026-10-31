@@ -150,3 +150,9 @@ Jeden schowek 10×10, bez kart. W przyszłości kolejne budowane skrytki zamiast
 62/62 testy i build. Przypadki testowe: środek 1×2 i 2×3, szczeliny, granice, kolizje, pełna stara druga strona i kontrola poprzedniego stanu przy zapisie po migracji. Chromium: rzeczywiste ruchy myszą, chwyt za brzeg i centrowanie pod kursorem, zachowane rozmiary ramki i grafiki podczas przeciągania, transfer między siatkami, kolizja bez zmiany zapisu, odświeżenie i identyczne kratki przy 320/390/768/1440 px. Bez fizycznego telefonu.
 
 Dodatkowo sprawdzono w Chromium odkładanie 1×1 w środek pola i transfer emulowanym dotykiem, z zachowaniem wymiarów i położenia.
+
+## Schowek 8×9 i ciche odrzucanie niedozwolonej pozycji
+
+Schowek zmniejszony do 8 kolumn i 9 rzędów, ekwipunek nadal 5×9. Limit rozmiaru przedmiotu 2×3 sprawdzany w domenie. Niezgodna pozycja lub brak miejsca nie uruchamiają zapisu i nie pokazują komunikatu o awarii danych; podgląd kolizji i pozostanie przedmiotu w źródle wystarczają. Rzeczywiste błędy IndexedDB i konflikt z inną kartą pozostają widoczne. Wyposażenie aktywnej wyprawy nie może rozpocząć gestu przenoszenia ani transferu.
+
+Schemat v6 sprawdza starsze v4/v5 według ich pierwotnych granic 10×10 przed migracją. Rzeczy poza nowymi granicami układa w wolnych miejscach albo zachowuje w odbiorze. Nie naprawia automatycznie uszkodzonych zapisów. 65/65 testów i build; testy pełnego schowka v5, nadmiaru przy migracji, maksymalnego rozmiaru i cichego braku zmiany przy kolizji. Chromium: rzeczywiste przeciąganie, brak alertu po niedozwolonym upuszczeniu, jednakowe rozmiary grafiki, 320/390/768/1440 px i emulowany dotyk.

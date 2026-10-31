@@ -73,17 +73,17 @@ export function InventoryGrid({ state, page, selectedId, disabled, select, place
     drag.current = null; setPreview(null); cleanup.current?.();
     if (current?.active && !disabled) {
       const target = targetAt(event.clientX, event.clientY, current);
-      if (target) place(current.entry.id, target.page, target.point);
+      if (target?.valid) place(current.entry.id, target.page, target.point);
     }
   }
-  return <div className="container-scroll"><div data-bag-page={page} className={`bag-grid ${page === -1 ? 'carried-grid' : 'hideout-grid'}`} style={{ gridTemplateColumns: `repeat(${size.columns}, var(--bag-cell-size))`, gridTemplateRows: `repeat(${size.rows}, var(--bag-cell-size))` }} role="group" aria-label={page === -1 ? 'Ekwipunek 5 na 9' : 'Schowek 10 na 10'}>
+  return <div className="container-scroll"><div data-bag-page={page} className={`bag-grid ${page === -1 ? 'carried-grid' : 'hideout-grid'}`} style={{ gridTemplateColumns: `repeat(${size.columns}, var(--bag-cell-size))`, gridTemplateRows: `repeat(${size.rows}, var(--bag-cell-size))` }} role="group" aria-label={page === -1 ? 'Ekwipunek 5 na 9' : 'Schowek 8 na 9'}>
     {Array.from({ length: size.columns * size.rows }, (_, index) => {
       const point = { x: index % size.columns, y: Math.floor(index / size.columns) };
       return <button className="bag-cell" key={`cell-${index}`} style={{ gridColumn: point.x + 1, gridRow: point.y + 1 }} disabled={disabled || !moving || !selectedId} aria-label={`Umieść wybrany przedmiot: kolumna ${point.x + 1}, rząd ${point.y + 1}`} onClick={() => { if (selectedId) place(selectedId, page, point); }} />;
     })}
     {entries.map((entry) => {
       const position = state.positions[entry.id]; const dimensions = itemSizes[entry.itemId];
-      return <button key={entry.id} className={`bag-item ${selectedId === entry.id ? 'is-selected' : ''} ${preview?.drag.entry.id === entry.id ? 'drag-origin' : ''}`} style={{ gridColumn: `${position.x + 1} / span ${dimensions.width}`, gridRow: `${position.y + 1} / span ${dimensions.height}` }} aria-label={`${getItem(entry.itemId)?.name}, ilość ${entry.quantity}, rozmiar ${dimensions.width} na ${dimensions.height}`} aria-pressed={selectedId === entry.id} aria-controls="item-details" title={getItem(entry.itemId)?.name} onPointerDown={(event) => begin(event, entry)} onClick={() => select(entry.id)}>
+      return <button key={entry.id} className={`bag-item ${selectedId === entry.id ? 'is-selected' : ''} ${preview?.drag.entry.id === entry.id ? 'drag-origin' : ''}`} style={{ gridColumn: `${position.x + 1} / span ${dimensions.width}`, gridRow: `${position.y + 1} / span ${dimensions.height}` }} aria-label={`${getItem(entry.itemId)?.name}, ilość ${entry.quantity}, rozmiar ${dimensions.width} na ${dimensions.height}`} aria-pressed={selectedId === entry.id} aria-controls="item-details" title={getItem(entry.itemId)?.name} aria-disabled={disabled || state.activeExpedition?.cargo.equipmentId === entry.id} onPointerDown={(event) => { if (state.activeExpedition?.cargo.equipmentId !== entry.id) begin(event, entry); }} onClick={() => select(entry.id)}>
         {contents(entry)}
       </button>;
     })}

@@ -39,7 +39,7 @@ describe('reguły podstawowego stanu', () => {
 
 describe('walidacja wersjonowanego zapisu', () => {
   it('odrzuca nowszą wersję zamiast tworzyć nowy stan', () => {
-    expect(() => validateSave({ ...createInitialState(), schemaVersion: 6 })).toThrow('wersja');
+    expect(() => validateSave({ ...createInitialState(), schemaVersion: 7 })).toThrow('wersja');
   });
   it.each([
     null,

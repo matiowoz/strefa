@@ -3,7 +3,10 @@ import type { GameState, InventoryEntry, Placement } from './types';
 export const GRID_COLUMNS = 5;
 export const GRID_ROWS = 9;
 export const STASH_PAGES = 1;
-export const gridSize = (page: number) => page === -1 ? { columns: GRID_COLUMNS, rows: GRID_ROWS } : { columns: 10, rows: 10 };
+export const MAX_ITEM_WIDTH = 2;
+export const MAX_ITEM_HEIGHT = 3;
+export const STASH_SIZE = { columns: 8, rows: 9 };
+export const gridSize = (page: number) => page === -1 ? { columns: GRID_COLUMNS, rows: GRID_ROWS } : STASH_SIZE;
 // Demonstracyjne rozmiary jednego stosu (ilości zachowują dotychczasowy model).
 export const itemSizes: Record<string, { width: number; height: number }> = {
   backpack: { width: 2, height: 3 }, water: { width: 1, height: 2 },
@@ -12,10 +15,10 @@ export const itemSizes: Record<string, { width: number; height: number }> = {
   food: { width: 2, height: 2 }, cloth: { width: 2, height: 1 },
 };
 
-export function fits(entries: InventoryEntry[], positions: Record<string, Placement>, entry: InventoryEntry, point: Placement, pageCount = STASH_PAGES): boolean {
+export function fits(entries: InventoryEntry[], positions: Record<string, Placement>, entry: InventoryEntry, point: Placement, pageCount = STASH_PAGES, stashSize = STASH_SIZE): boolean {
   const size = itemSizes[entry.itemId];
-  const bounds = gridSize(point.page);
-  if (!size || !Number.isInteger(point.x) || !Number.isInteger(point.y) || !Number.isInteger(point.page)
+  const bounds = point.page === -1 ? gridSize(-1) : stashSize;
+  if (!size || size.width > MAX_ITEM_WIDTH || size.height > MAX_ITEM_HEIGHT || !Number.isInteger(point.x) || !Number.isInteger(point.y) || !Number.isInteger(point.page)
     || point.page < -1 || point.page >= pageCount || point.x < 0 || point.y < 0
     || point.x + size.width > bounds.columns || point.y + size.height > bounds.rows) return false;
   return entries.every((other) => {
@@ -72,6 +75,8 @@ export function atShelter(state: GameState, now = Date.now()): boolean {
   return !state.activeExpedition || now >= state.activeExpedition.expectedReturnAt;
 }
 
+export class InventorySpaceError extends Error {}
+
 export function moveItem(state: GameState, id: string, page: number, point?: { x: number; y: number }, now = Date.now()): GameState {
   if (!atShelter(state, now)) throw new Error('Przenoszenie rzeczy jest dostępne po powrocie do kryjówki.');
   if (state.activeExpedition?.cargo.equipmentId === id) throw new Error('Odbierz raport, aby zwolnić wyposażenie wyprawy.');
@@ -80,10 +85,15 @@ export function moveItem(state: GameState, id: string, page: number, point?: { x
   const entry = [...all, ...state.overflow].find((entry) => entry.id === id);
   if (!entry) throw new Error('Nie znaleziono przedmiotu.');
   const target = point ? { ...point, page } : firstFree(all, state.positions, entry, page);
-  if (!target || !fits(all, state.positions, entry, target)) throw new Error('Brak miejsca: przedmiot nie mieści się w wybranym miejscu.');
+  if (!target || !fits(all, state.positions, entry, target)) throw new InventorySpaceError('Brak miejsca: przedmiot nie mieści się w wybranym miejscu.');
   const inventory = state.inventory.filter((entry) => entry.id !== id);
   const stash = state.stash.filter((entry) => entry.id !== id);
   (page === -1 ? inventory : stash).push(entry);
   return { ...state, inventory, stash, overflow: state.overflow.filter((entry) => entry.id !== id), positions: { ...state.positions, [id]: target },
     preparation: page !== -1 && state.preparation.equipmentId === id ? { ...state.preparation, equipmentId: null } : state.preparation, updatedAt: now };
+}
+
+export function tryMoveItem(...args: Parameters<typeof moveItem>): GameState {
+  try { return moveItem(...args); }
+  catch (error) { if (error instanceof InventorySpaceError) return args[0]; throw error; }
 }

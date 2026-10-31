@@ -83,7 +83,7 @@ function isV3(value: unknown): boolean {
     && report.cargo.loot.some((entry) => entry.itemId === 'scrap' && entry.quantity === report.scrap);
 }
 
-function validGridState(value: unknown, version: number, pages: number): boolean {
+function validGridState(value: unknown, version: number, pages: number, bounds = { columns: 8, rows: 9 }): boolean {
   if (!record(value) || value.schemaVersion !== version || !Array.isArray(value.inventory) || !Array.isArray(value.stash) || !Array.isArray(value.overflow) || !record(value.positions)) return false;
   const all = [...value.inventory, ...value.stash, ...value.overflow];
   if (!isV3({ ...value, schemaVersion: 3, inventory: all })) return false;
@@ -94,7 +94,7 @@ function validGridState(value: unknown, version: number, pages: number): boolean
     if (!record(p) || !integer(p.x) || !integer(p.y) || !integer(p.page)) return false;
     const point = p as unknown as Placement;
     if ((value.inventory as InventoryEntry[]).some((item) => item.id === entry.id) ? point.page !== -1 : point.page < 0) return false;
-    if (!fits(entries, value.positions as Record<string, Placement>, entry, point, pages)) return false;
+    if (!fits(entries, value.positions as Record<string, Placement>, entry, point, pages, bounds)) return false;
   }
   const equipment = (value.preparation as unknown as GameState['preparation']).equipmentId;
   if (equipment && !(value.inventory as InventoryEntry[]).some((entry) => entry.id === equipment)) return false;
@@ -107,11 +107,11 @@ function validGridState(value: unknown, version: number, pages: number): boolean
 }
 
 export function isGameState(value: unknown): value is GameState {
-  return validGridState(value, 5, 1);
+  return validGridState(value, 6, 1);
 }
 
 export function validateSave(value: unknown): GameState {
-  if (record(value) && ![1, 2, 3, 4, 5].includes(Number(value.schemaVersion))) {
+  if (record(value) && ![1, 2, 3, 4, 5, 6].includes(Number(value.schemaVersion))) {
     throw new Error('Nieobsługiwana wersja zapisu. Dane pozostawiono bez zmian.');
   }
   if (record(value) && value.schemaVersion === 1 && validStructure(value)) {
@@ -127,13 +127,16 @@ export function validateSave(value: unknown): GameState {
       lastReport: record(report) ? { ...report, cargo: legacyCargo(report.scrap as number) } : null });
   }
   if (record(value) && value.schemaVersion === 3 && isV3(value)) {
-    const next = { ...value, schemaVersion: 5, stash: [], overflow: [], positions: {} } as unknown as GameState;
+    const next = { ...value, schemaVersion: 6, stash: [], overflow: [], positions: {} } as unknown as GameState;
     const priority = [next.activeExpedition?.cargo.equipmentId, next.preparation.equipmentId];
     next.inventory = [...next.inventory].sort((a, b) => Number(priority.includes(b.id)) - Number(priority.includes(a.id)));
     return validateSave(arrange(next));
   }
-  if (record(value) && value.schemaVersion === 4 && validGridState(value, 4, 2)) {
-    return validateSave(arrange({ ...value, schemaVersion: 5 } as unknown as GameState));
+  if (record(value) && value.schemaVersion === 4 && validGridState(value, 4, 2, { columns: 10, rows: 10 })) {
+    return validateSave(arrange({ ...value, schemaVersion: 6 } as unknown as GameState));
+  }
+  if (record(value) && value.schemaVersion === 5 && validGridState(value, 5, 1, { columns: 10, rows: 10 })) {
+    return validateSave(arrange({ ...value, schemaVersion: 6 } as unknown as GameState));
   }
   if (!isGameState(value)) throw new Error('Zapis jest nieprawidłowy. Dane pozostawiono bez zmian.');
   return value;

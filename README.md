@@ -63,7 +63,7 @@ npm.cmd run preview
 6. Sprawdź, że woda i racje zostały pobrane raz przy starcie; plecak pozostaje bez zmian. W Ekwipunku z surowców z wyprawy uzdatnij wodę i przygotuj rację. Po dwóch wyprawach wystarczy tkaniny na bandaż. Widać koszt i wynik każdej receptury. Brak zasobów blokuje operację.
 7. Przy błędzie zapisu zmiana nie zostaje zastosowana; ponów odbiór. Przy konflikcie z inną kartą odśwież stronę.
 
-Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v5 (migracja poprawnych v1, v2, v3 i v4 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
+Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v6 (migracja poprawnych v1, v2, v3, v4 i v5 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
 
 Zapis jest osobny dla urządzenia, przeglądarki i adresu z portem. localhost i adres LAN mają różne zapisy; telefon nie współdzieli zapisu komputera. Czyszczenie danych witryny lub tryb prywatny może usunąć postęp. Brak synchronizacji, eksportu i kopii chmurowej. Nieaktualny zapis z drugiej karty jest odrzucany atomowo; odśwież ją przed kolejną zmianą. Czas wypraw opiera się na zegarze urządzenia, bez zabezpieczeń serwerowych.
 
@@ -88,9 +88,9 @@ Lekki zestaw kosztuje 1 wodę i 1 rację, z zapasem 2 i 2. Koszt obejmuje całą
 
 ## Ekwipunek i schowek
 
-Ekwipunek postaci ma 5 kolumn i 9 rzędów. Schowek w kryjówce ma jedną siatkę 10×10. Obie siatki mają identyczne kratki 52 px. Przedmioty zajmują prostokąty różnych rozmiarów; szczegóły pokazują ich wymiary i ilość. Ilość pozostaje stosem (bez nowych limitów stosowania).
+Ekwipunek postaci ma 5 kolumn i 9 rzędów. Schowek w kryjówce ma jedną siatkę 8×9. Obie siatki mają identyczne kratki 52 px. Przedmioty zajmują prostokąty różnych rozmiarów; szczegóły pokazują ich wymiary i ilość. Maksymalny rozmiar przedmiotu to 2×3. Ilość pozostaje stosem (bez nowych limitów stosowania).
 
-Przeciągnij rzecz na siatkę: podgląd centruje się pod kursorem bez zmiany wymiarów, a upuszczanie działa też na liniach i między kratkami. Alternatywnie wybierz rzecz, kliknij „Zmień położenie” i wskaż pole. Przyciski pod szczegółami przenoszą do ekwipunku lub schowka, szukając pierwszego wolnego miejsca. Za mało miejsca lub kolizja oznacza błąd bez przeniesienia. Na małych ekranach schowek przewija się poziomo. Przenoszenie wymaga powrotu do kryjówki; zarezerwowany plecak czeka dodatkowo na odbiór raportu. Odłożenie wybranego plecaka do schowka odznacza go w planie.
+Przeciągnij rzecz na siatkę: podgląd centruje się pod kursorem bez zmiany wymiarów, a upuszczanie działa też na liniach i między kratkami. Alternatywnie wybierz rzecz, kliknij „Zmień położenie” i wskaż pole. Przyciski pod szczegółami przenoszą do ekwipunku lub schowka, szukając pierwszego wolnego miejsca. Za mało miejsca lub kolizja pozostawia przedmiot na miejscu bez komunikatu o błędzie. Błędy rzeczywistego zapisu lub odczytu nadal są zgłaszane. Na małych ekranach schowek przewija się poziomo. Przenoszenie wymaga powrotu do kryjówki; zarezerwowany plecak czeka dodatkowo na odbiór raportu. Odłożenie wybranego plecaka do schowka odznacza go w planie.
 
 Start i receptury korzystają wyłącznie z rzeczy przy postaci; surowce ze schowka trzeba najpierw przenieść. Znaleziska i wyniki receptur najpierw trafiają do ekwipunku, następnie do wolnych miejsc schowka, a przy braku miejsca do bezpiecznego odbioru. Odbiór służy wyłącznie zabezpieczeniu wyników i migracji — nie można odkładać tam rzeczy. Stare zapisy zachowują całą zawartość, nazwę i aktywną wyprawę. Wyprawy nadal nie pokazują przyszłych zdobyczy.
 
