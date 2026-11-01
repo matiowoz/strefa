@@ -1,3 +1,4 @@
+import { emptyEquipment, wornItems } from './equipment';
 import { eventLoot, resolveExpeditionEvents } from './expeditionEvents';
 import { arrange } from './inventory';
 import { getItem, locations } from './catalog';
@@ -6,7 +7,7 @@ import type { GameState } from './types';
 
 export function createInitialState(now = Date.now()): GameState {
   return arrange({
-    schemaVersion: 8, backpack: { id: 'starter-backpack', itemId: 'backpack', quantity: 1, condition: 100 }, progress: { workshopVisited: false, workbenchRepaired: false }, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
+    schemaVersion: 9, equipped: emptyEquipment(), backpack: { id: 'starter-backpack', itemId: 'backpack', quantity: 1, condition: 100 }, progress: { workshopVisited: false, workbenchRepaired: false }, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
     hero: {
       id: 'survivor', name: 'Ocalały', level: 1, health: 100, maxHealth: 100,
       skills: { combat: 1, scouting: 1, survival: 1, medicine: 1, crafting: 1, electronics: 1, trade: 1, transport: 1 },
@@ -68,7 +69,14 @@ export function settleExpedition(state: GameState, id: string, now = Date.now())
   if (!expedition || expedition.id !== id) return state;
   if (!Number.isSafeInteger(now) || now < expedition.expectedReturnAt) throw new Error('Wyprawa jeszcze trwa.');
   const scrap = expedition.cargo.loot.find((entry) => entry.itemId === 'scrap')?.quantity ?? 0;
-  const inventory = addResources(state.inventory, expedition.cargo.loot);
+  const inventory = addResources(state.inventory, expedition.cargo.loot.filter((entry) => getItem(entry.itemId)?.category !== 'equipment'));
+  const usedIds = new Set([...state.inventory, ...state.stash, ...state.overflow, state.backpack, ...wornItems(state)].map((entry) => entry.id));
+  for (const reward of expedition.cargo.loot.filter((entry) => getItem(entry.itemId)?.category === 'equipment')) {
+    let entryId = `loot-${id}-${reward.itemId}`;
+    while (usedIds.has(entryId)) entryId += '-new';
+    usedIds.add(entryId);
+    inventory.push({ id: entryId, itemId: reward.itemId, quantity: 1, condition: 60 });
+  }
   return arrange({ ...state, inventory, updatedAt: now, activeExpedition: null,
     progress: { ...state.progress, workshopVisited: state.progress.workshopVisited || (expedition.plan.locationId === 'workshop' && !expedition.events?.some((event) => event.id === 'blocked-road')) },
     lastReport: { events: structuredClone(expedition.events), cargo: structuredClone(expedition.cargo), expeditionId: id, locationId: expedition.plan.locationId, returnedAt: expedition.expectedReturnAt, scrap } });

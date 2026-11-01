@@ -65,7 +65,7 @@ npm.cmd run preview
 6. Sprawdź, że start nie zużył wody ani racji, a plecak pozostaje założony. W raporcie przeczytaj zdarzenia i sprawdź znaleziska. Gdy znajdziesz surowce, w Ekwipunku uzdatnij wodę, przygotuj rację lub bandaż. Widać koszt i wynik każdej receptury. Brak zasobów blokuje operację.
 7. Przy błędzie zapisu zmiana nie zostaje zastosowana; ponów odbiór. Przy konflikcie z inną kartą odśwież stronę.
 
-Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v8 (migracja poprawnych v1, v2, v3, v4, v5, v6 i v7 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
+Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v9 (migracja poprawnych v1, v2, v3, v4, v5, v6, v7 i v8 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
 
 Zapis jest osobny dla urządzenia, przeglądarki i adresu z portem. localhost i adres LAN mają różne zapisy; telefon nie współdzieli zapisu komputera. Czyszczenie danych witryny lub tryb prywatny może usunąć postęp. Brak synchronizacji, eksportu i kopii chmurowej. Nieaktualny zapis z drugiej karty jest odrzucany atomowo; odśwież ją przed kolejną zmianą. Czas wypraw opiera się na zegarze urządzenia, bez zabezpieczeń serwerowych.
 
@@ -90,9 +90,9 @@ Postać wyrusza ze wszystkimi przedmiotami z obecnego ekwipunku. Nie wybiera zes
 
 ## Ekwipunek i schowek
 
-Zakładka Ekwipunek pokazuje postać ze slotami przy sylwetce i siatkę przedmiotów po prawej, we wspólnej ramie. Bez powtórzonej nazwy postaci, „Karty ocalałego” i nagłówków „Ekwipunek postaci”. Hełm, ubranie, rękawice, buty oraz broń główna i boczna mają poglądowe miejsca z ikonami. Slot plecaka pokazuje faktycznie założony plecak; po najechaniu lub dotknięciu zobaczysz opis. Zakładanie ubrań i uzbrojenia zostaje na przyszły etap. Na wąskich ekranach siatka znajduje się pod postacią. Pomoc przenoszenia jest zwijana; zakładka Postać zachowuje dane bohatera.
+Zakładka Ekwipunek pokazuje postać ze slotami przy sylwetce i siatkę przedmiotów po prawej, we wspólnej ramie. Bez powtórzonej nazwy postaci, „Karty ocalałego” i nagłówków „Ekwipunek postaci”. Na hełm, ubranie, buty i broń główną można zakładać pasujące przedmioty znalezione podczas nowych wypraw. Przeciągnij sprzęt z plecaka do slotu albo użyj „Załóż” w opisie. Zdejmij go na puste pola plecaka albo przyciskiem „Zdejmij”. Przy wymianie poprzedni egzemplarz wraca do zwolnionych pól lub innego wolnego miejsca; gdy się nie mieści, zmiana nie jest stosowana. Pełny plecak nie przenosi zdejmowanych rzeczy automatycznie do skrytki ani odbioru. Rękawice i broń boczna pozostają w przygotowaniu. Plecak jest nadal założony na stałe. Na wąskich ekranach siatka znajduje się pod postacią. Pomoc przenoszenia jest zwijana; zakładka Postać zachowuje dane bohatera.
 
-Ekwipunek postaci ma 5 kolumn i 9 rzędów. Schowek w kryjówce ma jedną siatkę 8×9. Obie siatki mają identyczne kratki 52 px. Przedmioty zajmują prostokąty różnych rozmiarów; szczegóły pokazują ich wymiary i ilość. Maksymalny rozmiar przedmiotu to 2×3. Ilość pozostaje stosem (bez nowych limitów stosowania).
+Ekwipunek postaci ma 5 kolumn i 9 rzędów. Schowek w kryjówce ma jedną siatkę 8×9. Obie siatki mają identyczne kratki 52 px. Przedmioty zajmują prostokąty różnych rozmiarów; szczegóły pokazują ich wymiary i ilość. Maksymalny rozmiar przedmiotu to 2×3. Zapasy i materiały pozostają stosami (bez nowych limitów stosowania), a sprzęt to osobne egzemplarze z własnym ID i stanem.
 
 Przeciągnij rzecz na siatkę: podgląd centruje się pod kursorem bez zmiany wymiarów, a upuszczanie działa też na liniach i między kratkami. Alternatywnie wybierz rzecz, kliknij „Zmień położenie” i wskaż pole. Przyciski pod szczegółami przenoszą do ekwipunku lub schowka, szukając pierwszego wolnego miejsca. Za mało miejsca lub kolizja pozostawia przedmiot na miejscu bez komunikatu o błędzie. Błędy rzeczywistego zapisu lub odczytu nadal są zgłaszane. Na małych ekranach schowek przewija się poziomo. Przenoszenie wymaga powrotu do kryjówki. Założony plecak nie jest przedmiotem do przenoszenia.
 
@@ -113,6 +113,12 @@ Główny ekran przedstawia schronienie postapo. Pod ilustracją przejdziesz do p
 ## Mapa okolicy
 
 Na papierowym planie wybierz osiedle lub warsztat, albo użyj listy pod mapą. Wybór zapisuje się od razu; panel pokazuje ilustrację miejsca, czas oraz informację o zabieranym ekwipunku. Przycisk „Przygotuj wyprawę” przenosi do istniejącego planowania, nie rozpoczyna podróży. Znacznik kryjówki wraca do głównego ekranu. Podczas aktywnej wyprawy mapa wybiera tylko następny cel, bez zmiany trwającej wyprawy i bez pobierania zapasów.
+
+## Pierwsze wyposażenie
+
+Zniszczony hełm (2×2), łatana kurtka (2×3), znoszone buty (2×2) i zardzewiały łom (1×3) mogą wypaść przy przeszukiwaniu miejsc. Każdy znaleziony egzemplarz ma własne ID, ilość 1 i roboczy stan 60%. Przedmioty nie łączą się w stosy. Zmiana wyposażenia wymaga powrotu do kryjówki. Sprzęt w skrytce trzeba najpierw przenieść do plecaka.
+
+Założony sprzęt przetrwa odświeżenie i wyprawę. Na tym etapie nie daje premii, nie zużywa się i nie otwiera zamkniętych skrzyń; rysunek sylwetki pozostaje poglądowy. Stare zapisy otrzymują puste nowe sloty bez zmiany rzeczy i rozpoczętych wypraw. Nowe grafiki wyposażenia są własnym wygenerowanym atlasem `/art/equipment-worn.webp`.
 
 ## Wyprawa i raport
 

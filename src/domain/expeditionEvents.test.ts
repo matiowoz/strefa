@@ -20,7 +20,7 @@ describe('krótkie historie wypraw', () => {
     expect(isGameState(result)).toBe(true);
   });
   it('przeszukanie mieszkania, zamknięta skrzynia i podwórze wyjaśniają każde znalezisko', () => {
-    const trip = startExpedition(createInitialState(0), 1000, sequence(.5, .99, .5, .99, .1, .99));
+    const trip = startExpedition(createInitialState(0), 1000, sequence(.5, .99, .5, .99, .1, .99, .99, .99));
     expect(trip.activeExpedition!.events).toEqual([
       { id: 'apartment', loot: [{ itemId: 'raw-water', quantity: 3 }, { itemId: 'food', quantity: 2 }, { itemId: 'cloth', quantity: 2 }] },
       { id: 'locked-cache', loot: [] },
@@ -34,10 +34,10 @@ describe('krótkie historie wypraw', () => {
     expect(settleExpedition(result, trip.activeExpedition!.id, 999999)).toBe(result);
   });
   it('pozwala przeszukać miejsca i wrócić bez łupów, ale zalicza dotarcie do warsztatu', () => {
-    const events = resolveExpeditionEvents('workshop', sequence(.5, 0, 0, .99, 0, 0));
+    const events = resolveExpeditionEvents('workshop', sequence(.5, 0, 0, .99, 0, 0, .99, .99));
     expect(events.map((event) => event.id)).toEqual(['workshop-floor', 'storeroom']);
     expect(eventLoot(events)).toEqual([]);
-    const trip = startExpedition(selectLocation(createInitialState(0), 'workshop', 0), 1000, sequence(.5, 0, 0, .99, 0, 0));
+    const trip = startExpedition(selectLocation(createInitialState(0), 'workshop', 0), 1000, sequence(.5, 0, 0, .99, 0, 0, .99, .99));
     expect(settleExpedition(trip, trip.activeExpedition!.id, 121000).progress.workshopVisited).toBe(true);
   });
   it('warsztat ma własne miejsca i zapisany wynik nie zmienia się po wyborze innego celu', () => {
@@ -50,7 +50,7 @@ describe('krótkie historie wypraw', () => {
   });
   it('odrzuca błędny los na każdym etapie i nieznaną trasę', () => {
     expect(() => resolveExpeditionEvents('unknown', () => .5)).toThrow();
-    for (let i = 0; i < 6; i++) expect(() => resolveExpeditionEvents('outskirts', sequence(...Array(i).fill(.5), NaN))).toThrow('losowanie');
+    for (let i = 0; i < 8; i++) expect(() => resolveExpeditionEvents('outskirts', sequence(...Array(i).fill(.5), NaN))).toThrow('losowanie');
   });
 });
 
@@ -91,7 +91,7 @@ describe('walidacja dziennika i migracja', () => {
     const { events: _reportEvents, ...report } = next.lastReport!;
     const old = { ...next, schemaVersion: 7, activeExpedition: active, lastReport: report };
     const loaded = validateSave(old);
-    expect(loaded.schemaVersion).toBe(8);
+    expect(loaded.schemaVersion).toBe(9);
     expect(loaded.activeExpedition).toEqual({ ...active, events: null });
     expect(loaded.lastReport).toEqual({ ...report, events: null });
     expect(loaded.inventory).toEqual(old.inventory);

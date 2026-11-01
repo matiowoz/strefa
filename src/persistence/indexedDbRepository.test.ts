@@ -40,7 +40,7 @@ describe('adapter IndexedDB', () => {
   });
   it('nie traktuje nowszej wersji jako pustej gry i nie usuwa surowych danych', async () => {
     const factory = new IDBFactory();
-    await writeRaw(factory, { schemaVersion: 9, marker: 'keep' });
+    await writeRaw(factory, { schemaVersion: 10, marker: 'keep' });
     const repository = new IndexedDbRepository(factory, 'test');
     await expect(repository.load()).rejects.toThrow('wersja');
     await expect(repository.load()).rejects.toThrow('wersja');
@@ -106,13 +106,13 @@ describe('transakcje wyprawy', () => {
     await repository.save(result, started);
     expect(await repository.load()).toEqual(result);
   });
-  it('wczytuje v1 i zapisuje v8 dopiero przy udanej zmianie', async () => {
+  it('wczytuje v1 i zapisuje v9 dopiero przy udanej zmianie', async () => {
     const factory = new IDBFactory();
     const { lastReport: _, ...legacy } = createInitialState(0);
     await writeRaw(factory, { ...legacy, schemaVersion: 1 });
     const repository = new IndexedDbRepository(factory, 'test');
     const loaded = (await repository.load())!;
-    expect(loaded.schemaVersion).toBe(8);
+    expect(loaded.schemaVersion).toBe(9);
     await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
     expect((await repository.load())!.hero.name).toBe('Kruk');
   });
@@ -180,7 +180,7 @@ it('migruje starą drugą stronę schowka i zachowuje kontrolę poprzedniego sta
   await writeRaw(factory, { ...state, schemaVersion: 4, positions: { ...state.positions, 'starter-water': { x: 9, y: 5, page: 1 } } });
   const repository = new IndexedDbRepository(factory, 'test');
   const loaded = (await repository.load())!;
-  expect(loaded.schemaVersion).toBe(8);
+  expect(loaded.schemaVersion).toBe(9);
   expect(loaded.positions['starter-water'].page).toBe(0);
   const moved = moveItem(loaded, 'starter-water', -1, undefined, 2000);
   await repository.save(moved, loaded);
@@ -337,4 +337,36 @@ it('nie nadpisuje aktualnego zapisu z niezgodnym dziennikiem i łupami', async (
   await expect(repository.load()).rejects.toThrow('nieprawidłowy');
   await expect(repository.save(createInitialState(0))).rejects.toThrow();
   await expect(repository.load()).rejects.toThrow('nieprawidłowy');
+});
+
+it('wymiana założonego sprzętu jest atomowa i dwie karty nie powielają egzemplarzy', async () => {
+  const { equipItem } = await import('../domain/equipment');
+  const initial = createInitialState(0);
+  const packed = arrange({ ...initial, inventory: [...initial.inventory, { id:'old-helmet',itemId:'helmet',quantity:1,condition:30 }, {id:'new-helmet',itemId:'helmet',quantity:1,condition:80}] });
+  const state = equipItem(packed,'old-helmet','head',100);
+  const factory = new IDBFactory();const repository = new IndexedDbRepository(factory,'test');await repository.save(state,null);
+  const next = equipItem(state,'new-helmet','head',200);
+  const original = IDBDatabase.prototype.transaction;
+  const spy = vi.spyOn(IDBDatabase.prototype,'transaction').mockImplementation(function(this:IDBDatabase,...args:Parameters<typeof original>){const tx=original.apply(this,args);queueMicrotask(()=>tx.abort());return tx;});
+  await expect(repository.save(next,state)).rejects.toThrow();spy.mockRestore();expect(await repository.load()).toEqual(state);
+  const results=await Promise.allSettled([repository.save(next,state),repository.save(next,state)]);
+  expect(results.filter(r=>r.status==='fulfilled')).toHaveLength(1);
+  const loaded=(await new IndexedDbRepository(factory,'test').load())!;
+  expect(loaded).toEqual(next);expect(loaded.equipped.head?.id).toBe('new-helmet');expect(loaded.inventory.filter(e=>e.id==='old-helmet')).toHaveLength(1);
+});
+
+it('przerwane zdejmowanie zachowuje sprzęt na postaci i nie zajmuje pól plecaka', async () => {
+  const { equipItem,unequipItem }=await import('../domain/equipment');
+  const initial=createInitialState(0);const state=equipItem(arrange({...initial,inventory:[...initial.inventory,{id:'boots',itemId:'boots',quantity:1,condition:60}]}),'boots','feet',100);
+  const repository=new IndexedDbRepository(new IDBFactory(),'test');await repository.save(state,null);const next=unequipItem(state,'boots',undefined,200);
+  const original=IDBDatabase.prototype.transaction;const spy=vi.spyOn(IDBDatabase.prototype,'transaction').mockImplementation(function(this:IDBDatabase,...args:Parameters<typeof original>){const tx=original.apply(this,args);queueMicrotask(()=>tx.abort());return tx;});
+  await expect(repository.save(next,state)).rejects.toThrow();spy.mockRestore();expect(await repository.load()).toEqual(state);
+  await repository.save(next,state);expect(await repository.load()).toEqual(next);
+});
+
+it('migruje v8 do pustych slotów i zapisuje v9 bez zmiany rozpoczętej wyprawy',async()=>{
+  const {startExpedition}=await import('../domain/game');const started=startExpedition(createInitialState(0),1000,()=>.5);
+  const {equipped:_,...old}=started;const factory=new IDBFactory();await writeRaw(factory,{...old,schemaVersion:8});
+  const repository=new IndexedDbRepository(factory,'test');const loaded=(await repository.load())!;expect(loaded).toEqual(started);
+  const next=renameHero(loaded,'Kruk',2000);await repository.save(next,loaded);expect(await new IndexedDbRepository(factory,'test').load()).toEqual(next);
 });

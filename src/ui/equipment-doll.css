@@ -37,3 +37,8 @@
   .wear-slot .item-art { width:56px; height:56px; }
 }
 @media (min-width:1180px) { .equipment-stage { --slot-width:76px; height:640px; } .wear-slot { left:24px; } .slot-weapon,.slot-sidearm,.slot-backpack { left:auto; right:24px; } .wear-slot::after { width:28px; } }
+
+.wear-slot { touch-action:none; user-select:none; }
+.wear-slot.drag-origin { opacity:.35; }
+.wear-slot.slot-weapon .item-art { width:56px; height:76px; }
+.wear-slot[aria-disabled=true] { cursor:default; }

@@ -33,3 +33,7 @@
 
 .bag-drop-preview.merge { border-color:#e5d294; background:#b8c77766; box-shadow:0 0 12px #dae89855; }
 .bag-drop-preview.merge::after { content:'Połącz'; position:absolute; left:50%; top:-4px; transform:translate(-50%, -100%); padding:.25rem .35rem; border-radius:3px; background:#1c291bed; color:#f5e4b8; font-size:.7rem; white-space:nowrap; }
+
+.bag-drag-preview .item-art { width:var(--drag-art-width); height:var(--drag-art-height); flex-shrink:0; }
+.bag-drop-preview.equip.valid { border-color:#e5d294; background:#b8c77766; box-shadow:0 0 12px #dae89855; }
+.bag-drop-preview.equip.valid::after { content:'Załóż'; position:absolute; left:50%; top:-4px; transform:translate(-50%,-100%); padding:.25rem .35rem; border-radius:3px; background:#1c291bed; color:#f5e4b8; font-size:.7rem; }

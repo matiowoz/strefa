@@ -10,6 +10,7 @@ export const STASH_SIZE = { columns: 8, rows: 9 };
 export const gridSize = (page: number) => page === -1 ? { columns: GRID_COLUMNS, rows: GRID_ROWS } : STASH_SIZE;
 // Demonstracyjne rozmiary jednego stosu (ilości zachowują dotychczasowy model).
 export const itemSizes: Record<string, { width: number; height: number }> = {
+  helmet: { width: 2, height: 2 }, jacket: { width: 2, height: 3 }, boots: { width: 2, height: 2 }, crowbar: { width: 1, height: 3 },
   backpack: { width: 2, height: 3 }, water: { width: 1, height: 2 },
   ration: { width: 1, height: 1 }, bandage: { width: 1, height: 1 },
   scrap: { width: 2, height: 2 }, 'raw-water': { width: 1, height: 2 },
@@ -31,7 +32,7 @@ export function fits(entries: InventoryEntry[], positions: Record<string, Placem
   });
 }
 
-function firstFree(entries: InventoryEntry[], positions: Record<string, Placement>, entry: InventoryEntry, page: number): Placement | null {
+export function firstFree(entries: InventoryEntry[], positions: Record<string, Placement>, entry: InventoryEntry, page: number): Placement | null {
   const bounds = gridSize(page);
   for (let y = 0; y < bounds.rows; y++) for (let x = 0; x < bounds.columns; x++) {
     const point = { x, y, page };
@@ -107,7 +108,7 @@ export function splitStack(state: GameState, id: string, amount: number, now = D
   const entry = source.find((entry) => entry.id === id);
   if (!entry) throw new Error('Nie znaleziono stosu w siatce.');
   if (!Number.isSafeInteger(amount) || amount < 1 || amount >= entry.quantity) throw new Error('Wybierz liczbę mniejszą od całego stosu.');
-  const all = [...state.inventory, ...state.stash, ...state.overflow, state.backpack];
+  const all = [...state.inventory, ...state.stash, ...state.overflow, state.backpack, ...Object.values(state.equipped).filter((entry): entry is InventoryEntry => entry !== null)];
   let newId = `${id}-split`;
   while (all.some((item) => item.id === newId)) newId += '-new';
   const separated = { ...entry, id: newId, quantity: amount };

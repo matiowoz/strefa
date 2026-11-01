@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import type { InventoryEntry } from '../domain/types';
+import type { EquipmentSlot, GameState } from '../domain/types';
+import { unequipItem, wornItems } from '../domain/equipment';
+import type { InventoryDrag } from './useInventoryDrag';
 import { getItem } from '../domain/catalog';
 import { ItemArt } from './ItemArt';
 import { ItemPopover } from './ItemPopover';
@@ -23,26 +25,39 @@ function SlotIcon({ kind }: { kind: SlotKind }) {
   return <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true"><path d={outlines[kind]} /></svg>;
 }
 
-export function EquipmentDoll({ backpack }: { backpack: InventoryEntry }) {
+type Props = { state: GameState; disabled: boolean; selectedId: string | null; drag: InventoryDrag; equip: (id: string, slot: EquipmentSlot) => void; unequip: (id: string) => void };
+export function EquipmentDoll({ state, disabled, selectedId, drag, equip, unequip }: Props) {
+  const backpack = state.backpack;
   const popoverId = useId();
-  const [anchor, setAnchor] = useState<DOMRect | null>(null);
+  const [hover, setHover] = useState<{ id: string; anchor: DOMRect } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const keep = () => { if (timer.current) clearTimeout(timer.current); };
-  const close = () => { keep(); setAnchor(null); };
-  const leave = () => { keep(); timer.current = setTimeout(() => setAnchor(null), 250); };
-  const open = (element: HTMLElement) => { keep(); setAnchor(element.getBoundingClientRect()); };
+  const close = () => { keep(); setHover(null); };
+  const leave = () => { keep(); timer.current = setTimeout(() => setHover(null), 250); };
+  const open = (id: string, element: HTMLElement) => { keep(); if (!drag.active) setHover({ id, anchor: element.getBoundingClientRect() }); };
+  const viewed = [backpack, ...wornItems(state)].find((entry) => entry.id === hover?.id);
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
   return <section className="equipment-doll" aria-label="Wyposażenie postaci">
     <div className="equipment-stage">
-      <img className="equipment-survivor" src="/art/survivor.png" alt="Ocalały w zużytym płaszczu. Miejsca na wyposażenie znajdują się przy sylwetce." width="1024" height="1536" />
+      <img className="equipment-survivor" src="/art/survivor.png" alt="Ocalały w zużytym płaszczu. Założone przedmioty pokazują miejsca przy sylwetce." width="1024" height="1536" />
       <span className="equipment-crosshair" aria-hidden="true" />
-      {slots.map(({ kind, label }) => <div className={`wear-slot slot-${kind}`} key={kind} role="img" aria-label={`${label} — puste miejsce, zakładanie w przygotowaniu`} title={`${label} — zakładanie w przygotowaniu`}><SlotIcon kind={kind} /><span>{label}</span></div>)}
-      <button className="wear-slot slot-backpack is-equipped" aria-label={`Założony plecak: ${getItem(backpack.itemId)?.name}`} aria-controls={anchor ? popoverId : undefined} aria-expanded={!!anchor} onPointerEnter={(event) => { if (event.pointerType !== 'touch') open(event.currentTarget); }} onPointerLeave={leave} onFocus={(event) => open(event.currentTarget)} onBlur={leave} onClick={(event) => open(event.currentTarget)}>
+      {slots.map(({ kind, label }) => {
+        const entry = state.equipped[kind];
+        const available = kind !== 'hands' && kind !== 'sidearm';
+        if (!available) return <div className={`wear-slot slot-${kind}`} key={kind} role="img" aria-label={`${label} — w przygotowaniu`} title={`${label} — w przygotowaniu`}><SlotIcon kind={kind} /><span>{label}</span></div>;
+        return <button key={kind} data-equipment-slot={kind} data-worn-id={entry?.id} className={`wear-slot slot-${kind} ${entry ? 'is-equipped' : ''} ${drag.draggingId === entry?.id && entry ? 'drag-origin' : ''}`} aria-label={entry ? `${label}: ${getItem(entry.itemId)?.name}` : `${label} — puste miejsce`} aria-disabled={disabled} aria-expanded={!!entry && hover?.id === entry.id} aria-controls={entry && hover?.id === entry.id ? popoverId : undefined}
+          title={entry ? getItem(entry.itemId)?.name : `Upuść przedmiot: ${label}`}
+          onPointerEnter={(event) => { if (entry && event.pointerType !== 'touch') open(entry.id, event.currentTarget); }} onPointerLeave={leave} onFocus={(event) => { if (entry) open(entry.id, event.currentTarget); }} onBlur={leave}
+          onPointerDown={(event) => { if (entry) { close(); drag.begin(event, entry); } }} onClick={(event) => { if (entry) open(entry.id, event.currentTarget); else if (selectedId && !disabled) equip(selectedId, kind); }}>
+          {entry ? <ItemArt itemId={entry.itemId} /> : <SlotIcon kind={kind} />}<span>{label}</span>{entry && <i aria-hidden="true" />}
+        </button>;
+      })}
+      <button className="wear-slot slot-backpack is-equipped" aria-label={`Założony plecak: ${getItem(backpack.itemId)?.name}`} aria-controls={hover?.id === backpack.id ? popoverId : undefined} aria-expanded={hover?.id === backpack.id} onPointerEnter={(event) => { if (event.pointerType !== 'touch') open(backpack.id, event.currentTarget); }} onPointerLeave={leave} onFocus={(event) => open(backpack.id, event.currentTarget)} onBlur={leave} onClick={(event) => open(backpack.id, event.currentTarget)}>
         <ItemArt itemId={backpack.itemId} /><span>Plecak</span><i aria-hidden="true" />
       </button>
       <span className="equipment-stencil" aria-hidden="true">STREFA / OSOBISTE</span>
     </div>
-    <p className="equipment-future">Sloty odzieży i broni — w przygotowaniu.</p>
-    {anchor && <ItemPopover id={popoverId} entry={backpack} anchor={anchor} keep={keep} leave={leave} close={close}><p>Założony na stałe · 5 × 9 pól.</p></ItemPopover>}
+    <p className="equipment-future">Sylwetka poglądowa · wyposażenie bez premii.</p>
+    {hover && viewed && !drag.active && <ItemPopover id={popoverId} entry={viewed} anchor={hover.anchor} keep={keep} leave={leave} close={close}>{viewed.id === backpack.id ? <p>Założony na stałe · 5 × 9 pól.</p> : <><p>Stan: {viewed.condition}%</p><button disabled={disabled || unequipItem(state, viewed.id) === state} title="Zdejmij do wolnego miejsca w plecaku" onClick={() => { close(); unequip(viewed.id); }}>Zdejmij</button></>}</ItemPopover>}
   </section>;
 }

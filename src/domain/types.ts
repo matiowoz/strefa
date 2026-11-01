@@ -8,12 +8,14 @@ export interface Hero {
   skills: Record<SkillId, number>;
 }
 
+export type EquipmentSlot = 'head' | 'body' | 'hands' | 'feet' | 'weapon' | 'sidearm';
 export type ItemCategory = 'equipment' | 'supply' | 'material';
 export interface ItemDefinition {
   id: string;
   name: string;
   category: ItemCategory;
   weightKg: number;
+  slot?: EquipmentSlot;
   description: string;
 }
 export interface InventoryEntry {
@@ -65,7 +67,8 @@ export interface ExpeditionReport {
 
 export interface Placement { x: number; y: number; page: number } // -1 = ekwipunek, 0 = schowek
 export interface GameState {
-  schemaVersion: 8;
+  schemaVersion: 9;
+  equipped: Record<EquipmentSlot, InventoryEntry | null>;
   backpack: InventoryEntry;
   progress: { workshopVisited: boolean; workbenchRepaired: boolean };
   positions: Record<string, Placement>;

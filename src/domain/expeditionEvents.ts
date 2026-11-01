@@ -12,7 +12,8 @@ export const eventDefinitions = {
 const routes: Record<string, readonly [ExpeditionEventId, ExpeditionEventId]> = {
   outskirts: ['apartment', 'courtyard'], workshop: ['workshop-floor', 'storeroom'],
 };
-const resourceOrder = ['scrap', 'raw-water', 'food', 'cloth'];
+const gearByEvent: Record<ExpeditionEventId, readonly string[]> = { apartment: ['jacket', 'boots'], courtyard: ['helmet'], 'workshop-floor': ['helmet', 'crowbar'], storeroom: ['jacket', 'boots'], 'locked-cache': [], 'blocked-road': [] };
+const resourceOrder = ['scrap', 'raw-water', 'food', 'cloth', 'helmet', 'jacket', 'boots', 'crowbar'];
 function roll(random: () => number): number {
   const value = random();
   if (!Number.isFinite(value) || value < 0 || value >= 1) throw new Error('Nieprawidłowe losowanie.');
@@ -30,7 +31,12 @@ export function resolveExpeditionEvents(locationId: string, random: () => number
   const search = (id: ExpeditionEventId): ExpeditionEvent => ({ id, loot: eventDefinitions[id].drops.map(({ itemId, maximum }) => ({ itemId, quantity: Math.floor(roll(random) * (maximum + 1)) })).filter((entry) => entry.quantity > 0) });
   const first = search(route[0]);
   const cache: ExpeditionEvent[] = roll(random) < 0.30 ? [{ id: 'locked-cache', loot: [] }] : [];
-  return [first, ...cache, search(route[1])];
+  const events = [first, ...cache, search(route[1])];
+  for (const event of events) {
+    const gear = gearByEvent[event.id];
+    if (gear.length && roll(random) < .25) event.loot.push({ itemId: gear[Math.floor(roll(random) * gear.length)], quantity: 1 });
+  }
+  return events;
 }
 
 const record = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -45,7 +51,7 @@ export function validExpeditionEvents(value: unknown, locationId: string, loot: 
     for (const resource of event.loot) {
       if (!record(resource) || typeof resource.itemId !== 'string' || typeof resource.quantity !== 'number' || !Number.isSafeInteger(resource.quantity) || resource.quantity < 1 || ids.has(resource.itemId)) return false;
       const drop = definition.drops.find((entry) => entry.itemId === resource.itemId);
-      if (!drop || resource.quantity > drop.maximum) return false;
+      if (drop ? resource.quantity > drop.maximum : !gearByEvent[event.id as ExpeditionEventId].includes(resource.itemId) || resource.quantity !== 1) return false;
       ids.add(resource.itemId);
     }
   }
