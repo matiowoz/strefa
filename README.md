@@ -90,7 +90,7 @@ Postać wyrusza ze wszystkimi przedmiotami z obecnego ekwipunku. Nie wybiera zes
 
 ## Ekwipunek i schowek
 
-Zakładka Ekwipunek łączy postać i przedmioty w jednej karcie: po lewej ten sam portret, nazwa, poziom i zdrowie co w zakładce Postać, pod nimi założony plecak; po prawej siatka. Na wąskich ekranach siatka znajduje się pod postacią. Zakładanie ubrań i uzbrojenia zostaje na przyszły etap.
+Zakładka Ekwipunek pokazuje postać ze slotami przy sylwetce i siatkę przedmiotów po prawej, we wspólnej ramie. Bez powtórzonej nazwy postaci, „Karty ocalałego” i nagłówków „Ekwipunek postaci”. Hełm, ubranie, rękawice, buty oraz broń główna i boczna mają poglądowe miejsca z ikonami. Slot plecaka pokazuje faktycznie założony plecak; po najechaniu lub dotknięciu zobaczysz opis. Zakładanie ubrań i uzbrojenia zostaje na przyszły etap. Na wąskich ekranach siatka znajduje się pod postacią. Pomoc przenoszenia jest zwijana; zakładka Postać zachowuje dane bohatera.
 
 Ekwipunek postaci ma 5 kolumn i 9 rzędów. Schowek w kryjówce ma jedną siatkę 8×9. Obie siatki mają identyczne kratki 52 px. Przedmioty zajmują prostokąty różnych rozmiarów; szczegóły pokazują ich wymiary i ilość. Maksymalny rozmiar przedmiotu to 2×3. Ilość pozostaje stosem (bez nowych limitów stosowania).
 

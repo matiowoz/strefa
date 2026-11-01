@@ -5,7 +5,7 @@ import { consumableIds, useItem } from '../domain/useItem';
 import { atShelter, itemSizes, mergeStacks, splitStack, tryMoveItem } from '../domain/inventory';
 import { craft, quantity, recipes } from '../domain/preparation';
 import type { GameState, InventoryEntry } from '../domain/types';
-import { HeroPortrait } from './HeroPortrait';
+import { EquipmentDoll } from './EquipmentDoll';
 import { ItemArt } from './ItemArt';
 import { SplitStackDialog } from './SplitStackDialog';
 import { InventoryGrid } from './InventoryGrid';
@@ -75,15 +75,15 @@ export function InventoryScreen({ state, update, saving, storage }: Props) {
   const backpackCard = <section className="stash-panel equipped-backpack"><ItemArt itemId="backpack" /><div><span className="eyebrow">Założony na stałe</span><h2>{getItem(state.backpack.itemId)?.name}</h2><p>Podstawowy plecak · 5 × 9 pól. W przyszłości wymienisz go na większy.</p></div></section>;
   return <div className="inventory-workbench">
     {splitEntry && <SplitStackDialog entry={splitEntry} disabled={disabled} close={() => setSplitId(null)} submit={divide} />}
-    <div className="inventory-intro"><div><span className="eyebrow">To, co niesiesz. To, co zostawiasz.</span><p>{storage ? 'Ekwipunek i skrytka' : 'Ekwipunek postaci'}</p></div><span className="pack-weight">Przy postaci <strong>{inventoryWeight(state).toLocaleString('pl-PL', { maximumFractionDigits: 1 })} <small>kg</small></strong></span></div>
+    {storage && <div className="inventory-intro"><div><span className="eyebrow">To, co niesiesz. To, co zostawiasz.</span><p>Ekwipunek i skrytka</p></div><span className="pack-weight">Przy postaci <strong>{inventoryWeight(state).toLocaleString('pl-PL', { maximumFractionDigits: 1 })} <small>kg</small></strong></span></div>}
     {storage && backpackCard}
     {!home && <p className="storage-warning">Postać jest na wyprawie. Przenoszenie przedmiotów będzie możliwe po powrocie do kryjówki.</p>}
     <div className={storage ? 'storage-columns' : 'inventory-character-sheet'}>
-      {!storage && <HeroPortrait hero={state.hero}>{backpackCard}</HeroPortrait>}
-      <section className="stash-panel"><div className="stash-heading"><h2>Ekwipunek postaci</h2><span>5 × 9</span></div><p className="stash-note">Z tymi przedmiotami wyruszasz na wyprawę.</p><InventoryGrid state={state} page={-1} selectedId={selectedId} disabled={disabled} select={setSelectedId} place={place} moving={moving} merge={merge} actions={actions} /></section>
+      {!storage && <EquipmentDoll backpack={state.backpack} />}
+      <section className="stash-panel" aria-label="Przedmioty w plecaku">{storage ? <><div className="stash-heading"><h2>Ekwipunek postaci</h2><span>5 × 9</span></div><p className="stash-note">Z tymi przedmiotami wyruszasz na wyprawę.</p></> : <div className="inventory-pack-top"><span aria-label="Pojemność plecaka: 5 na 9">5 × 9</span><span className="inventory-pack-weight" title="Masa zawartości plecaka">{inventoryWeight(state).toLocaleString('pl-PL', { maximumFractionDigits: 1 })} <small>kg</small></span></div>}<InventoryGrid state={state} page={-1} selectedId={selectedId} disabled={disabled} select={setSelectedId} place={place} moving={moving} merge={merge} actions={actions} /></section>
       {storage && <section className="stash-panel"><div className="stash-heading"><h2>Skrytka w kryjówce</h2><span>8 × 9</span></div><p className="stash-note">Jeden schowek. Kolejne skrytki będzie można budować w przyszłości.</p><InventoryGrid state={state} page={page} selectedId={selectedId} disabled={disabled} select={setSelectedId} place={place} moving={moving} merge={merge} actions={actions} /></section>}
     </div>
-    <p className="stash-note">Przeciągnij przedmiot na taki sam, aby połączyć stosy. Aby zmienić położenie, upuść go na puste pole lub wybierz go, kliknij „Zmień położenie” i wskaż pole. Na telefonie schowek można przewijać poziomo. Ilości pozostają stosami; rozmiar dotyczy całego stosu.</p>
+    <details className="inventory-help"><summary>Jak przenosić przedmioty</summary><p className="stash-note">Przeciągnij przedmiot na taki sam, aby połączyć stosy. Aby zmienić położenie, upuść go na puste pole lub wybierz go, kliknij „Zmień położenie” i wskaż pole. Na telefonie schowek można przewijać poziomo. Ilości pozostają stosami; rozmiar dotyczy całego stosu.</p></details>
     <p className="inventory-notice" role="status">{notice}</p>
     <details className="selected-item-details"><summary>Szczegóły i układanie zaznaczonego przedmiotu</summary><section id="item-details" className="stash-panel storage-details" aria-label="Szczegóły przedmiotu">{selected && item ? <><div className="detail-top"><div className="detail-art"><ItemArt itemId={item.id} /></div><div><span className="eyebrow">{carried ? 'Przy postaci' : state.stash.some((entry) => entry.id === selected.id) ? 'Schowek' : 'Odbiór'}</span><h3>{item.name}</h3><p>{item.description}</p></div></div>
       <dl><div><dt>Ilość</dt><dd>{selected.quantity}</dd></div><div><dt>Rozmiar</dt><dd>{itemSizes[item.id].width} × {itemSizes[item.id].height}</dd></div><div><dt>Masa sztuki</dt><dd>{item.weightKg} kg</dd></div>{selected.condition !== null && <div><dt>Stan</dt><dd>{selected.condition}%</dd></div>}</dl>
