@@ -106,13 +106,13 @@ describe('transakcje wyprawy', () => {
     await repository.save(result, started);
     expect(await repository.load()).toEqual(result);
   });
-  it('wczytuje v1 i zapisuje v7 dopiero przy udanej zmianie', async () => {
+  it('wczytuje v1 i zapisuje v8 dopiero przy udanej zmianie', async () => {
     const factory = new IDBFactory();
     const { lastReport: _, ...legacy } = createInitialState(0);
     await writeRaw(factory, { ...legacy, schemaVersion: 1 });
     const repository = new IndexedDbRepository(factory, 'test');
     const loaded = (await repository.load())!;
-    expect(loaded.schemaVersion).toBe(7);
+    expect(loaded.schemaVersion).toBe(8);
     await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
     expect((await repository.load())!.hero.name).toBe('Kruk');
   });
@@ -180,7 +180,7 @@ it('migruje starą drugą stronę schowka i zachowuje kontrolę poprzedniego sta
   await writeRaw(factory, { ...state, schemaVersion: 4, positions: { ...state.positions, 'starter-water': { x: 9, y: 5, page: 1 } } });
   const repository = new IndexedDbRepository(factory, 'test');
   const loaded = (await repository.load())!;
-  expect(loaded.schemaVersion).toBe(7);
+  expect(loaded.schemaVersion).toBe(8);
   expect(loaded.positions['starter-water'].page).toBe(0);
   const moved = moveItem(loaded, 'starter-water', -1, undefined, 2000);
   await repository.save(moved, loaded);
@@ -306,4 +306,35 @@ it('przerwany zapis łączenia zachowuje oba stosy, ilości i pola', async () =>
   });
   await expect(repository.save(next, state)).rejects.toThrow(); spy.mockRestore();
   expect(await repository.load()).toEqual(state);
+});
+
+it('migruje wyprawę i raport v7 bez dopisywania historii, a zapis zachowuje kontrolę współbieżności', async () => {
+  const { startExpedition, settleExpedition } = await import('../domain/game');
+  const factory = new IDBFactory();
+  const first = startExpedition(createInitialState(0), 1000, () => .5);
+  const returned = settleExpedition(first, first.activeExpedition!.id, 61000);
+  const next = startExpedition(returned, 62000, () => .99);
+  const { events: _, ...active } = next.activeExpedition!;
+  const { events: _report, ...report } = next.lastReport!;
+  await writeRaw(factory, { ...next, schemaVersion: 7, activeExpedition: active, lastReport: report });
+  const repository = new IndexedDbRepository(factory, 'test');
+  const loaded = (await repository.load())!;
+  expect(loaded.activeExpedition).toEqual({ ...active, events: null });
+  expect(loaded.lastReport).toEqual({ ...report, events: null });
+  const changed = renameHero(loaded, 'Kruk', 63000);
+  await repository.save(changed, loaded);
+  expect(await new IndexedDbRepository(factory, 'test').load()).toEqual(changed);
+  await expect(repository.save(loaded, loaded)).rejects.toThrow('innej karcie');
+});
+
+it('nie nadpisuje aktualnego zapisu z niezgodnym dziennikiem i łupami', async () => {
+  const { startExpedition } = await import('../domain/game');
+  const factory = new IDBFactory();
+  const started = startExpedition(createInitialState(0), 1000, () => .5);
+  started.activeExpedition!.events = [{ id: 'blocked-road', loot: [] }];
+  await writeRaw(factory, started);
+  const repository = new IndexedDbRepository(factory, 'test');
+  await expect(repository.load()).rejects.toThrow('nieprawidłowy');
+  await expect(repository.save(createInitialState(0))).rejects.toThrow();
+  await expect(repository.load()).rejects.toThrow('nieprawidłowy');
 });

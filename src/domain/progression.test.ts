@@ -27,6 +27,7 @@ describe('zmienne znaleziska', () => {
   it('waliduje łupy bez złomu i odrzuca ujemne ilości, duplikaty oraz błędny raport', () => {
     const trip = startExpedition(createInitialState(0), 1000, () => 0);
     trip.activeExpedition!.cargo.loot = [{ itemId: 'cloth', quantity: 1 }];
+    trip.activeExpedition!.events = [{ id: 'apartment', loot: [{ itemId: 'cloth', quantity: 1 }] }, { id: 'courtyard', loot: [] }];
     expect(isGameState(trip)).toBe(true);
     const report = settleExpedition(trip, trip.activeExpedition!.id, 61000);
     expect(isGameState(report)).toBe(true);
@@ -75,7 +76,7 @@ it('migruje rzeczywisty v6 z aktywną wyprawą i zachowuje sprzęt, koszty, łup
   const result = validateSave(old);
   expect(result.backpack).toEqual(initial.backpack);
   expect(result.inventory).toEqual(initial.inventory);
-  expect(result.activeExpedition).toEqual(old.activeExpedition);
+  expect(result.activeExpedition).toEqual({ ...old.activeExpedition, events: null });
   expect(result.positions['starter-water']).toEqual(old.positions['starter-water']);
   expect(result.positions[initial.backpack.id]).toBeUndefined();
   expect(isGameState(result)).toBe(true);

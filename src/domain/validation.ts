@@ -1,3 +1,4 @@
+import { validExpeditionEvents } from './expeditionEvents';
 import { arrange, fits } from './inventory';
 import { getItem, locations, skillNames } from './catalog';
 import type { Cargo, GameState, InventoryEntry, Placement } from './types';
@@ -86,7 +87,7 @@ function isV3(value: unknown, modern = false): boolean {
 function validGridState(value: unknown, version: number, pages: number, bounds = { columns: 8, rows: 9 }): boolean {
   if (!record(value) || value.schemaVersion !== version || !Array.isArray(value.inventory) || !Array.isArray(value.stash) || !Array.isArray(value.overflow) || !record(value.positions)) return false;
   const all = [...value.inventory, ...value.stash, ...value.overflow];
-  if (!isV3({ ...value, schemaVersion: 3, inventory: version === 7 ? [...all, value.backpack] : all }, version === 7)) return false;
+  if (!isV3({ ...value, schemaVersion: 3, inventory: version >= 7 ? [...all, value.backpack] : all }, version >= 7)) return false;
   const entries = [...value.inventory, ...value.stash] as InventoryEntry[];
   if (Object.keys(value.positions).length !== entries.length) return false;
   for (const entry of entries) {
@@ -101,21 +102,28 @@ function validGridState(value: unknown, version: number, pages: number, bounds =
   const active = value.activeExpedition;
   if (record(active) && record(active.cargo)) {
     const id = active.cargo.equipmentId;
-    if (id && !(version === 7 && record(value.backpack) && value.backpack.id === id) && !(value.inventory as InventoryEntry[]).some((entry) => entry.id === id)) return false;
+    if (id && !(version >= 7 && record(value.backpack) && value.backpack.id === id) && !(value.inventory as InventoryEntry[]).some((entry) => entry.id === id)) return false;
   }
   return true;
 }
 
-export function isGameState(value: unknown): value is GameState {
+function validBackpackState(value: unknown, version: number): boolean {
   if (!record(value) || !record(value.backpack) || value.backpack.itemId !== 'backpack'
     || !record(value.progress) || typeof value.progress.workshopVisited !== 'boolean' || typeof value.progress.workbenchRepaired !== 'boolean'
     || (value.progress.workbenchRepaired && !value.progress.workshopVisited)
     || !record(value.preparation) || value.preparation.equipmentId !== null) return false;
-  return validGridState(value, 7, 1);
+  return validGridState(value, version, 1);
+}
+
+export function isGameState(value: unknown): value is GameState {
+  if (!validBackpackState(value, 8)) return false;
+  const state = value as GameState;
+  return (!state.activeExpedition || validExpeditionEvents(state.activeExpedition.events, state.activeExpedition.plan.locationId, state.activeExpedition.cargo.loot))
+    && (!state.lastReport || validExpeditionEvents(state.lastReport.events, state.lastReport.locationId, state.lastReport.cargo.loot));
 }
 
 export function validateSave(value: unknown): GameState {
-  if (record(value) && ![1, 2, 3, 4, 5, 6, 7].includes(Number(value.schemaVersion))) {
+  if (record(value) && ![1, 2, 3, 4, 5, 6, 7, 8].includes(Number(value.schemaVersion))) {
     throw new Error('Nieobsługiwana wersja zapisu. Dane pozostawiono bez zmian.');
   }
   if (record(value) && value.schemaVersion === 1 && validStructure(value)) {
@@ -156,6 +164,12 @@ export function validateSave(value: unknown): GameState {
     return validateSave({ ...old, schemaVersion: 7, backpack, positions,
       inventory: old.inventory.filter((entry) => entry.id !== backpack.id), stash: old.stash.filter((entry) => entry.id !== backpack.id), overflow: old.overflow.filter((entry) => entry.id !== backpack.id),
       preparation: { kit: 'light', equipmentId: null }, progress: { workshopVisited: old.lastReport?.locationId === 'workshop', workbenchRepaired: false } });
+  }
+  if (record(value) && value.schemaVersion === 7 && validBackpackState(value, 7)) {
+    const old = value as unknown as GameState;
+    return validateSave({ ...old, schemaVersion: 8,
+      activeExpedition: old.activeExpedition ? { ...old.activeExpedition, events: null } : null,
+      lastReport: old.lastReport ? { ...old.lastReport, events: null } : null });
   }
   if (!isGameState(value)) throw new Error('Zapis jest nieprawidłowy. Dane pozostawiono bez zmian.');
   return value;

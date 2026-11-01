@@ -1,3 +1,4 @@
+import { eventLoot, resolveExpeditionEvents } from './expeditionEvents';
 import { arrange } from './inventory';
 import { getItem, locations } from './catalog';
 import { addResources, preparationError } from './preparation';
@@ -5,7 +6,7 @@ import type { GameState } from './types';
 
 export function createInitialState(now = Date.now()): GameState {
   return arrange({
-    schemaVersion: 7, backpack: { id: 'starter-backpack', itemId: 'backpack', quantity: 1, condition: 100 }, progress: { workshopVisited: false, workbenchRepaired: false }, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
+    schemaVersion: 8, backpack: { id: 'starter-backpack', itemId: 'backpack', quantity: 1, condition: 100 }, progress: { workshopVisited: false, workbenchRepaired: false }, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
     hero: {
       id: 'survivor', name: 'Ocalały', level: 1, health: 100, maxHealth: 100,
       skills: { combat: 1, scouting: 1, survival: 1, medicine: 1, crafting: 1, electronics: 1, trade: 1, transport: 1 },
@@ -51,16 +52,10 @@ export function startExpedition(state: GameState, now = Date.now(), random: () =
   }
   const problem = preparationError(state);
   if (problem) throw new Error(problem);
-  const loot = [
-    { itemId: 'scrap', maximum: state.selectedLocationId === 'workshop' ? 6 : 4 },
-    { itemId: 'raw-water', maximum: 3 }, { itemId: 'food', maximum: 3 }, { itemId: 'cloth', maximum: 2 },
-  ].map(({ itemId, maximum }) => {
-    const roll = random();
-    if (!Number.isFinite(roll) || roll < 0 || roll >= 1) throw new Error('Nieprawidłowe losowanie.');
-    return { itemId, quantity: Math.floor(roll * (maximum + 1)) };
-  }).filter((entry) => entry.quantity > 0);
+  const events = resolveExpeditionEvents(state.selectedLocationId, random);
+  const loot = eventLoot(events);
   return arrange({ ...state, updatedAt: now, activeExpedition: {
-    cargo: { equipmentId: state.backpack.id, water: 0, ration: 0, loot },
+    events, cargo: { equipmentId: state.backpack.id, water: 0, ration: 0, loot },
     // getRandomValues also works on HTTP LAN addresses, where randomUUID is unavailable.
     id: Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) => byte.toString(16).padStart(2, '0')).join(''), plan: { locationId: state.selectedLocationId, strategy: 'balanced' },
     status: 'running', startedAt: now, expectedReturnAt: now + rule.durationMs,
@@ -75,6 +70,6 @@ export function settleExpedition(state: GameState, id: string, now = Date.now())
   const scrap = expedition.cargo.loot.find((entry) => entry.itemId === 'scrap')?.quantity ?? 0;
   const inventory = addResources(state.inventory, expedition.cargo.loot);
   return arrange({ ...state, inventory, updatedAt: now, activeExpedition: null,
-    progress: { ...state.progress, workshopVisited: state.progress.workshopVisited || expedition.plan.locationId === 'workshop' },
-    lastReport: { cargo: structuredClone(expedition.cargo), expeditionId: id, locationId: expedition.plan.locationId, returnedAt: expedition.expectedReturnAt, scrap } });
+    progress: { ...state.progress, workshopVisited: state.progress.workshopVisited || (expedition.plan.locationId === 'workshop' && !expedition.events?.some((event) => event.id === 'blocked-road')) },
+    lastReport: { events: structuredClone(expedition.events), cargo: structuredClone(expedition.cargo), expeditionId: id, locationId: expedition.plan.locationId, returnedAt: expedition.expectedReturnAt, scrap } });
 }

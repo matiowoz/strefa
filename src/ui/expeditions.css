@@ -54,3 +54,13 @@
 .expedition-footnote { font-size: .7rem; color: #aeb99f; margin: 1.4rem 0 0; }
 @media (min-width: 680px) { .report-findings { grid-template-columns: repeat(4, minmax(0, 1fr)); } .report-accounting { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1180px) { .expedition-layout { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } .expedition-landscape img { aspect-ratio: 4/3; } .destination-copy, .expedition-plan { padding: 1.5rem; } }
+
+.report-journey { margin-top:1.5rem; }
+.report-journey h3 { font:1.4rem Georgia,serif; color:#eadab4; margin:.4rem 0 1rem; }
+.report-journey ol { list-style:none; padding:0; margin:0; }
+.report-journey li { display:flex; align-items:flex-start; gap:.85rem; padding:1rem 0; border-bottom:1px solid #596045; }
+.journey-step { flex:0 0 32px; height:32px; display:grid; place-items:center; border:1px solid #8d8059; color:#d8bf89; font:.85rem Georgia,serif; }
+.report-journey li > div { min-width:0; }
+.report-journey h4 { margin:0 0 .4rem; font:1.1rem Georgia,serif; color:#ecdfbc; }
+.report-journey p { font-size:.8rem; line-height:1.7; margin:.4rem 0; color:#bcc6ac; overflow-wrap:anywhere; }
+.report-journey .journey-findings { color:#e4cf9f; }

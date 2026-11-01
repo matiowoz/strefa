@@ -36,7 +36,10 @@ export interface Cargo {
   ration: number;
   loot: ResourceAmount[];
 }
+export type ExpeditionEventId = 'apartment' | 'courtyard' | 'workshop-floor' | 'storeroom' | 'locked-cache' | 'blocked-road';
+export interface ExpeditionEvent { id: ExpeditionEventId; loot: ResourceAmount[] }
 export interface Expedition {
+  events: ExpeditionEvent[] | null;
   cargo: Cargo;
   id: string;
   plan: ExpeditionPlan;
@@ -52,6 +55,7 @@ export interface Location {
 }
 
 export interface ExpeditionReport {
+  events: ExpeditionEvent[] | null;
   cargo: Cargo;
   expeditionId: string;
   locationId: string;
@@ -61,7 +65,7 @@ export interface ExpeditionReport {
 
 export interface Placement { x: number; y: number; page: number } // -1 = ekwipunek, 0 = schowek
 export interface GameState {
-  schemaVersion: 7;
+  schemaVersion: 8;
   backpack: InventoryEntry;
   progress: { workshopVisited: boolean; workbenchRepaired: boolean };
   positions: Record<string, Placement>;

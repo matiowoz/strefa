@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getItem, locations } from '../domain/catalog';
 import { expeditionRules, startExpedition, settleExpedition } from '../domain/game';
+import { eventDefinitions } from '../domain/expeditionEvents';
 import { preparationError } from '../domain/preparation';
 import type { GameState } from '../domain/types';
 import { ItemArt } from './ItemArt';
@@ -45,10 +46,13 @@ export function ExpeditionsScreen({ state, update, saving, navigate }: Props) {
       </section>
     </div>
     {report && <section className="expedition-report" aria-labelledby="report-heading"><div className="report-header"><div><span className="eyebrow">Ostatni raport / rozliczony</span><h2 id="report-heading">Bezpieczny powrót</h2><p>{locations.find((entry) => entry.id === report.locationId)?.name}</p></div><span>Powrót: <time dateTime={new Date(report.returnedAt).toISOString()}>{new Date(report.returnedAt).toLocaleString('pl-PL')}</time></span></div>
+      <section className="report-journey" aria-labelledby="journey-heading"><span className="eyebrow">Ślady wyprawy</span><h3 id="journey-heading">Co wydarzyło się po drodze</h3>
+        {report.events === null ? <p>Ta wyprawa rozpoczęła się przed wprowadzeniem dziennika. Zachowano jej pierwotny wynik.</p> : <ol>{report.events.map((event, index) => <li key={`${index}-${event.id}`}><span className="journey-step" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><div><h4>{eventDefinitions[event.id].title}</h4><p>{eventDefinitions[event.id].description}</p><p className="journey-findings">{event.loot.length ? `Znaleziono: ${event.loot.map((entry) => `${getItem(entry.itemId)?.name} ×${entry.quantity}`).join(', ')}.` : event.id === 'blocked-road' ? 'Powrót bez znalezisk.' : event.id === 'locked-cache' ? 'Ze skrzyni niczego nie zabrano.' : 'Nie znaleziono niczego przydatnego.'}</p></div></li>)}</ol>}
+      </section>
       <h3>Przyniesione znaleziska</h3>{report.cargo.loot.length === 0 && <p>Tym razem nie znaleziono niczego wartego zabrania.</p>}<ul className="report-findings">{report.cargo.loot.map((entry) => <li key={entry.itemId}><ItemArt itemId={entry.itemId} /><span>{getItem(entry.itemId)?.name}<strong>×{entry.quantity}</strong></span></li>)}</ul>
       <div className="report-accounting"><p><span className="eyebrow">Zużyte zapasy</span>Woda ×{report.cargo.water} · Racje ×{report.cargo.ration}<small>{report.cargo.water || report.cargo.ration ? "Koszt wcześniejszej wyprawy." : "Start nie zużywa zapasów."}</small></p><p><span className="eyebrow">Stan po powrocie</span>Zdrowie i wyposażenie bez zmian.<small>Sprzęt jest znowu dostępny.</small></p></div>
       <div className="report-footer"><p>Znaleziska zapisano. Sprawdź ekwipunek, schowek i ewentualny odbiór. Raport jest już rozliczony.</p><button className="text-button" onClick={() => navigate('inventory')}>Zobacz ekwipunek →</button></div>
     </section>}
-    <p className="expedition-footnote">Prototyp: lokalny zegar, bez walki i symulacji zdarzeń. Strategia zrównoważona nie ma jeszcze odrębnego działania.</p>
+    <p className="expedition-footnote">Prototyp: lokalny zegar, bez walki i ręcznych decyzji podczas wyprawy. Strategia zrównoważona nie ma jeszcze odrębnego działania.</p>
   </div>;
 }
