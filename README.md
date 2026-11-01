@@ -19,7 +19,7 @@ Otwórz adres wypisany przez Vite, zwykle http://localhost:5173. `npm.cmd` omija
 
 W folderze projektu otwórz **Uruchom STREFĘ.cmd**. Potrzebujesz Git for Windows, Node.js (polecany 24 LTS), Internetu i dostępu do prywatnego repozytorium GitHub. Przy pierwszym logowaniu Git może otworzyć przeglądarkę.
 
-Plik wymaga gałęzi `main` i czystego katalogu (także bez dodatkowych nieignorowanych plików). Pobiera `origin/main` i aktualizuje tylko przez fast-forward; nie usuwa Twoich zmian ani lokalnych commitów. Po udanej aktualizacji wykonuje `npm ci --include=optional`, a następnie uruchamia Vite i otwiera **http://localhost:5173**. Błąd na dowolnym kroku zatrzymuje dalszą pracę; okno pozostaje z komunikatem. Nie omija weryfikacji TLS. Skrypt PowerShell uruchamia się z polityką ustawioną tylko dla tego procesu, bez zmiany ustawień systemu.
+Plik wymaga gałęzi `main` i czystego katalogu (także bez dodatkowych nieignorowanych plików). Pobiera `origin/main` i aktualizuje tylko przez fast-forward; nie usuwa Twoich zmian ani lokalnych commitów. Po udanej aktualizacji wykonuje `npm ci --include=optional`, a następnie uruchamia Vite dla komputera i urządzeń w tej samej sieci (`--host 0.0.0.0`, stały port 5173) i otwiera na komputerze **http://localhost:5173**. W oknie pokazuje instrukcję oraz adresy **Network** dla telefonu. Błąd na dowolnym kroku zatrzymuje dalszą pracę; okno pozostaje z komunikatem. Nie omija weryfikacji TLS. Skrypt PowerShell uruchamia się z polityką ustawioną tylko dla tego procesu, bez zmiany ustawień systemu.
 
 W nowej wersji **Ctrl+C** zatrzymuje serwer i pokazuje menu w tym samym oknie:
 
@@ -37,11 +37,13 @@ Plik trzeba pobrać jednorazowo poleceniem `git pull --ff-only` z folderu `stref
 ## Telefon w tej samej sieci
 
 1. Połącz komputer i telefon z tą samą zaufaną siecią Wi-Fi.
-2. W folderze projektu uruchom `npm.cmd run dev:lan`.
-3. Otwórz na telefonie adres **Network** wypisany przez Vite, np. `http://192.168.1.10:5173`. Nie wpisuj localhost na telefonie. Port może być inny, jeśli domyślny jest zajęty.
+2. Uruchom **Uruchom STREFĘ.cmd**. Po pierwszej aktualizacji do wersji z obsługą Wi-Fi zamknij launcher i otwórz go ponownie. Alternatywnie w folderze projektu uruchom `npm.cmd run dev:lan`.
+3. Otwórz na telefonie adres **Network** wypisany przez Vite, np. `http://192.168.1.10:5173`. Nie wpisuj localhost na telefonie. Launcher zawsze używa portu 5173; ręczne `dev:lan` może wybrać inny, jeśli port jest zajęty.
 4. Jeśli Windows zapyta o zaporę, zezwól Node.js na dostęp tylko w zaufanej sieci prywatnej. W razie braku połączenia sprawdź profil sieci, VPN i izolację urządzeń w routerze. Nie wyłączaj całej zapory i nie przekierowuj portów routera.
 
-Zatrzymanie serwera: Ctrl+C. Jest to podgląd deweloperski w sieci lokalnej, bez tunelu ani publicznej publikacji. IndexedDB działa w nowoczesnej przeglądarce także przy takim podglądzie HTTP, lecz nie dodano PWA ani instalacji offline aplikacji.
+Komputer musi być włączony, a okno serwera otwarte. Telefon ma osobny zapis gry; zmiana adresu IP komputera również zmienia adres zapisu na telefonie.
+
+Zatrzymanie serwera: Ctrl+C (w launcherze otwiera menu U/Z). Jest to podgląd deweloperski w sieci lokalnej, bez tunelu ani publicznej publikacji. IndexedDB działa w nowoczesnej przeglądarce także przy takim podglądzie HTTP, lecz nie dodano PWA ani instalacji offline aplikacji.
 
 ## Sprawdzenie
 

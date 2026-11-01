@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createInitialState, selectLocation, startExpedition, settleExpedition } from './game';
 import { validateSave } from './validation';
 
@@ -42,4 +42,18 @@ describe('minimalna wyprawa', () => {
     expect(() => validateSave({ ...legacy, schemaVersion: 1, inventory: [] , hero: null })).toThrow();
     expect(() => validateSave({ ...current, lastReport: { expeditionId: 'e', locationId: 'workshop', returnedAt: 100, scrap: -1 } })).toThrow();
   });
+});
+
+it('uruchamia wyprawę przez HTTP w LAN bez crypto.randomUUID i nadaje niezależne ID', () => {
+  const getRandomValues = crypto.getRandomValues.bind(crypto);
+  vi.stubGlobal('crypto', { getRandomValues });
+  try {
+    const state = createInitialState(0);
+    const first = startExpedition(state, 1000, () => 0.5);
+    const second = startExpedition(state, 1000, () => 0.5);
+    expect(first.activeExpedition!.id).toMatch(/^[a-f0-9]{32}$/);
+    expect(second.activeExpedition!.id).not.toBe(first.activeExpedition!.id);
+    expect(validateSave(JSON.parse(JSON.stringify(first)))).toEqual(first);
+    expect(settleExpedition(first, first.activeExpedition!.id, 61000).lastReport!.expeditionId).toBe(first.activeExpedition!.id);
+  } finally { vi.unstubAllGlobals(); }
 });

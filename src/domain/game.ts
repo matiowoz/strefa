@@ -61,7 +61,8 @@ export function startExpedition(state: GameState, now = Date.now(), random: () =
   }).filter((entry) => entry.quantity > 0);
   return arrange({ ...state, updatedAt: now, activeExpedition: {
     cargo: { equipmentId: state.backpack.id, water: 0, ration: 0, loot },
-    id: crypto.randomUUID(), plan: { locationId: state.selectedLocationId, strategy: 'balanced' },
+    // getRandomValues also works on HTTP LAN addresses, where randomUUID is unavailable.
+    id: Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) => byte.toString(16).padStart(2, '0')).join(''), plan: { locationId: state.selectedLocationId, strategy: 'balanced' },
     status: 'running', startedAt: now, expectedReturnAt: now + rule.durationMs,
   } });
 }

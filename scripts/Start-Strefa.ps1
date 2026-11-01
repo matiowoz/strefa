@@ -22,8 +22,8 @@ function Update-Strefa {
     if ($LASTEXITCODE -ne 0) { throw 'Nie mozna sprawdzic lokalnych zmian.' }
     if ($changes) { throw 'Masz lokalne zmiany lub dodatkowe pliki w repozytorium. Nie zostaly nadpisane. Pokaz wynik git status w czacie.' }
 
-    # Check the fixed origin before replacing node_modules of a running server.
-    $addresses = @([Net.IPAddress]::Loopback)
+    # Check the LAN listener and localhost before replacing dependencies.
+    $addresses = @([Net.IPAddress]::Any)
     if ([Net.Sockets.Socket]::OSSupportsIPv6) { $addresses += [Net.IPAddress]::IPv6Loopback }
     foreach ($address in $addresses) {
         $probe = [Net.Sockets.TcpListener]::new($address, 5173)
@@ -51,7 +51,7 @@ function Start-StrefaServer {
     $process.StartInfo.FileName = (Get-Command 'node.exe').Source
     $vitePath = Join-Path $root 'node_modules\vite\bin\vite.js'
     if (-not (Test-Path -LiteralPath $vitePath)) { throw 'Brakuje Vite po instalacji zaleznosci.' }
-    $process.StartInfo.Arguments = '"' + $vitePath + '" --host localhost --port 5173 --strictPort --open'
+    $process.StartInfo.Arguments = '"' + $vitePath + '" --host 0.0.0.0 --port 5173 --strictPort --open http://localhost:5173'
     $process.StartInfo.WorkingDirectory = $root
     $process.StartInfo.UseShellExecute = $false
     $process.StartInfo.RedirectStandardInput = $true
@@ -61,6 +61,10 @@ function Start-StrefaServer {
     try {
         [Console]::TreatControlCAsInput = $true
         Write-Host "`n[3/3] Uruchamianie gry..." -ForegroundColor Green
+        Write-Host 'Komputer: http://localhost:5173 (dotychczasowy zapis).'
+        Write-Host 'Telefon w tym samym Wi-Fi: otworz adres Network wypisany ponizej przez Vite.'
+        Write-Host 'Jesli Windows zapyta o zapore, zezwol Node.js na dostep w sieci prywatnej.'
+        Write-Host 'Telefon ma osobny zapis. Komputer musi pozostac wlaczony.'
         Write-Host 'Zostaw to okno otwarte. Ctrl+C zatrzymuje gre i otwiera menu.'
         $started = $process.Start()
         if (-not $started) { throw 'Nie udalo sie uruchomic serwera.' }
