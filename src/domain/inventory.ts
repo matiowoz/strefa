@@ -1,3 +1,4 @@
+import { getItem } from './catalog';
 import type { GameState, InventoryEntry, Placement } from './types';
 
 export const GRID_COLUMNS = 5;
@@ -115,4 +116,25 @@ export function splitStack(state: GameState, id: string, amount: number, now = D
   const next = [...source.map((item) => item.id === id ? { ...item, quantity: item.quantity - amount } : item), separated];
   return { ...state, inventory: carried ? next : state.inventory, stash: carried ? state.stash : next,
     positions: { ...state.positions, [newId]: target }, updatedAt: now };
+}
+
+export function canMergeStacks(source: InventoryEntry, target: InventoryEntry): boolean {
+  return source.id !== target.id && source.itemId === target.itemId && source.condition === target.condition
+    && ['supply', 'material'].includes(getItem(source.itemId)?.category ?? '')
+    && Number.isSafeInteger(source.quantity) && source.quantity > 0
+    && Number.isSafeInteger(target.quantity) && target.quantity > 0
+    && Number.isSafeInteger(source.quantity + target.quantity);
+}
+
+// Keep the destination's identity and placement, free the source's cells.
+export function mergeStacks(state: GameState, sourceId: string, targetId: string, now = Date.now()): GameState {
+  if (!atShelter(state, now)) throw new Error('Łączenie jest dostępne po powrocie do kryjówki.');
+  const all = [...state.inventory, ...state.stash];
+  const source = all.find((entry) => entry.id === sourceId);
+  const target = all.find((entry) => entry.id === targetId);
+  if (!source || !target || !canMergeStacks(source, target)) return state;
+  const merged = { ...target, quantity: target.quantity + source.quantity };
+  const combine = (entries: InventoryEntry[]) => entries.filter((entry) => entry.id !== sourceId).map((entry) => entry.id === targetId ? merged : entry);
+  const positions = { ...state.positions }; delete positions[sourceId];
+  return { ...state, inventory: combine(state.inventory), stash: combine(state.stash), positions, updatedAt: now };
 }

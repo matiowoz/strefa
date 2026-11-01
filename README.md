@@ -98,6 +98,10 @@ Receptury korzystają wyłącznie z rzeczy przy postaci; surowce ze schowka trze
 
 Stosy większe niż 1 sztuka mają przycisk „Rozdziel” w opisie po najechaniu i w szczegółach. Wybierz ilość od 1 do liczby sztuk pomniejszonej o 1. Nowy stos zajmuje osobny prostokąt w tej samej siatce; przy braku miejsca stan pozostaje bez zmian. Podział jest dostępny po powrocie do kryjówki i zachowuje łączną liczbę przedmiotów.
 
+Przeciągnij stos na drugi stos tego samego przedmiotu, aby je połączyć. Podświetlenie „Połącz” obejmuje cały przedmiot docelowy, także wielopolowy. Działa wewnątrz ekwipunku, skrytki i między nimi w otwartej skrytce. Cel zachowuje swoje ID i położenie; źródło znika, a jego pola są zwalniane. Łączą się tylko zapasy i materiały o zgodnym stanie. Inny typ, sprzęt lub za duża suma pozostawiają oba stosy bez zmian.
+
+`id` identyfikuje konkretny stos, `itemId` — rodzaj przedmiotu. Rozdzielone stosy mają różne `id`, ale to samo `itemId`. Pojedyncze sztuki w stosie nie mają osobnych numerów seryjnych.
+
 W przyszłości będzie możliwość budowania kolejnych skrytek. Obecnie jest jedna; nie ma stron, zakupów ani płatności. Rzeczy z dawnej drugiej strony są przenoszone do wolnych miejsc schowka, a jeśli się nie mieszczą, pozostają w bezpiecznym odbiorze.
 
 ## Ilustrowana kryjówka

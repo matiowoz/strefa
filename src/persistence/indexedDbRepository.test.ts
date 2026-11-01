@@ -277,3 +277,33 @@ it('przerwany podział nie zmniejsza źródła i nie dodaje nowego stosu ani poz
   await expect(repository.save(next, initial)).rejects.toThrow(); spy.mockRestore();
   expect(await repository.load()).toEqual(initial);
 });
+
+it('połączenie stosów jest trwałe i dwie karty nie podwajają ilości', async () => {
+  const { mergeStacks, splitStack } = await import('../domain/inventory');
+  const factory = new IDBFactory();
+  const repository = new IndexedDbRepository(factory, 'test');
+  const state = splitStack(createInitialState(0), 'starter-water', 1, 100);
+  const source = state.inventory.find((entry) => entry.itemId === 'water' && entry.id !== 'starter-water')!;
+  await repository.save(state, null);
+  const next = mergeStacks(state, source.id, 'starter-water', 200);
+  const results = await Promise.allSettled([repository.save(next, state), repository.save(next, state)]);
+  expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+  expect(await new IndexedDbRepository(factory, 'test').load()).toEqual(next);
+  expect(next.inventory.find((entry) => entry.id === 'starter-water')!.quantity).toBe(3);
+  expect(mergeStacks(next, source.id, 'starter-water', 300)).toBe(next);
+});
+
+it('przerwany zapis łączenia zachowuje oba stosy, ilości i pola', async () => {
+  const { mergeStacks, splitStack } = await import('../domain/inventory');
+  const repository = new IndexedDbRepository(new IDBFactory(), 'test');
+  const state = splitStack(createInitialState(0), 'starter-water', 1, 100);
+  const source = state.inventory.find((entry) => entry.itemId === 'water' && entry.id !== 'starter-water')!;
+  await repository.save(state, null);
+  const next = mergeStacks(state, source.id, 'starter-water', 200);
+  const original = IDBDatabase.prototype.transaction;
+  const spy = vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(function (this: IDBDatabase, ...args: Parameters<typeof original>) {
+    const tx = original.apply(this, args); queueMicrotask(() => tx.abort()); return tx;
+  });
+  await expect(repository.save(next, state)).rejects.toThrow(); spy.mockRestore();
+  expect(await repository.load()).toEqual(state);
+});

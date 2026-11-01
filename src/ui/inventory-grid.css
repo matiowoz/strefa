@@ -30,3 +30,6 @@
 .item-popover-actions button { font-size: .75rem; padding: .5rem .75rem; }
 .selected-item-details { margin-top: 1rem; }
 .selected-item-details summary { cursor: pointer; color: #c4b38c; font-size: .8rem; padding: .6rem 0; }
+
+.bag-drop-preview.merge { border-color:#e5d294; background:#b8c77766; box-shadow:0 0 12px #dae89855; }
+.bag-drop-preview.merge::after { content:'Połącz'; position:absolute; left:50%; top:-4px; transform:translate(-50%, -100%); padding:.25rem .35rem; border-radius:3px; background:#1c291bed; color:#f5e4b8; font-size:.7rem; white-space:nowrap; }

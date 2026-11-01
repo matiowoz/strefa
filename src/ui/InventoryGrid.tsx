@@ -3,18 +3,18 @@ import { createPortal } from 'react-dom';
 import type { PointerEvent, ReactNode } from 'react';
 import type { GameState, InventoryEntry } from '../domain/types';
 import { getItem } from '../domain/catalog';
-import { fits, gridSize, itemSizes } from '../domain/inventory';
+import { canMergeStacks, fits, gridSize, itemSizes } from '../domain/inventory';
 import { ItemPopover } from './ItemPopover';
 import { ItemArt } from './ItemArt';
 import { snapDrop } from './gridDrag';
 
-type Props = { state: GameState; page: number; selectedId: string | null; disabled: boolean; select: (id: string) => void; place: (id: string, page: number, point: { x: number; y: number }) => void; moving: boolean; actions: (entry: InventoryEntry) => ReactNode };
+type Props = { state: GameState; page: number; selectedId: string | null; disabled: boolean; select: (id: string) => void; place: (id: string, page: number, point: { x: number; y: number }) => void; moving: boolean; merge: (sourceId: string, targetId: string) => void; actions: (entry: InventoryEntry) => ReactNode };
 type Drag = { entry: InventoryEntry; grab: { x: number; y: number }; start: { x: number; y: number }; width: number; height: number; active: boolean };
-type Target = { page: number; point: { x: number; y: number }; valid: boolean; left: number; top: number };
+type Target = { page: number; point: { x: number; y: number }; valid: boolean; left: number; top: number; mergeId?: string; width?: number; height?: number };
 function contents(entry: InventoryEntry) {
   return <><span className="bag-quantity">×{entry.quantity}</span><ItemArt itemId={entry.itemId} /></>;
 }
-export function InventoryGrid({ state, page, selectedId, disabled, select, place, moving, actions }: Props) {
+export function InventoryGrid({ state, page, selectedId, disabled, select, place, moving, merge, actions }: Props) {
   const size = gridSize(page);
   const popoverId = useId();
   const [hover, setHover] = useState<{ id: string; anchor: DOMRect } | null>(null);
@@ -35,6 +35,15 @@ export function InventoryGrid({ state, page, selectedId, disabled, select, place
       const clip = grid.parentElement!.getBoundingClientRect();
       if (x < clip.left || x > clip.right || y < clip.top || y > clip.bottom) continue;
       if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) continue;
+      for (const element of grid.querySelectorAll<HTMLElement>('[data-item-id]')) {
+        const box = element.getBoundingClientRect();
+        if (x < box.left || x > box.right || y < box.top || y > box.bottom) continue;
+        const candidate = [...state.inventory, ...state.stash].find((entry) => entry.id === element.dataset.itemId);
+        if (candidate && canMergeStacks(current.entry, candidate)) return {
+          page: Number(grid.dataset.bagPage), point: state.positions[candidate.id], valid: true,
+          mergeId: candidate.id, left: box.left, top: box.top, width: box.width, height: box.height,
+        };
+      }
       const cell = grid.querySelector('.bag-cell')!.getBoundingClientRect();
       const styles = getComputedStyle(grid);
       const point = snapDrop({ x, y }, { x: cell.left, y: cell.top }, current.grab, { x: cell.width + parseFloat(styles.columnGap), y: cell.height + parseFloat(styles.rowGap) });
@@ -83,7 +92,10 @@ export function InventoryGrid({ state, page, selectedId, disabled, select, place
     drag.current = null; setPreview(null); cleanup.current?.();
     if (current?.active && !disabled) {
       const target = targetAt(event.clientX, event.clientY, current);
-      if (target?.valid) place(current.entry.id, target.page, target.point);
+      if (target?.valid) {
+        if (target.mergeId) merge(current.entry.id, target.mergeId);
+        else place(current.entry.id, target.page, target.point);
+      }
     }
   }
   return <div className="container-scroll"><div data-bag-page={page} className={`bag-grid ${page === -1 ? 'carried-grid' : 'hideout-grid'}`} style={{ gridTemplateColumns: `repeat(${size.columns}, var(--bag-cell-size))`, gridTemplateRows: `repeat(${size.rows}, var(--bag-cell-size))` }} role="group" aria-label={page === -1 ? 'Ekwipunek 5 na 9' : 'Schowek 8 na 9'}>
@@ -93,9 +105,9 @@ export function InventoryGrid({ state, page, selectedId, disabled, select, place
     })}
     {entries.map((entry) => {
       const position = state.positions[entry.id]; const dimensions = itemSizes[entry.itemId];
-      return <button key={entry.id} className={`bag-item ${selectedId === entry.id ? 'is-selected' : ''} ${preview?.drag.entry.id === entry.id ? 'drag-origin' : ''}`} style={{ gridColumn: `${position.x + 1} / span ${dimensions.width}`, gridRow: `${position.y + 1} / span ${dimensions.height}` }} aria-label={`${getItem(entry.itemId)?.name}, ilość ${entry.quantity}, rozmiar ${dimensions.width} na ${dimensions.height}`} aria-pressed={selectedId === entry.id} aria-controls={hover?.id === entry.id ? popoverId : undefined} aria-expanded={hover?.id === entry.id} onPointerEnter={(event) => { if (event.pointerType !== 'touch') open(entry.id, event.currentTarget); }} onPointerLeave={leave} onFocus={(event) => open(entry.id, event.currentTarget)} onBlur={leave} aria-disabled={disabled || state.activeExpedition?.cargo.equipmentId === entry.id} onPointerDown={(event) => { if (state.activeExpedition?.cargo.equipmentId !== entry.id) begin(event, entry); }} onClick={(event) => { select(entry.id); open(entry.id, event.currentTarget); }}>
+      return <button key={entry.id} data-item-id={entry.id} className={`bag-item ${selectedId === entry.id ? 'is-selected' : ''} ${preview?.drag.entry.id === entry.id ? 'drag-origin' : ''}`} style={{ gridColumn: `${position.x + 1} / span ${dimensions.width}`, gridRow: `${position.y + 1} / span ${dimensions.height}` }} aria-label={`${getItem(entry.itemId)?.name}, ilość ${entry.quantity}, rozmiar ${dimensions.width} na ${dimensions.height}`} aria-pressed={selectedId === entry.id} aria-controls={hover?.id === entry.id ? popoverId : undefined} aria-expanded={hover?.id === entry.id} onPointerEnter={(event) => { if (event.pointerType !== 'touch') open(entry.id, event.currentTarget); }} onPointerLeave={leave} onFocus={(event) => open(entry.id, event.currentTarget)} onBlur={leave} aria-disabled={disabled || state.activeExpedition?.cargo.equipmentId === entry.id} onPointerDown={(event) => { if (state.activeExpedition?.cargo.equipmentId !== entry.id) begin(event, entry); }} onClick={(event) => { select(entry.id); open(entry.id, event.currentTarget); }}>
         {contents(entry)}
       </button>;
     })}
-  </div>{hover && !preview && entries.some((entry) => entry.id === hover.id) && <ItemPopover id={popoverId} entry={entries.find((entry) => entry.id === hover.id)!} anchor={hover.anchor} keep={keep} leave={leave} close={close}>{actions(entries.find((entry) => entry.id === hover.id)!)}</ItemPopover>}{preview && createPortal(<div className="bag-drag-layer" aria-hidden="true">{preview.target && <div className={`bag-drop-preview ${preview.target.valid ? 'valid' : 'invalid'}`} style={{ left: preview.target.left, top: preview.target.top, width: preview.drag.width, height: preview.drag.height }} />}<div className="bag-item bag-drag-preview" style={{ left: preview.left, top: preview.top, width: preview.drag.width, height: preview.drag.height }}>{contents(preview.drag.entry)}</div></div>, document.body)}</div>;
+  </div>{hover && !preview && entries.some((entry) => entry.id === hover.id) && <ItemPopover id={popoverId} entry={entries.find((entry) => entry.id === hover.id)!} anchor={hover.anchor} keep={keep} leave={leave} close={close}>{actions(entries.find((entry) => entry.id === hover.id)!)}</ItemPopover>}{preview && createPortal(<div className="bag-drag-layer" aria-hidden="true">{preview.target && <div className={`bag-drop-preview ${preview.target.valid ? 'valid' : 'invalid'} ${preview.target.mergeId ? 'merge' : ''}`} style={{ left: preview.target.left, top: preview.target.top, width: preview.target.width ?? preview.drag.width, height: preview.target.height ?? preview.drag.height }} />}<div className="bag-item bag-drag-preview" style={{ left: preview.left, top: preview.top, width: preview.drag.width, height: preview.drag.height }}>{contents(preview.drag.entry)}</div></div>, document.body)}</div>;
 }

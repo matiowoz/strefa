@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getItem } from '../domain/catalog';
 import { inventoryWeight } from '../domain/game';
 import { consumableIds, useItem } from '../domain/useItem';
-import { atShelter, itemSizes, splitStack, tryMoveItem } from '../domain/inventory';
+import { atShelter, itemSizes, mergeStacks, splitStack, tryMoveItem } from '../domain/inventory';
 import { craft, quantity, recipes } from '../domain/preparation';
 import type { GameState, InventoryEntry } from '../domain/types';
 import { HeroPortrait } from './HeroPortrait';
@@ -33,6 +33,15 @@ export function InventoryScreen({ state, update, saving, storage }: Props) {
   const carried = selected && state.inventory.some((entry) => entry.id === selected.id);
   function place(id: string, target: number, point?: { x: number; y: number }) {
     setNotice(''); let moved = false; void update((previous) => { const next = tryMoveItem(previous, id, target, point); moved = next !== previous; return next; }).then((ok) => { if (ok && moved) { setMoving(false); setNotice('Przedmiot przeniesiony i zapisany.'); } });
+  }
+  function merge(sourceId: string, targetId: string) {
+    setNotice(''); let changed = false;
+    void update((previous) => {
+      const next = mergeStacks(previous, sourceId, targetId);
+      changed = next !== previous; return next;
+    }).then((ok) => {
+      if (ok && changed) { setSelectedId(targetId); setMoving(false); setNotice('Stosy połączone i zapisane.'); }
+    });
   }
   function useThis(entry: InventoryEntry) {
     setNotice('');
@@ -71,10 +80,10 @@ export function InventoryScreen({ state, update, saving, storage }: Props) {
     {!home && <p className="storage-warning">Postać jest na wyprawie. Przenoszenie przedmiotów będzie możliwe po powrocie do kryjówki.</p>}
     <div className={storage ? 'storage-columns' : 'inventory-character-sheet'}>
       {!storage && <HeroPortrait hero={state.hero}>{backpackCard}</HeroPortrait>}
-      <section className="stash-panel"><div className="stash-heading"><h2>Ekwipunek postaci</h2><span>5 × 9</span></div><p className="stash-note">Z tymi przedmiotami wyruszasz na wyprawę.</p><InventoryGrid state={state} page={-1} selectedId={selectedId} disabled={disabled} select={setSelectedId} place={place} moving={moving} actions={actions} /></section>
-      {storage && <section className="stash-panel"><div className="stash-heading"><h2>Skrytka w kryjówce</h2><span>8 × 9</span></div><p className="stash-note">Jeden schowek. Kolejne skrytki będzie można budować w przyszłości.</p><InventoryGrid state={state} page={page} selectedId={selectedId} disabled={disabled} select={setSelectedId} place={place} moving={moving} actions={actions} /></section>}
+      <section className="stash-panel"><div className="stash-heading"><h2>Ekwipunek postaci</h2><span>5 × 9</span></div><p className="stash-note">Z tymi przedmiotami wyruszasz na wyprawę.</p><InventoryGrid state={state} page={-1} selectedId={selectedId} disabled={disabled} select={setSelectedId} place={place} moving={moving} merge={merge} actions={actions} /></section>
+      {storage && <section className="stash-panel"><div className="stash-heading"><h2>Skrytka w kryjówce</h2><span>8 × 9</span></div><p className="stash-note">Jeden schowek. Kolejne skrytki będzie można budować w przyszłości.</p><InventoryGrid state={state} page={page} selectedId={selectedId} disabled={disabled} select={setSelectedId} place={place} moving={moving} merge={merge} actions={actions} /></section>}
     </div>
-    <p className="stash-note">Przeciągnij przedmiot na puste pole lub wybierz go, kliknij „Zmień położenie” i wskaż pole. Na telefonie schowek można przewijać poziomo. Ilości pozostają stosami; rozmiar dotyczy całego stosu.</p>
+    <p className="stash-note">Przeciągnij przedmiot na taki sam, aby połączyć stosy. Aby zmienić położenie, upuść go na puste pole lub wybierz go, kliknij „Zmień położenie” i wskaż pole. Na telefonie schowek można przewijać poziomo. Ilości pozostają stosami; rozmiar dotyczy całego stosu.</p>
     <p className="inventory-notice" role="status">{notice}</p>
     <details className="selected-item-details"><summary>Szczegóły i układanie zaznaczonego przedmiotu</summary><section id="item-details" className="stash-panel storage-details" aria-label="Szczegóły przedmiotu">{selected && item ? <><div className="detail-top"><div className="detail-art"><ItemArt itemId={item.id} /></div><div><span className="eyebrow">{carried ? 'Przy postaci' : state.stash.some((entry) => entry.id === selected.id) ? 'Schowek' : 'Odbiór'}</span><h3>{item.name}</h3><p>{item.description}</p></div></div>
       <dl><div><dt>Ilość</dt><dd>{selected.quantity}</dd></div><div><dt>Rozmiar</dt><dd>{itemSizes[item.id].width} × {itemSizes[item.id].height}</dd></div><div><dt>Masa sztuki</dt><dd>{item.weightKg} kg</dd></div>{selected.condition !== null && <div><dt>Stan</dt><dd>{selected.condition}%</dd></div>}</dl>
