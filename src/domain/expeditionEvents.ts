@@ -1,6 +1,6 @@
 import type { ExpeditionEvent, ExpeditionEventId, ResourceAmount } from './types';
 
-// Prototype encounters: no combat, equipment checks or player decisions yet.
+// Prototype encounters: the crowbar can open a cache; no combat or manual decisions.
 export const eventDefinitions = {
   apartment: { title: 'Opuszczone mieszkanie', description: 'Przeszukano szafki, przewrócone meble i resztki kuchennych zapasów.', locations: ['outskirts'], drops: [{ itemId: 'raw-water', maximum: 3 }, { itemId: 'food', maximum: 3 }, { itemId: 'cloth', maximum: 2 }] },
   courtyard: { title: 'Podwórze za blokami', description: 'Wśród porzuconych sprzętów i gruzu szukano rzeczy nadających się do odzysku.', locations: ['outskirts'], drops: [{ itemId: 'scrap', maximum: 4 }] },
@@ -24,7 +24,7 @@ export function eventLoot(events: readonly ExpeditionEvent[]): ResourceAmount[] 
   return resourceOrder.map((itemId) => ({ itemId, quantity: events.reduce((sum, event) => sum + event.loot.filter((entry) => entry.itemId === itemId).reduce((total, entry) => total + entry.quantity, 0), 0) })).filter((entry) => entry.quantity > 0);
 }
 
-export function resolveExpeditionEvents(locationId: string, random: () => number): ExpeditionEvent[] {
+export function resolveExpeditionEvents(locationId: string, random: () => number, hasCrowbar = false): ExpeditionEvent[] {
   const route = routes[locationId];
   if (!route) throw new Error('Nieznana trasa wyprawy.');
   if (roll(random) < 0.15) return [{ id: 'blocked-road', loot: [] }];
@@ -35,6 +35,14 @@ export function resolveExpeditionEvents(locationId: string, random: () => number
   for (const event of events) {
     const gear = gearByEvent[event.id];
     if (gear.length && roll(random) < .25) event.loot.push({ itemId: gear[Math.floor(roll(random) * gear.length)], quantity: 1 });
+  }
+  const chest = events.find((event) => event.id === 'locked-cache');
+  if (chest) {
+    chest.cacheResult = !hasCrowbar ? 'no-tool' : roll(random) < .7 ? 'opened' : 'jammed';
+    if (chest.cacheResult === 'opened') chest.loot = [
+      { itemId: 'scrap', quantity: 1 + Math.floor(roll(random) * 3) },
+      { itemId: 'cloth', quantity: 1 + Math.floor(roll(random) * 2) },
+    ];
   }
   return events;
 }
@@ -47,10 +55,17 @@ export function validExpeditionEvents(value: unknown, locationId: string, loot: 
     if (!record(event) || typeof event.id !== 'string' || !Object.hasOwn(eventDefinitions, event.id) || !Array.isArray(event.loot)) return false;
     const definition = eventDefinitions[event.id as ExpeditionEventId];
     if (!(definition.locations as readonly string[]).includes(locationId)) return false;
+    if (event.id !== 'locked-cache' && event.cacheResult !== undefined) return false;
+    if (event.id === 'locked-cache') {
+      if (event.cacheResult !== undefined && (typeof event.cacheResult !== 'string' || !['no-tool', 'opened', 'jammed'].includes(event.cacheResult))) return false;
+      if (event.cacheResult !== 'opened' && event.loot.length !== 0) return false;
+      if (event.cacheResult === 'opened' && (event.loot.length !== 2 || !event.loot.some((entry: unknown) => record(entry) && entry.itemId === 'scrap') || !event.loot.some((entry: unknown) => record(entry) && entry.itemId === 'cloth'))) return false;
+    }
     const ids = new Set<string>();
     for (const resource of event.loot) {
       if (!record(resource) || typeof resource.itemId !== 'string' || typeof resource.quantity !== 'number' || !Number.isSafeInteger(resource.quantity) || resource.quantity < 1 || ids.has(resource.itemId)) return false;
-      const drop = definition.drops.find((entry) => entry.itemId === resource.itemId);
+      const drops = event.id === 'locked-cache' && event.cacheResult === 'opened' ? [{ itemId: 'scrap', maximum: 3 }, { itemId: 'cloth', maximum: 2 }] : definition.drops;
+      const drop = drops.find((entry) => entry.itemId === resource.itemId);
       if (drop ? resource.quantity > drop.maximum : !gearByEvent[event.id as ExpeditionEventId].includes(resource.itemId) || resource.quantity !== 1) return false;
       ids.add(resource.itemId);
     }

@@ -23,7 +23,7 @@ describe('krótkie historie wypraw', () => {
     const trip = startExpedition(createInitialState(0), 1000, sequence(.5, .99, .5, .99, .1, .99, .99, .99));
     expect(trip.activeExpedition!.events).toEqual([
       { id: 'apartment', loot: [{ itemId: 'raw-water', quantity: 3 }, { itemId: 'food', quantity: 2 }, { itemId: 'cloth', quantity: 2 }] },
-      { id: 'locked-cache', loot: [] },
+      { id: 'locked-cache', loot: [], cacheResult: 'no-tool' },
       { id: 'courtyard', loot: [{ itemId: 'scrap', quantity: 4 }] },
     ]);
     expect(trip.activeExpedition!.cargo.loot).toEqual(eventLoot(trip.activeExpedition!.events!));

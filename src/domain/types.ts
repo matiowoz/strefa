@@ -39,7 +39,7 @@ export interface Cargo {
   loot: ResourceAmount[];
 }
 export type ExpeditionEventId = 'apartment' | 'courtyard' | 'workshop-floor' | 'storeroom' | 'locked-cache' | 'blocked-road';
-export interface ExpeditionEvent { id: ExpeditionEventId; loot: ResourceAmount[] }
+export interface ExpeditionEvent { id: ExpeditionEventId; loot: ResourceAmount[]; cacheResult?: 'no-tool' | 'opened' | 'jammed' }
 export interface Expedition {
   events: ExpeditionEvent[] | null;
   cargo: Cargo;

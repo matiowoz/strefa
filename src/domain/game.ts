@@ -53,7 +53,7 @@ export function startExpedition(state: GameState, now = Date.now(), random: () =
   }
   const problem = preparationError(state);
   if (problem) throw new Error(problem);
-  const events = resolveExpeditionEvents(state.selectedLocationId, random);
+  const events = resolveExpeditionEvents(state.selectedLocationId, random, [...state.inventory, ...wornItems(state)].some((entry) => entry.itemId === 'crowbar'));
   const loot = eventLoot(events);
   return arrange({ ...state, updatedAt: now, activeExpedition: {
     events, cargo: { equipmentId: state.backpack.id, water: 0, ration: 0, loot },

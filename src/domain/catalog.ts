@@ -6,7 +6,7 @@ export const items = [
   { id: 'helmet', name: 'Zniszczony hełm', category: 'equipment', slot: 'head', weightKg: 1.4, description: 'Wgnieciony stalowy hełm. Łuszcząca się farba, rdza i postrzępiony pasek. Wciąż trzyma się na głowie.' },
   { id: 'jacket', name: 'Łatana kurtka', category: 'equipment', slot: 'body', weightKg: 1.8, description: 'Ciężka kurtka zszywana różnymi nićmi. Przetarte mankiety i plamy po wielu wyprawach.' },
   { id: 'boots', name: 'Znoszone buty', category: 'equipment', slot: 'feet', weightKg: 1.2, description: 'Popękana skóra, błoto i niedopasowane sznurowadła. Para butów, która przeszła już sporo.' },
-  { id: 'crowbar', name: 'Zardzewiały łom', category: 'equipment', slot: 'weapon', weightKg: 2.5, description: 'Stalowy łom z resztkami czerwonej farby. Na razie można go założyć jako broń główną; jego zastosowania w wyprawach pojawią się później.' },
+  { id: 'crowbar', name: 'Zardzewiały łom', category: 'equipment', slot: 'weapon', weightKg: 2.5, description: 'Stalowy łom z resztkami czerwonej farby. Zabrany w plecaku lub założony jako broń główna pozwala spróbować otworzyć zamkniętą skrzynię.' },
   { id: 'water', name: 'Woda', category: 'supply', weightKg: 1, description: 'Zapas wyprawowy. Bez stale opadającego paska pragnienia.' },
   { id: 'ration', name: 'Racja żywnościowa', category: 'supply', weightKg: 0.4, description: 'Zapas na drogę.' },
   { id: 'bandage', name: 'Bandaż', category: 'supply', weightKg: 0.1, description: 'Środek medyczny. Leczenie nie jest jeszcze wdrożone.' },

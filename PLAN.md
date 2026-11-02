@@ -244,3 +244,13 @@ Schemat v9: migracja poprawnego v8 i starszych dodaje pustą mapę sześciu miej
 Grafiki: własny wygenerowany atlas 2×2 `/art/equipment-worn.webp`, przezroczyste, zniszczone przedmioty pasujące do poprzednich ilustracji; bez materiałów z cudzych gier.
 
 Weryfikacja: 149/149 testów i build. Domena: cztery sloty, zdejmowanie, wymiana dwóch stanów i ID, pełny plecak, wskazany prostokąt/kolizje, niewłaściwy przedmiot, zakaz zdejmowania plecaka, brak zmian w drodze i premii, walidacja sprzętu i zdarzeń, migracja v8, przyznanie sprzętu raz i zachowanie nadmiaru. Adapter: przerwana wymiana i zdejmowanie, dwie karty i odtworzenie, zapis po migracji. Chromium: wszystkie cztery przedmioty przeciągane do slotów, zdejmowanie, wymiana, zły slot i pełny plecak bez utraty, zachowany rozmiar grafiki/ramki i centrowanie, emulowany dotyk, „Załóż”/„Zdejmij”, odświeżenie, raport z nowym sprzętem oraz migracja aktywnej wyprawy v8. Ponownie sprawdzono łączenie i rozdzielanie stosów myszą/dotykiem, anulowanie, walidację ilości i trwałość. Szerokości 320/390/768/1024/1440 px, kratki 52 px, brak przepełnienia i błędów JS. Bez fizycznego telefonu.
+
+## Łom założony lub zabrany w plecaku — otwieranie skrzyń
+
+Na doprecyzowane polecenie łom działa zarówno w slocie wyposażenia, jak i w inventory przy starcie wyprawy. Skrytka i overflow nie są zabierane; przedmiot znaleziony dopiero w drodze nie wpływa na tę próbę. Zdarzenie skrzyni zapisuje wynik no-tool/opened/jammed i łup w tym samym snapshotcie co reszta wyprawy. Rozliczenie i odświeżenie nie sprawdzają ponownie narzędzia ani nie losują.
+
+Roboczo 70% szans otwarcia, przy sukcesie 1–3 złomu i 1–2 tkaniny. Brak zużycia narzędzia, zmian czasu, zdrowia i pozostałych premii. Raport rozróżnia brak łomu, nieudaną próbę i sukces. Opcjonalne pole cacheResult zachowuje zgodność schematu v9: wcześniejsze zamknięte skrzynie bez pola pozostają bez zmian. Walidacja sprawdza wynik i zgodność nagrody; poza skrzynią to pole jest niedozwolone.
+
+158 testów i build: oba miejsca narzędzia, skrytka/odbiór/brak narzędzia, łom znaleziony w drodze, nieudana próba, utrwalony wynik po odłożeniu łomu po powrocie, brak zużycia i ponownych nagród, starszy dziennik oraz trwałość i równoległy odbiór.
+
+Chromium: raporty dla łomu w plecaku i w slocie, brak łomu ze skrytki, nieudane otwarcie oraz trwałość wyniku i nagrody po odświeżeniu; brak błędów JS.

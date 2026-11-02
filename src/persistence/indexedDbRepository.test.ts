@@ -370,3 +370,14 @@ it('migruje v8 do pustych slotów i zapisuje v9 bez zmiany rozpoczętej wyprawy'
   const repository=new IndexedDbRepository(factory,'test');const loaded=(await repository.load())!;expect(loaded).toEqual(started);
   const next=renameHero(loaded,'Kruk',2000);await repository.save(next,loaded);expect(await new IndexedDbRepository(factory,'test').load()).toEqual(next);
 });
+
+it('zachowuje wynik otwarcia skrzyni po ponownym otwarciu i przyznaje łup tylko raz',async()=>{
+  const {startExpedition,settleExpedition}=await import('../domain/game');
+  const initial=createInitialState(0);const packed=arrange({...initial,inventory:[...initial.inventory,{id:'bar',itemId:'crowbar',quantity:1,condition:60}]});
+  const values=[.5,.5,.5,.5,.1,.5,.99,.99,.1,.5,.5];let i=0;
+  const trip=startExpedition(packed,1000,()=>values[i++]);const factory=new IDBFactory();const repository=new IndexedDbRepository(factory,'test');await repository.save(trip,null);
+  const loaded=(await new IndexedDbRepository(factory,'test').load())!;expect(loaded.activeExpedition).toEqual(trip.activeExpedition);
+  const result=settleExpedition(loaded,loaded.activeExpedition!.id,61000);
+  const writes=await Promise.allSettled([repository.save(result,loaded),repository.save(result,loaded)]);
+  expect(writes.filter(e=>e.status==='fulfilled')).toHaveLength(1);expect(await repository.load()).toEqual(result);
+});
