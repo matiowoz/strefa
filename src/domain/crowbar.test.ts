@@ -6,7 +6,7 @@ import { eventLoot } from './expeditionEvents';
 import { isGameState, validateSave } from './validation';
 
 const packed = () => { const state=createInitialState(0);return arrange({...state, inventory:[...state.inventory,{id:'bar',itemId:'crowbar',quantity:1,condition:60}]}); };
-const random = (attempt=.1) => { const values=[.5,.5,.5,.5,.1,.5,.99,.99,attempt,.5,.5];let i=0;return ()=>{if(i>=values.length)throw new Error('Ponowne losowanie');return values[i++];}; };
+const random = (attempt=.1) => { const values=[.5,.5,.5,.5,.1,.5,.99,.99,attempt,.5,.5,.99,.99];let i=0;return ()=>{if(i>=values.length)throw new Error('Ponowne losowanie');return values[i++];}; };
 
 it.each(['carried','equipped'])('łom %s pozwala otworzyć skrzynię i utrwala dodatkowy wynik', kind=>{
   const state=kind==='equipped'?equipItem(packed(),'bar','weapon',0):packed();
@@ -49,7 +49,7 @@ it('odrzuca błędny wynik lub nagrodę skrzyni, ale czyta wcześniejszy dzienni
 
 it('łom znaleziony dopiero na wyprawie nie zastępuje zabranego narzędzia',()=>{
   const state={...createInitialState(0),selectedLocationId:'workshop'};
-  const values=[.5,.5,.5,.1,.5,.5,.1,.99,.99];let i=0;
+  const values=[.5,.5,.5,.1,.5,.5,.1,.99,.99,.99,.99];let i=0;
   const started=startExpedition(state,1000,()=>values[i++]);
   expect(started.activeExpedition!.cargo.loot).toContainEqual({itemId:'crowbar',quantity:1});
   expect(started.activeExpedition!.events!.find(e=>e.id==='locked-cache')!.cacheResult).toBe('no-tool');

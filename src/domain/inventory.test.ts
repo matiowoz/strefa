@@ -71,7 +71,7 @@ describe('migracja i walidacja siatki', () => {
     const old = { ...state, schemaVersion: 3, inventory: [...state.inventory, ...state.stash, ...state.overflow], hero: { ...state.hero, name: 'Kruk' } };
     const migrated = validateSave(old);
     expect(totals(migrated)).toEqual(totals(state)); expect(migrated.hero.name).toBe('Kruk');
-    expect(migrated.schemaVersion).toBe(9); expect(isGameState(migrated)).toBe(true);
+    expect(migrated.schemaVersion).toBe(10); expect(isGameState(migrated)).toBe(true);
   });
   it('odrzuca uszkodzone położenia i powielony ID między kontenerami', () => {
     const state = createInitialState(0); const id = state.inventory[0].id;
@@ -87,7 +87,7 @@ it('migracja pełnego zapisu zachowuje aktywną wyprawę i jej zarezerwowany ple
   const running = startExpedition(initial, 1000, () => 0.5);
   const old = { ...running, schemaVersion: 3, preparation: { kit: 'light', equipmentId: initial.backpack.id }, inventory: [...filled(250).inventory, ...filled(250).stash, ...filled(250).overflow, initial.backpack, ...running.inventory] };
   const migrated = validateSave(old);
-  expect(migrated.activeExpedition).toEqual({ ...running.activeExpedition, events: null });
+  expect(migrated.activeExpedition).toEqual({ ...running.activeExpedition, events: null, health: null });
   expect(migrated.backpack).toEqual(initial.backpack);
   expect(migrated.preparation.equipmentId).toBeNull();
   expect(migrated.inventory.length + migrated.stash.length + migrated.overflow.length + 1).toBe(old.inventory.length);
@@ -101,7 +101,7 @@ it('migruje pełne dwie strony v4 do mniejszego schowka bez utraty rzeczy', () =
   const result = validateSave(old);
   expect(totals(result)).toEqual(entries.map((entry) => entry.id).sort());
   expect(result.stash).toHaveLength(72); expect(result.overflow).toHaveLength(128);
-  expect(result.schemaVersion).toBe(9);
+  expect(result.schemaVersion).toBe(10);
 });
 
 it('przenosi przedmiot z dawnej drugiej strony na wolne miejsce, ale nie naprawia uszkodzonego zapisu v4', () => {

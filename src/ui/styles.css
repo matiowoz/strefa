@@ -68,3 +68,9 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .navigation button[aria-current] { border: 1px solid #8e8354; color: #f1e0b6; background: linear-gradient(110deg, #5a5939, #38442d); }
 .page-heading { text-shadow: 0 2px 5px #0009; }
 .page-footer { color: #bec5ae; border-color: #767c5055; }
+
+.illness-status { display:flex; align-items:center; gap:.8rem; border:1px solid #aa925d; border-radius:6px; background:linear-gradient(120deg,#45452a,#202d22); padding:1rem; margin-bottom:1.2rem; color:#e7d6a6; }
+.illness-status p { font-size:.78rem; line-height:1.6; margin:.35rem 0; }
+.illness-status span { font-size:.7rem; color:#d6c593; }
+.illness-art { width:52px; height:52px; flex:0 0 52px; }
+.report-health { margin:1.1rem 0; padding:.9rem; border:1px solid #78784c; background:#1b291d88; font-size:.8rem; color:#ded1aa; line-height:1.7; }

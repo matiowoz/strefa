@@ -10,6 +10,7 @@ export const STASH_SIZE = { columns: 8, rows: 9 };
 export const gridSize = (page: number) => page === -1 ? { columns: GRID_COLUMNS, rows: GRID_ROWS } : STASH_SIZE;
 // Demonstracyjne rozmiary jednego stosu (ilości zachowują dotychczasowy model).
 export const itemSizes: Record<string, { width: number; height: number }> = {
+  antibiotic: { width: 1, height: 1 },
   helmet: { width: 2, height: 2 }, jacket: { width: 2, height: 3 }, boots: { width: 2, height: 2 }, crowbar: { width: 1, height: 3 },
   backpack: { width: 2, height: 3 }, water: { width: 1, height: 2 },
   ration: { width: 1, height: 1 }, bandage: { width: 1, height: 1 },

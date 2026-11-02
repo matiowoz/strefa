@@ -76,7 +76,7 @@ it('migruje rzeczywisty v6 z aktywną wyprawą i zachowuje sprzęt, koszty, łup
   const result = validateSave(old);
   expect(result.backpack).toEqual(initial.backpack);
   expect(result.inventory).toEqual(initial.inventory);
-  expect(result.activeExpedition).toEqual({ ...old.activeExpedition, events: null });
+  expect(result.activeExpedition).toEqual({ ...old.activeExpedition, events: null, health: null });
   expect(result.positions['starter-water']).toEqual(old.positions['starter-water']);
   expect(result.positions[initial.backpack.id]).toBeUndefined();
   expect(isGameState(result)).toBe(true);

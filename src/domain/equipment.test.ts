@@ -79,12 +79,12 @@ it('nie zapisuje niezgodnego slotu, powielonego ID, stosu sprzętu i błędnego 
 it('migruje v8 bez zmiany wyprawy, raportu, rzeczy i położeń', () => {
   const trip=startExpedition(createInitialState(0),1000,()=>.5);
   const {equipped:_,...old}=trip;
-  const loaded=validateSave({...old,schemaVersion:8});expect(loaded).toEqual(trip);
+  const loaded=validateSave({...old,schemaVersion:8});expect(loaded).toEqual({...trip, activeExpedition:{...trip.activeExpedition, health:null}});
   expect(()=>validateSave({...old,schemaVersion:8,positions:{}})).toThrow();
 });
 
 it('losuje sprzęt przy starcie i przyznaje osobne egzemplarze tylko raz, także w pełnych siatkach', () => {
-  const values=[.5,.5,.5,.5,.99,.5,.1,.1,.1,.1];let i=0;
+  const values=[.5,.5,.5,.5,.99,.5,.1,.1,.1,.1,.99,.99];let i=0;
   const trip=startExpedition(createInitialState(0),1000,()=>values[i++]);
   expect(trip.activeExpedition!.cargo.loot).toContainEqual({itemId:'jacket',quantity:1});
   expect(trip.activeExpedition!.cargo.loot).toContainEqual({itemId:'helmet',quantity:1});
@@ -101,7 +101,7 @@ it('odrzuca sprzęt z niewłaściwego zdarzenia, stos sprzętu i błędne losowa
   const state=createInitialState(0);
   const invalidRoll=[.5,.5,.5,.5,.99,.5,.1,NaN];let index=0;
   expect(()=>startExpedition(state,1000,()=>invalidRoll[index++])).toThrow('losowanie');
-  const values=[.5,.5,.5,.5,.99,.5,.1,.1,.1,.1];index=0;
+  const values=[.5,.5,.5,.5,.99,.5,.1,.1,.1,.1,.99,.99];index=0;
   const trip=startExpedition(state,1000,()=>values[index++]);
   const bad=structuredClone(trip);bad.activeExpedition!.events![0].loot.push({itemId:'crowbar',quantity:1});bad.activeExpedition!.cargo.loot.push({itemId:'crowbar',quantity:1});
   expect(isGameState(bad)).toBe(false);

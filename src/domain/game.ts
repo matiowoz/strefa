@@ -1,3 +1,4 @@
+import { expeditionDuration, illnessRules, isSick } from './illness';
 import { emptyEquipment, wornItems } from './equipment';
 import { eventLoot, resolveExpeditionEvents } from './expeditionEvents';
 import { arrange } from './inventory';
@@ -7,7 +8,7 @@ import type { GameState } from './types';
 
 export function createInitialState(now = Date.now()): GameState {
   return arrange({
-    schemaVersion: 9, equipped: emptyEquipment(), backpack: { id: 'starter-backpack', itemId: 'backpack', quantity: 1, condition: 100 }, progress: { workshopVisited: false, workbenchRepaired: false }, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
+    schemaVersion: 10, illness: null, equipped: emptyEquipment(), backpack: { id: 'starter-backpack', itemId: 'backpack', quantity: 1, condition: 100 }, progress: { workshopVisited: false, workbenchRepaired: false }, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
     hero: {
       id: 'survivor', name: 'Ocalały', level: 1, health: 100, maxHealth: 100,
       skills: { combat: 1, scouting: 1, survival: 1, medicine: 1, crafting: 1, electronics: 1, trade: 1, transport: 1 },
@@ -55,11 +56,23 @@ export function startExpedition(state: GameState, now = Date.now(), random: () =
   if (problem) throw new Error(problem);
   const events = resolveExpeditionEvents(state.selectedLocationId, random, [...state.inventory, ...wornItems(state)].some((entry) => entry.itemId === 'crowbar'));
   const loot = eventLoot(events);
-  return arrange({ ...state, updatedAt: now, activeExpedition: {
-    events, cargo: { equipmentId: state.backpack.id, water: 0, ration: 0, loot },
+  const sickAtStart = isSick(state, now);
+  const jacketWorn = state.equipped.body?.itemId === 'jacket';
+  let contracted = false;
+  if (!jacketWorn && !sickAtStart) {
+    const chance = random();
+    if (!Number.isFinite(chance) || chance < 0 || chance >= 1) throw new Error('Nieprawidłowe losowanie.');
+    contracted = chance < .5;
+  }
+  const expectedReturnAt = now + expeditionDuration(state, rule.durationMs, now);
+  if (!Number.isSafeInteger(expectedReturnAt + illnessRules.durationMs)) throw new Error('Nieprawidłowy czas wyprawy.');
+  const illness = contracted ? { startedAt: expectedReturnAt, endsAt: expectedReturnAt + illnessRules.durationMs } : state.illness;
+
+  return arrange({ ...state, illness, updatedAt: now, activeExpedition: {
+    health: { jacketWorn, sickAtStart, contracted }, events, cargo: { equipmentId: state.backpack.id, water: 0, ration: 0, loot },
     // getRandomValues also works on HTTP LAN addresses, where randomUUID is unavailable.
     id: Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) => byte.toString(16).padStart(2, '0')).join(''), plan: { locationId: state.selectedLocationId, strategy: 'balanced' },
-    status: 'running', startedAt: now, expectedReturnAt: now + rule.durationMs,
+    status: 'running', startedAt: now, expectedReturnAt,
   } });
 }
 
@@ -79,5 +92,5 @@ export function settleExpedition(state: GameState, id: string, now = Date.now())
   }
   return arrange({ ...state, inventory, updatedAt: now, activeExpedition: null,
     progress: { ...state.progress, workshopVisited: state.progress.workshopVisited || (expedition.plan.locationId === 'workshop' && !expedition.events?.some((event) => event.id === 'blocked-road')) },
-    lastReport: { events: structuredClone(expedition.events), cargo: structuredClone(expedition.cargo), expeditionId: id, locationId: expedition.plan.locationId, returnedAt: expedition.expectedReturnAt, scrap } });
+    lastReport: { health: structuredClone(expedition.health), events: structuredClone(expedition.events), cargo: structuredClone(expedition.cargo), expeditionId: id, locationId: expedition.plan.locationId, returnedAt: expedition.expectedReturnAt, scrap } });
 }

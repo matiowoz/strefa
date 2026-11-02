@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { IllnessStatus } from './IllnessStatus';
 import { HeroScreen } from './HeroScreen';
 import { ExpeditionsScreen } from './ExpeditionsScreen';
 import { MapScreen } from './MapScreen';
@@ -28,6 +29,7 @@ export function App({ repository }: { repository: GameRepository }) {
         {error && <div className="error" role="alert"><strong>Nie udało się zapisać lub odczytać danych.</strong><p>{error}</p>{!state ? <button onClick={retry}>Ponów odczyt</button> : <p>Zmiana nie została zastosowana. Możesz spróbować ponownie.</p>}</div>}
         {!state && !error && <p role="status">Otwieranie kryjówki…</p>}
         {state && <>
+          <IllnessStatus state={state} />
           {screen === 'shelter' && <ShelterScreen saving={saving} update={update} state={state} navigate={setScreen} />}
           {screen === 'map' && <MapScreen state={state} update={update} saving={saving} navigate={setScreen} />}
           {screen === 'expeditions' && <ExpeditionsScreen state={state} update={update} saving={saving} navigate={setScreen} />}

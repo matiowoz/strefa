@@ -1,256 +1,149 @@
-# STREFA — plan prototypu
+# STREFA
 
-Źródło: GDD 1.1, rozdziały 1, 4–7, 11–14, 20, 22, 24. Nazwa STREFA jest nazwą projektu przyjętą w bieżącym zleceniu.
+Prototyp mobilnego idle survival RPG: wyprawy ze zdarzeniami, ekwipunek, skrytka, naprawa stołu i proste receptury. Lokalny zapis, bez walki.
 
-## Etap 1 — fundament obecnego zlecenia
+Praca z telefonu przy wyłączonym komputerze: zobacz CLOUD.md. Dokumentacja projektu: docs/GDD.pdf i tekst pomocniczy docs/GDD.md.
 
-- [x] Oddzielny projekt React, TypeScript strict, Vite i CSS mobile-first.
-- [x] Kryjówka jako ekran startowy, zwijany panel informacji i pięć ekranów.
-- [x] Typy bohatera, przedmiotów, lokacji i jednej aktywnej wyprawy.
-- [x] Czyste funkcje domenowe oraz port GameRepository.
-- [x] Adapter IndexedDB, wersjonowanie i walidacja danych bez nadpisywania uszkodzonego zapisu.
-- [x] Pseudonim i wybór celu jako minimalne operacje sprawdzające trwały zapis.
-- [x] Testy domeny oraz odczytu, zapisu i przerwania transakcji.
-- [x] Weryfikacja: npm test (25/25), npm run build oraz sprawdzenie pięciu ekranów i zapisu po odświeżeniu w przeglądarce.
+## Windows
 
-Kryterium ukończenia: aplikacja startuje w Kryjówce, wszystkie ekrany są dostępne na telefonie, zmiany przetrwają odświeżenie, testy i kompilacja przechodzą. Nie uruchamiamy jeszcze wypraw.
+Zainstaluj Node.js **22.12 lub nowszy** (polecana linia 24 LTS). Otwórz PowerShell w tym folderze:
 
-## Etap 2 — minimalna wyprawa
+```powershell
+npm.cmd ci
+npm.cmd run dev
+```
 
-Plan, start jednej automatycznej wyprawy, czas zakończenia i jednokrotne rozliczenie prostego raportu. Bez walki i losowego zaawansowanego silnika.
+Otwórz adres wypisany przez Vite, zwykle http://localhost:5173. `npm.cmd` omija ewentualną blokadę skryptu npm.ps1 bez zmieniania polityki PowerShell. Nie uruchamiaj index.html dwuklikiem.
 
-Kryteria: druga wyprawa nie wystartuje równolegle; zamknięcie i ponowne otwarcie nie zmienia wyniku; nagrody nie są przyznawane dwa razy. Lokalny zegar jest tylko rozwiązaniem prototypowym, a nie autorytetem przyszłej gospodarki.
+## Windows — aktualizacja i start dwuklikiem
 
-## Etap 3 — podstawowa pętla przygotowania
+W folderze projektu otwórz **Uruchom STREFĘ.cmd**. Potrzebujesz Git for Windows, Node.js (polecany 24 LTS), Internetu i dostępu do prywatnego repozytorium GitHub. Przy pierwszym logowaniu Git może otworzyć przeglądarkę.
 
-Zapasy wyprawowe, wybór prostego zestawu, bezpieczny powrót i niewielka liczba receptur. Zakres każdorazowo zatwierdzany przed rozpoczęciem.
+Plik wymaga gałęzi `main` i czystego katalogu (także bez dodatkowych nieignorowanych plików). Pobiera `origin/main` i aktualizuje tylko przez fast-forward; nie usuwa Twoich zmian ani lokalnych commitów. Po udanej aktualizacji wykonuje `npm ci --include=optional`, a następnie uruchamia Vite dla komputera i urządzeń w tej samej sieci (`--host 0.0.0.0`, stały port 5173) i otwiera na komputerze **http://localhost:5173**. W oknie pokazuje instrukcję oraz adresy **Network** dla telefonu. Błąd na dowolnym kroku zatrzymuje dalszą pracę; okno pozostaje z komunikatem. Nie omija weryfikacji TLS. Skrypt PowerShell uruchamia się z polityką ustawioną tylko dla tego procesu, bez zmiany ustawień systemu.
 
-Kryteria: brak ujemnych zasobów, deterministyczne receptury, własny sprzęt nie przepada, brak stale opadających pasków głodu i pragnienia.
+W nowej wersji **Ctrl+C** zatrzymuje serwer i pokazuje menu w tym samym oknie:
 
-## Etap 4 — pionowy wycinek
+- **U + Enter** — sprawdź aktualizacje, zainstaluj zależności i uruchom grę ponownie.
+- **Z + Enter** — zamknij program.
 
-Szczegółowe wnętrze, jedna dopracowana lokacja i krótki ciąg celów; dalsze reguły tylko po uzgodnieniu. Backend i autorytatywny czas mają osobny przyszły etap przed gospodarką graczy.
+Przy błędzie aktualizacji lub instalacji menu również pozostaje dostępne; kolejne kroki nie są wykonywane. Inne odpowiedzi ponawiają pytanie. Serwer działa jako własny proces Node, a jego wejście jest odłączone od klawiatury; Ctrl+C obsługuje launcher, zatrzymując tylko ten proces i jego potomków. Nie ma pytania CMD o zakończenie całego pliku wsadowego. Kontrola lokalnych zmian i zajętego portu powtarza się przed każdym U. Blokada drugiego launchera obejmuje całą sesję, także menu.
 
-## Ograniczenia i propozycje względem GDD
+**Pierwsze wczytanie menu:** pobierz aktualizację dotychczasowym plikiem, zamknij go i otwórz ponownie — kod PowerShell jest wczytywany do pamięci na początku. Dotyczy to również przyszłych zmian samego launchera. Zwykłe aktualizacje gry wymagają już tylko Ctrl+C, U i Enter.
 
-- Jedna kryjówka, 2 poglądowe punkty mapy i 8 definicji przedmiotów; to dane testowe, nie finalny scenariusz ani balans.
-- Widok kryjówki jest lokalną, wygenerowaną ilustracją poglądową. Nie odwzorowuje dynamicznie urządzenia pokoju ani liczby zapasów.
-- Brak fabuły, walki, kolejek produkcji, badań, energii, x4 i transportu. Nie zmienia to ich ustalonej wizji.
-- Lokalny zapis zamiast serwera jest świadomym ograniczeniem zlecenia. Nie zapewnia synchronizacji ani ochrony przed edycją danych i zmianą zegara.
-- Adapter zapisuje snapshot z atomowym sprawdzeniem oczekiwanego stanu. Nieaktualna karta nie może nadpisać nowszego zapisu; przy konflikcie odśwież stronę. Brak scalania zmian i synchronizacji urządzeń.
-- Nie dodajemy resetu zapisu, automatycznego kasowania błędnych danych, kont ani płatności.
-- Ekran startowy i rozwinięcie panelu są ustawieniami interfejsu, nie elementem trwałego stanu gry.
-- Schemat v3: poprawne v1 i v2 migrują w pamięci bez utraty postępu; zapis v3 następuje przy udanej zmianie. Nieznana wersja, uszkodzone dane lub nieznane ID zatrzymują odczyt bez nadpisania.
-- Późniejszy adapter HTTP implementuje port GameRepository. Komendy i reguły gospodarki trzeba wówczas przenieść na serwer; sama zmiana adaptera nie zapewnia bezpieczeństwa.
+Zanim uruchomisz osobne okno programu, zakończ poprzednią sesję przez Ctrl+C, a następnie Z. Drugie uruchomienie tego samego pliku jest blokowane, dopóki pierwsze działa. Serwer uruchomiony ręcznie trzeba zatrzymać samodzielnie. Zajęty port 5173 powoduje błąd zamiast przełączenia portu i otwarcia innego zapisu gry. Wcześniejszy zapis spod `127.0.0.1:5173` nie jest tym samym zapisem co `localhost:5173`.
 
-Etapy 2 i 3 zostały zlecone osobno. Po etapie 3 zatrzymujemy prace; etap 4 wymaga osobnego zlecenia.
+Plik trzeba pobrać jednorazowo poleceniem `git pull --ff-only` z folderu `strefa-aktualna`. Później wystarczy dwuklik po każdym wysłaniu zmian na GitHub. Sam plik nie publikuje gry w Internecie.
 
-## Wyniki weryfikacji 26 października 2026
+## Telefon w tej samej sieci
 
-- Node 24.22.1; dokładne wersje pakietów przypięte w package-lock.json.
-- Vitest: 2 pliki testowe, 25 testów zaliczonych. Adapter sprawdzony przez fake-indexeddb, również przerwana transakcja i ochrona poprzedniego zapisu.
-- TypeScript strict i Vite build: kod wyjścia 0. Wynik w dist/; JS 234,63 kB (73,70 kB gzip), CSS 6,69 kB (2,42 kB gzip).
-- Przeglądarka: pięć ekranów, zwijanie panelu, zmiana pseudonimu, wybór warsztatu i odtworzenie obu zmian po odświeżeniu; po odświeżeniu ekranem startowym pozostaje Kryjówka.
-- Kontrola wizualna w wąskim oknie przeglądarki. Nie testowano fizycznego telefonu, połączenia LAN, Safari ani instalacji PWA.
-- Instalacja zależności: 0 zgłoszonych podatności w audycie npm w chwili instalacji.
-- Środowisko pracy: użyto dostarczonego Node 24 i zapisywalnego cache npm w work/, ponieważ systemowy Node 20.12 i domyślny cache miały ograniczenia. Nie zmieniano ustawień systemowych. Użytkownik powinien użyć Node 22.12+ zgodnie z README.
+1. Połącz komputer i telefon z tą samą zaufaną siecią Wi-Fi.
+2. Uruchom **Uruchom STREFĘ.cmd**. Po pierwszej aktualizacji do wersji z obsługą Wi-Fi zamknij launcher i otwórz go ponownie. Alternatywnie w folderze projektu uruchom `npm.cmd run dev:lan`.
+3. Otwórz na telefonie adres **Network** wypisany przez Vite, np. `http://192.168.1.10:5173`. Nie wpisuj localhost na telefonie. Launcher zawsze używa portu 5173; ręczne `dev:lan` może wybrać inny, jeśli port jest zajęty.
+4. Jeśli Windows zapyta o zaporę, zezwól Node.js na dostęp tylko w zaufanej sieci prywatnej. W razie braku połączenia sprawdź profil sieci, VPN i izolację urządzeń w routerze. Nie wyłączaj całej zapory i nie przekierowuj portów routera.
 
-## Realizacja etapu 2
+Komputer musi być włączony, a okno serwera otwarte. Telefon ma osobny zapis gry; zmiana adresu IP komputera również zmienia adres zapisu na telefonie.
 
-- [x] Jedna aktywna wyprawa, trwały cel i termin powrotu, działanie podczas nieobecności.
-- [x] Odbiór po terminie: nagroda, raport i usunięcie aktywnej wyprawy w jednej transakcji; ponowiona komenda niczego nie przyznaje.
-- [x] Ochrona przed nieaktualną kartą i migracja v1 → v2.
-- [x] Testy regresji: termin, ponowny odbiór, nieobecność, zmiana celu na mapie, konflikt kart i przerwana transakcja.
+Zatrzymanie serwera: Ctrl+C (w launcherze otwiera menu U/Z). Jest to podgląd deweloperski w sieci lokalnej, bez tunelu ani publicznej publikacji. IndexedDB działa w nowoczesnej przeglądarce także przy takim podglądzie HTTP, lecz nie dodano PWA ani instalacji offline aplikacji.
 
-Roboczy balans do sprawdzenia pętli, nie finalne reguły GDD: osiedle 1 minuta / 2 złomu, warsztat 2 minuty / 4 złomu. Jedyna strategia startu to zrównoważona; bez symulacji taktyk, walki, urazów, zużycia zapasów, doświadczenia, wyczerpywania lokacji i automatycznych serii. Przechowywany jest tylko ostatni rozliczony raport. Odebranie raportu przyznaje łup; do tego czasu wyprawa blokuje następny start. Zegar urządzenia jest prototypowy i nie zabezpiecza gospodarki przed manipulacją. Przyszłe zmiany balansu wymagają wersjonowania wyniku aktywnej wyprawy.
+## Sprawdzenie
 
-Weryfikacja etapu 2: `npm test` — 32/32, `npm run build` — sukces. Chromium headless, szerokość 390 px: start, odtworzenie aktywnej wyprawy po odświeżeniu, odbiór po terminie, raport po ponownym odświeżeniu i ekwipunek +2 złomu; brak poziomego przewijania. Upływ czasu zasymulowany przesunięciem zegara tylko w izolowanym profilu testowym. Bez testu fizycznego telefonu i Safari.
+```powershell
+npm.cmd test
+npm.cmd run build
+npm.cmd run preview
+```
 
-## Realizacja etapu 3 — przygotowanie
+`build` sprawdza TypeScript i tworzy dist/. `preview` służy wyłącznie do lokalnej kontroli kompilacji.
 
-- [x] Trwały wybór zestawu: lekki (1 woda + 1 racja), z zapasem (2 + 2); opcjonalnie jeden własny plecak.
-- [x] Koszt całej wyprawy wraz z powrotem pobierany atomowo przy starcie. Brak zapasów lub niesprawny sprzęt blokuje start. Nie ma pasków głodu/pragnienia.
-- [x] Sprzęt pozostaje w ewidencji i jest zarezerwowany do odbioru raportu, nie jest zużywany ani usuwany. Zestawu nie można zmieniać w trakcie.
-- [x] Łupy i zużycie utrwalone przy starcie, pokazane w raporcie. Receptury nie korzystają ze sprzętu ani zapasów już pobranych na wyprawę.
-- [x] Trzy deterministyczne receptury w Ekwipunku, z podglądem kosztów, stanu magazynu, wyniku i czasu. Koszty i wynik zapisywane w jednej transakcji. Równoległa nieaktualna karta jest odrzucana.
-- [x] Migracja v1/v2 → v3: dotychczasowa wyprawa zachowuje czas i nagrodę, bez nowych kosztów ani dodatkowych łupów; stary raport pozostaje dostępny.
+## Zapis i szybki test ręczny
 
-Robocze uproszczenia i balans, nie nowe ustalone reguły GDD:
-- Nowe wyprawy oprócz dotychczasowego złomu dają 2 wody do uzdatnienia, 2 składniki żywnościowe i 1 czystą tkaninę. Pozwala to odtwarzać zapasy bez bezpłatnego przyznawania gotowych racji.
-- Receptury: 1 woda do uzdatnienia → 1 woda; 1 składnik żywnościowy → 1 racja; 2 czyste tkaniny → 1 bandaż. Wykonanie natychmiastowe, bez paliwa, stanowisk, losowej jakości, doświadczenia, kolejek i x4. Bandaż nadal nie leczy.
-- Wariant z zapasem zużywa cały podany koszt, bez premii do łupu lub czasu; to test wyboru i pobierania zapasów, bez symulacji nadwyżek. Plecak nie dodaje jeszcze udźwigu ani premii. Nie wdrażamy napraw, modułów i zużycia sprzętu.
-- Brak odwrotu i porażek; bezpieczny powrót oznacza ukończenie po terminie bez strat własnego wyposażenia. Zegar nadal lokalny.
+1. Domyślnie otwiera się Kryjówka. Można zwinąć jej panel i przejść do pozostałych ekranów.
+2. W Postaci sprawdź zachowaną nazwę i zdrowie. Zmiana nazwy jest wyłączona.
+3. Na Mapie wybierz drugi punkt i odśwież stronę. Aplikacja wróci do Kryjówki, ale nazwa i wybrany cel pozostaną.
+4. W Wyprawach sprawdź cel i czas, następnie rozpocznij wyprawę z obecnym ekwipunkiem. Osiedle trwa minutę, warsztat dwie; to parametry demonstracyjne.
+5. Odśwież lub zamknij grę i wróć po terminie. W Wyprawach odbierz raport i nagrodę. Znaleziska w Ekwipunku pojawią się raz; raport pozostanie po odświeżeniu. Następna wyprawa jest dostępna po odbiorze poprzedniej.
+6. Sprawdź, że start nie zużył wody ani racji, a plecak pozostaje założony. W raporcie przeczytaj zdarzenia i sprawdź znaleziska. Gdy znajdziesz surowce, w Ekwipunku uzdatnij wodę, przygotuj rację lub bandaż. Widać koszt i wynik każdej receptury. Brak zasobów blokuje operację.
+7. Przy błędzie zapisu zmiana nie zostaje zastosowana; ponów odbiór. Przy konflikcie z inną kartą odśwież stronę.
 
-Weryfikacja: 44/44 testy, TypeScript i Vite build zaliczone. Chromium przy szerokości 390 px: zapis zestawu i sprzętu, odświeżenie, start, odtworzenie wyprawy, odbiór, blokada braku zapasów, wytworzenie wody i racji, odświeżenie i kolejny start. Brak poziomego przewijania. Czas przesunięty tylko w izolowanym profilu testowym. Bez fizycznego telefonu i Safari.
+Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v10 (migracja poprawnych v1, v2, v3, v4, v5, v6, v7, v8 i v9 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
 
-## Przebudowa wyglądu — wzorzec ekwipunku
+Zapis jest osobny dla urządzenia, przeglądarki i adresu z portem. localhost i adres LAN mają różne zapisy; telefon nie współdzieli zapisu komputera. Czyszczenie danych witryny lub tryb prywatny może usunąć postęp. Brak synchronizacji, eksportu i kopii chmurowej. Nieaktualny zapis z drugiej karty jest odrzucany atomowo; odśwież ją przed kolejną zmianą. Czas wypraw opiera się na zegarze urządzenia, bez zabezpieczeń serwerowych.
 
-Osobno zlecony ilustrowany ekran ekwipunku przed etapem 4. Panel ocalałego ma lokalną wygenerowaną ilustrację poglądową (nie odzwierciedla dynamicznego ubioru). Osiem lokalnych ilustracji przedmiotów, siatka z ilościami i stanem, filtry oraz szczegóły po wybraniu. Plecak można wybrać lub odłożyć bezpośrednio w tym ekranie za pomocą istniejących reguł przygotowania; miejsca głowy, tułowia i obuwia są wyraźnie oznaczonymi, nieaktywnymi propozycjami. Crafting zachowuje koszty i wyniki. Pozostałe ekrany czekają na akceptację kierunku graficznego; nie rozszerzamy etapu 4 ani schematu zapisu.
+## Struktura i zależności
 
-Weryfikacja: 44/44 testy i build zaliczone; Chromium 320/390/768/1440 px bez poziomego przewijania, ilustracja ładuje się lokalnie, wybór klawiaturą, filtry, szczegóły, zapamiętanie i odłożenie plecaka po odświeżeniu, blokada sprzętu na aktywnej wyprawie, odbiór i crafting. Bez testu fizycznego telefonu.
+```text
+src/
+  domain/       typy, minimalny katalog, czyste reguły, walidacja
+  persistence/  adapter IndexedDB implementujący GameRepository
+  app/          odczyt i polecenia zapisu dla Reacta
+  ui/           pięć widoków i CSS
+  main.tsx      punkt połączenia adaptera i aplikacji
+```
 
-## Uruchamianie Windows jednym kliknięciem
+Bez routera, globalnego store, biblioteki CSS, ikon ani wrappera IndexedDB. Pięć widoków nie wymaga jeszcze tras URL. React i ReactDOM to zależności aplikacji. Vite, TypeScript i typy służą kompilacji. Vitest oraz fake-indexeddb są wyłącznie do testów; emulacja nie zastępuje testu przeglądarki.
 
-Dodano `Uruchom STREFĘ.cmd` i skrypt PowerShell: weryfikacja narzędzi i wersji Node, blokada równoległych uruchomień, kontrola czystości `main`, fetch i tylko fast-forward, instalacja z lockfile, Vite na stałym localhost:5173 i otwarcie przeglądarki. Zajęty port blokuje instalację przed zmianą node_modules. Brak resetu, usuwania plików użytkownika i wyłączania TLS; błąd zatrzymuje kolejne kroki i pozostawia komunikat. Nie zmienia mechanik gry ani globalnej polityki wykonywania skryptów.
+PLAN.md określa dalsze etapy i ograniczenia względem GDD 1.1. AGENTS.md zawiera reguły pracy. Lista dokładnych wersji jest w package.json i package-lock.json.
 
-44/44 testy i kompilacja gry przechodzą. W środowisku Linux brak Windows/PowerShell — uruchomienie samego pliku CMD i ścieżki logowania GitHub wymaga sprawdzenia na komputerze użytkownika.
+## Uproszczenia przygotowania
 
-## Korekta ilustracji przedmiotów — zużycie postapo
+Postać wyrusza ze wszystkimi przedmiotami z obecnego ekwipunku. Nie wybiera zestawu ani ilości zapasów, a start niczego nie zużywa. Zawartość skrytki zostaje w kryjówce. Brak głodu i pragnienia upływającego podczas nieobecności. Podstawowy plecak jest założony na stałe poza siatką i nie można go zdjąć; wymiana na większy to przyszły etap. Receptury wykonują się od razu: 1 woda do uzdatnienia → 1 woda, 1 składnik żywnościowy → 1 racja, 2 czyste tkaniny → 1 bandaż. Naprawiony stół odblokowuje zestaw opatrunków: 2 tkaniny + 1 woda → 3 bandaże. Są to robocze parametry opisane w PLAN.md.
 
-Zastąpiono gładkie wektory wspólnym, wygenerowanym atlasem malowanych ilustracji: łatany i przetarty plecak, porysowana manierka, pognieciona racja z taśmą, bandaż w zużytym opakowaniu, skorodowany złom, ponownie użyta butelka z wodą do uzdatnienia, puszka z workiem składników i cerowana tkanina. Warstwa opatrunkowa pozostaje czysta. Wizualne zużycie nie zmienia zapisanej kondycji ani użyteczności przedmiotów. Atlas WebP z przezroczystością (około 493 KiB) obsługuje siatkę, szczegóły, plecak i crafting, bez osobnych pobrań dla każdego przedmiotu. Reguły, katalog ID, zapis i zależności bez zmian.
+## Ekwipunek i schowek
 
-Weryfikacja: 44/44 testy, build i kontrola Chromium 320/390/768/1440 px — filtry, klawiatura, szczegóły, rezerwacja sprzętu, wyprawa i crafting; bez poziomego przewijania i wyjątków JS. Sprawdzono wygląd w zrzucie ekranu.
+Zakładka Ekwipunek pokazuje postać ze slotami przy sylwetce i siatkę przedmiotów po prawej, we wspólnej ramie. Bez powtórzonej nazwy postaci, „Karty ocalałego” i nagłówków „Ekwipunek postaci”. Na hełm, ubranie, buty i broń główną można zakładać pasujące przedmioty znalezione podczas nowych wypraw. Przeciągnij sprzęt z plecaka do slotu albo użyj „Załóż” w opisie. Zdejmij go na puste pola plecaka albo przyciskiem „Zdejmij”. Przy wymianie poprzedni egzemplarz wraca do zwolnionych pól lub innego wolnego miejsca; gdy się nie mieści, zmiana nie jest stosowana. Pełny plecak nie przenosi zdejmowanych rzeczy automatycznie do skrytki ani odbioru. Rękawice i broń boczna pozostają w przygotowaniu. Plecak jest nadal założony na stałe. Na wąskich ekranach siatka znajduje się pod postacią. Pomoc przenoszenia jest zwijana; zakładka Postać zachowuje dane bohatera.
 
-## Ilustrowana kryjówka — przebudowa wyglądu
+Ekwipunek postaci ma 5 kolumn i 9 rzędów. Schowek w kryjówce ma jedną siatkę 8×9. Obie siatki mają identyczne kratki 52 px. Przedmioty zajmują prostokąty różnych rozmiarów; szczegóły pokazują ich wymiary i ilość. Maksymalny rozmiar przedmiotu to 2×3. Zapasy i materiały pozostają stosami (bez nowych limitów stosowania), a sprzęt to osobne egzemplarze z własnym ID i stanem.
 
-Zastąpiono scenę z prostych kształtów lokalną ilustracją WebP: popękane ściany, przetarte posłanie, zapasy, łatany plecak, zużyty stół, radio i ciepła lampa. Spójna z nowym ekwipunkiem kolorystyka oliwki, rdzy i mosiądzu. Pod ilustracją skróty do wyprawy i mapy; zwijany panel zawiera zdrowie i poziom bohatera, stan wyprawy z odliczaniem i informacją o gotowym raporcie oraz liczbę wody i racji. Stół prowadzi do istniejących receptur; radio pozostaje wyraźnie oznaczoną dekoracją, bez nowych zadań, produkcji, mechanik i migracji zapisu. Ilustracja nie zmienia się wraz z zapasami.
+Przeciągnij rzecz na siatkę: podgląd centruje się pod kursorem bez zmiany wymiarów, a upuszczanie działa też na liniach i między kratkami. Alternatywnie wybierz rzecz, kliknij „Zmień położenie” i wskaż pole. Przyciski pod szczegółami przenoszą do ekwipunku lub schowka, szukając pierwszego wolnego miejsca. Za mało miejsca lub kolizja pozostawia przedmiot na miejscu bez komunikatu o błędzie. Błędy rzeczywistego zapisu lub odczytu nadal są zgłaszane. Na małych ekranach schowek przewija się poziomo. Przenoszenie wymaga powrotu do kryjówki. Założony plecak nie jest przedmiotem do przenoszenia.
 
-44/44 testy i kompilacja przechodzą. Chromium: 320/390/768/1440 px bez poziomego przewijania, obraz załadowany, zwijanie klawiaturą z aria-expanded, nawigacja do bohatera, mapy i ekwipunku, brak zapisu stanu przy samej nawigacji; pusty magazyn, długi pseudonim, odtworzenie aktywnej wyprawy po odświeżeniu, aktualizacja odliczania, przejście po gotowy raport i odbiór. Czas przesunięty tylko w izolowanej przeglądarce testowej. Bez fizycznego telefonu.
+Receptury korzystają wyłącznie z rzeczy przy postaci; surowce ze schowka trzeba najpierw przenieść. Znaleziska i wyniki receptur najpierw trafiają do ekwipunku, następnie do wolnych miejsc schowka, a przy braku miejsca do bezpiecznego odbioru. Odbiór służy wyłącznie zabezpieczeniu wyników i migracji — nie można odkładać tam rzeczy. Stare zapisy zachowują całą zawartość, nazwę i aktywną wyprawę. Wyprawy nadal nie pokazują przyszłych zdobyczy.
 
-## Ilustrowana mapa okolicy
+Stosy większe niż 1 sztuka mają przycisk „Rozdziel” w opisie po najechaniu i w szczegółach. Wybierz ilość od 1 do liczby sztuk pomniejszonej o 1. Nowy stos zajmuje osobny prostokąt w tej samej siatce; przy braku miejsca stan pozostaje bez zmian. Podział jest dostępny po powrocie do kryjówki i zachowuje łączną liczbę przedmiotów.
 
-Papierowy, zniszczony plan zastępuje schemat CSS. Kryjówka prowadzi do ekranu schronienia, a dwa przyciski celów zapisują wybór istniejącą komendą selectLocation. Lista poniżej zapewnia alternatywę dla znaczników i klawiatury. Panel wybranego miejsca zawiera lokalną ilustrację, dotychczasowy opis i poziom poznania, czas z istniejących reguł, złom oraz zestaw zapasów. Przejście do Wypraw nie rozpoczyna zadania. Zmiana celu podczas aktywnej wyprawy dotyczy wyłącznie następnej; pokazano komunikat z nazwą aktywnego celu. Brak nowych lokacji, reguł, zagrożeń, tras i zmian w schemacie zapisu.
+Przeciągnij stos na drugi stos tego samego przedmiotu, aby je połączyć. Podświetlenie „Połącz” obejmuje cały przedmiot docelowy, także wielopolowy. Działa wewnątrz ekwipunku, skrytki i między nimi w otwartej skrytce. Cel zachowuje swoje ID i położenie; źródło znika, a jego pola są zwalniane. Łączą się tylko zapasy i materiały o zgodnym stanie. Inny typ, sprzęt lub za duża suma pozostawiają oba stosy bez zmian.
 
-Weryfikacja: 44/44 testy i build; Chromium 320/390/768/1440 px bez poziomego przewijania, załadowane obrazy, wybór klawiaturą i listą, zachowanie celu po odświeżeniu, nawigacja do kryjówki i planowania. Symulowana przerwana transakcja zachowuje poprzedni cel w interfejsie i bazie; poprawna próba ponowna działa. Wybór następnego celu zachowuje plan, czasy i zapasy aktywnej wyprawy. Zrzuty ekranu sprawdzone wizualnie. Bez testu fizycznego telefonu.
+`id` identyfikuje konkretny stos, `itemId` — rodzaj przedmiotu. Rozdzielone stosy mają różne `id`, ale to samo `itemId`. Pojedyncze sztuki w stosie nie mają osobnych numerów seryjnych.
 
-## Wyprawa i raport — wygląd oraz brak podglądu zdobyczy
+W przyszłości będzie możliwość budowania kolejnych skrytek. Obecnie jest jedna; nie ma stron, zakupów ani płatności. Rzeczy z dawnej drugiej strony są przenoszone do wolnych miejsc schowka, a jeśli się nie mieszczą, pozostają w bezpiecznym odbiorze.
 
-Na polecenie użytkownika usunięto zapowiedź konkretnych łupów z mapy, przygotowania i aktywnej wyprawy. Przed startem widoczne są cel, czas, sprzęt i koszty. Wynik ujawnia dopiero rozliczony raport po powrocie: ilustracje znalezisk, ilości i zużyte zapasy. Ostatni raport jest wyraźnie oznaczoną historią; może pozostawać widoczny podczas kolejnej wyprawy. Ilustrowany ekran używa istniejących grafik lokacji, a licznik nie udaje walki lub zdarzeń. Model nagród nadal demonstracyjny i deterministyczny — nie dodano losowości, nowych kosztów, migracji ani mechanik.
+## Ilustrowana kryjówka
 
-Weryfikacja: 44/44 testy i build; Chromium 320/390/768/1440 px bez poziomego przewijania w przygotowaniu i raporcie. Brak nazw przyszłych znalezisk w mapie, planie, aktywnej i zakończonej, lecz nieodebranej wyprawie. Wcześniejszy odbiór zablokowany; przerwana transakcja nie ujawnia raportu ani nie przyznaje łupów. Ponowienie odbioru działa, raport zachowuje się po odświeżeniu bez powtórnych nagród; nawigacja do ekwipunku działa. Czas przesunięto wyłącznie w izolowanej przeglądarce testowej.
+Główny ekran przedstawia schronienie postapo. Pod ilustracją przejdziesz do przygotowania wyprawy lub mapy. Zwijany panel pokazuje bohatera i zdrowie, stan wyprawy oraz rzeczywiste ilości wody i racji w magazynie. Odliczanie zmienia się w „Raport czeka” po terminie; odbiór nadal następuje na ekranie Wyprawy. Po powrocie z warsztatu i odbiorze raportu naprawisz stół za 6 złomu i 2 tkaniny z ekwipunku lub skrytki. Naprawa zmienia ilustrację pokoju i odblokowuje recepturę zestawu opatrunków w Ekwipunku. Radio jest dekoracją oznaczoną jako funkcja w przygotowaniu. Ilustracja pokoju jest poglądowa; widoczne przedmioty nie oznaczają dodatkowych zasobów ani aktywnych pomieszczeń.
 
-## Karta Bohatera i wspólne tło postapo
+## Mapa okolicy
 
-Osobno zlecony wygląd Bohatera oraz tła strony: wygenerowana tekstura betonu z rdzą i pęknięciami, przygaszone światło, dopasowane tło nagłówka i nawigacji. Nieprzezroczyste panele utrzymują czytelność. Karta postaci korzysta z istniejącej ilustracji, pokazuje poziom, zdrowie i faktyczne wartości ośmiu specjalizacji. Jasno oznaczono brak rozwoju i premii; bez pasków fikcyjnego doświadczenia. Zachowano zapis pseudonimu, podgląd wybranego/rezerwowanego plecaka i przejście do ekwipunku. Grafika ubioru poglądowa. Bez zmiany domeny, schematu i zależności.
+Na papierowym planie wybierz osiedle lub warsztat, albo użyj listy pod mapą. Wybór zapisuje się od razu; panel pokazuje ilustrację miejsca, czas oraz informację o zabieranym ekwipunku. Przycisk „Przygotuj wyprawę” przenosi do istniejącego planowania, nie rozpoczyna podróży. Znacznik kryjówki wraca do głównego ekranu. Podczas aktywnej wyprawy mapa wybiera tylko następny cel, bez zmiany trwającej wyprawy i bez pobierania zapasów.
 
-44/44 testy i build zaliczone; Chromium: wspólne tło ładuje się, wszystkie pięć ekranów bez poziomego przewijania przy 320/390/768/1440 px, osiem umiejętności, nawigacja nie zmienia danych, zmiana pseudonimu zachowuje się po odświeżeniu i nie rusza ekwipunku, wybór plecaka w Ekwipunku jest odzwierciedlony na karcie Bohatera. Zrzut ekranu sprawdzony wizualnie. Bez fizycznego telefonu.
+## Pierwsze wyposażenie
 
-## Menu aktualizacji launchera Windows
+Zniszczony hełm (2×2), łatana kurtka (2×3), znoszone buty (2×2) i zardzewiały łom (1×3) mogą wypaść przy przeszukiwaniu miejsc. Każdy znaleziony egzemplarz ma własne ID, ilość 1 i roboczy stan 60%. Przedmioty nie łączą się w stosy. Zmiana wyposażenia wymaga powrotu do kryjówki. Sprzęt w skrytce trzeba najpierw przenieść do plecaka.
 
-Po zatrzymaniu własnego serwera przez Ctrl+C launcher pozostaje w tym samym oknie z opcjami U (aktualizacja i ponowne uruchomienie) oraz Z (zamknięcie), wybieranymi z Enter. Błąd cyklu pokazuje komunikat i to samo menu. Sprawdzenia czystego main, tylko fast-forward, wersji Node przy starcie, zajętego portu i lockfile zachowane; walidacja repozytorium i portu wykonywana w każdym cyklu. Blokada równoległej sesji trwa także podczas menu. Serwer uruchamiany bezpośrednio przez Node z przekierowanym stdin, pozostawionym stdout/stderr; launcher przechwytuje Ctrl+C jako klawisz i kończy tylko własny PID oraz jego drzewo. Przy zakończeniu przywraca tryb konsoli i zwalnia uchwyty. Brak globalnych zmian polityki PowerShell i zmian w grze.
+Założony sprzęt przetrwa odświeżenie i wyprawę. Założona kurtka chroni przed chorobą; pozostałe wyposażenie nie daje jeszcze premii liczbowych, a sprzęt się nie zużywa; rysunek sylwetki pozostaje poglądowy. Stare zapisy otrzymują puste nowe sloty bez zmiany rzeczy i rozpoczętych wypraw. Nowe grafiki wyposażenia są własnym wygenerowanym atlasem `/art/equipment-worn.webp`.
 
-W środowisku Linux nie ma Windows PowerShell ani taskkill: sprawdzono kod i dokumentację, nie wykonano menu ani przechwycenia Ctrl+C na Windows. Pierwszy start wymaga kontroli na komputerze użytkownika: Ctrl+C → U → kolejny start, Ctrl+C → Z, błędna odpowiedź w menu, zajęty port i lokalne zmiany. Testy aplikacji i build są osobną weryfikacją, nie testem launchera.
+## Wyprawa i raport
 
-## Siatki ekwipunku, schowek i nawigacja
+Przygotowanie pokazuje cel, czas oraz informację o zabraniu obecnego ekwipunku. Mapa, plan oraz trwająca wyprawa nie pokazują przyszłych zdobyczy. Odbiór po terminie zapisuje znaleziska i rozliczony raport z ilustracjami przedmiotów oraz zestawieniem zużycia. Ostatni rozliczony raport pozostaje dostępny jako historia, również podczas kolejnej wyprawy; nie jest prognozą nowych nagród. Zdarzenia i ich wynik są losowane i zapisywane raz przy starcie: ilości znalezisk są zmienne, a powrót może być pusty. Odświeżanie i późniejszy odbiór nie zmieniają wyniku. Wcześniej rozpoczęte wyprawy zachowują dawne łupy i koszty. Raport zawiera dziennik z opisem zdarzeń i znaleziskami z każdego miejsca. Osiedle obejmuje mieszkanie i podwórze, warsztat — zaplecze i magazyn. Można natrafić na zamkniętą skrzynię lub zatarasowaną drogę. Zabrany łom, założony lub niesiony w plecaku, daje szansę otwarcia skrzyni; zawrócenie przed celem oznacza pusty powrót i nie zalicza odwiedzenia warsztatu. Czas wyprawy pozostaje bez zmian. Nie ma walki ani ręcznych decyzji. Stare wyprawy pokazują informację o braku dziennika, zamiast otrzymywać wymyśloną historię.
 
-Na zlecenie użytkownika: kolejność Postać, Ekwipunek, Kryjówka, Wyprawy, Mapa; bez formularza zmiany nazwy, ale zachowane wcześniej zapisane nazwy. Ekwipunek 5×9. Po doprecyzowaniu ostatniej odpowiedzi: dwie strony schowka po 10×10. Dodatkowe strony za prawdziwe pieniądze pozostają wyłącznie przyszłym zakresem — brak mechanizmu płatności i zakupów.
+## Bohater i tło strony
 
-Robocze rozmiary: plecak 2×3, butelki 1×2, racja i bandaż 1×1, złom i składniki 2×2, tkanina 2×1. Wielkość dotyczy stosu; nie wprowadzono nowych limitów ilości stosu ani obracania przedmiotów. Przeciąganie lub wybór i wskazanie wolnego pola, automatyczne znalezienie miejsca przy transferze. Kolizje i wystawanie blokowane w domenie. Transfery tylko w kryjówce; sprzęt aktywnej wyprawy zwalniany dopiero przy rozliczeniu raportu. Surowce do startu i receptur muszą być przy postaci.
+Karta Bohatera pokazuje ilustrację poglądową, faktyczne zdrowie, poziom, pseudonim i osiem zapisanych wartości umiejętności. Rozwój i premie nie są jeszcze aktywne. Zmiana pseudonimu jest wyłączona; dotychczasowa nazwa pozostaje. Podgląd plecaka odzwierciedla wybór na następną lub wyposażenie aktywnej wyprawy; przycisk prowadzi do Ekwipunku. Wszystkie ekrany mają wspólne tło zużytego betonu, bez zmiany danych gry.
 
-Schemat v4 zachowuje układ, obie strony schowka i bezpieczny odbiór dla nadmiarowych przedmiotów z migracji/wyjść domeny. Odbiór nie jest miejscem do odkładania rzeczy. Wyniki nie mieszczące się przy postaci trafiają do schowka, a po jego zapełnieniu czekają bez utraty. Migracja poprawnych v1–v3 zachowuje rzeczy i ich ilości, nazwę, czas i wynik wyprawy; zarezerwowany/wybrany sprzęt ma pierwszeństwo przy rozmieszczaniu. Nieprawidłowe położenia, nakładanie lub powielone ID w v4 są odrzucane. IndexedDB nadal zapisuje całą zmianę atomowo z kontrolą poprzedniego stanu.
+## Kolejność nawigacji
 
-55/55 testów oraz build. Testy: granice, kolizje, transfer między kontenerami/stronami, pełne siatki, zachowanie łupów, migracja przepełnionego zapisu z aktywną wyprawą, przerwany zapis i konflikt dwóch kart. Chromium: nowa kolejność, brak edycji nazwy, dokładnie 45/100 pól, obie strony, transfery i położenie po odświeżeniu, błędne położenie bez utraty, migracja v3 i zachowana nazwa; 320/390/768/1440 px bez przewijania całej strony w poziomie (schowek ma własny scroll).
+Postać → Ekwipunek → Kryjówka → Wyprawy → Mapa. Kryjówka pozostaje ekranem początkowym. W kryjówce przycisk „Otwórz schowek” przechodzi do widoku z obiema siatkami.
 
-## Korekta przeciągania i jeden schowek
+## Opisy po najechaniu i używanie
 
-Na najnowsze polecenie: po chwyceniu podgląd jest centrowany pod kursorem (bez zachowania punktu chwytu) i ma dokładnie rozmiar przedmiotu w siatce. Jednakowe kratki 52×52 px i odstępy 2 px w ekwipunku i schowku; bez dopasowywania grafiki do szerokości panelu. Zdarzenia wskaźnika obsługuje cała powierzchnia, z zaokrągleniem początku prostokąta do najbliższego pola. Linie i szczeliny nie są już obszarem wyłączonym z upuszczania. Podgląd miejsca pokazuje dozwoloną lub kolidującą pozycję; kolizje nadal odrzucane w domenie. Podgląd realizowany lokalnie zamiast natywnego obrazu drag-and-drop, bez jego powiększania.
+Siatki nie pokazują nazw pod ilustracjami — nazwa i opis pojawiają się w interaktywnym okienku po najechaniu, ustawieniu fokusu lub dotknięciu przedmiotu. Woda, racje i bandaże mają przycisk „Użyj”: na tym etapie zużywa on jedną sztukę, bez zmiany zdrowia ani innych statystyk. Po ostatniej sztuce pola zostają zwolnione. Używanie jest dostępne po powrocie do kryjówki.
 
-Jeden schowek 10×10, bez kart. W przyszłości kolejne budowane skrytki zamiast płatnych stron. Schemat v5 sprawdza poprawność starego v4 z obiema stronami przed migracją; zachowuje pierwszą stronę i przenosi zawartość drugiej na wolne miejsca albo do odbioru, nigdy nie usuwając rzeczy. Nazwa, wyposażenie i aktywna wyprawa bez zmian.
+„Ekwipunek” w nawigacji pokazuje wyłącznie rzeczy przy postaci, bez przycisku „Do skrytki”. Skrytkę otworzysz z Kryjówki przyciskiem „Otwórz skrytkę”; w jej widoku widać obie siatki, a obok „Użyj” dostępny jest transfer „Do skrytki” (dla rzeczy przy postaci) lub „Do ekwipunku” (dla rzeczy w skrytce). Przenoszenie i centrowany podgląd zachowują dotychczasowe rozmiary. Szczegóły z układaniem klawiaturą pozostały w zwijanej sekcji.
 
-62/62 testy i build. Przypadki testowe: środek 1×2 i 2×3, szczeliny, granice, kolizje, pełna stara druga strona i kontrola poprzedniego stanu przy zapisie po migracji. Chromium: rzeczywiste ruchy myszą, chwyt za brzeg i centrowanie pod kursorem, zachowane rozmiary ramki i grafiki podczas przeciągania, transfer między siatkami, kolizja bez zmiany zapisu, odświeżenie i identyczne kratki przy 320/390/768/1440 px. Bez fizycznego telefonu.
+Łom liczy się według stanu przy starcie wyprawy: slot broni i plecak działają tak samo; skrytka, odbiór nadmiaru i łom znaleziony dopiero w drodze nie pomagają. Wynik próby i dodatkowy łup zapisują się przy starcie. Roboczo próba ma 70% szans powodzenia; sukces daje 1–3 złomu i 1–2 tkaniny. Łom nie jest zużywany. Wcześniej zapisane wyprawy zachowują swój wynik.
 
-Dodatkowo sprawdzono w Chromium odkładanie 1×1 w środek pola i transfer emulowanym dotykiem, z zachowaniem wymiarów i położenia.
+## Choroba i antybiotyk
 
-## Schowek 8×9 i ciche odrzucanie niedozwolonej pozycji
+Nowa wyprawa bez założonej kurtki ma 50% szans na zachorowanie. Kurtka musi być w slocie ubrania; niesiona w plecaku lub zostawiona w skrytce nie chroni. Wynik zapisuje się przy wyjściu, a choroba zaczyna się przy planowanym powrocie, nawet jeśli raport nie zostanie od razu odebrany. Roboczo trwa 30 minut i ustępuje także podczas nieobecności. Nie zmniejsza punktów zdrowia.
 
-Schowek zmniejszony do 8 kolumn i 9 rzędów, ekwipunek nadal 5×9. Limit rozmiaru przedmiotu 2×3 sprawdzany w domenie. Niezgodna pozycja lub brak miejsca nie uruchamiają zapisu i nie pokazują komunikatu o awarii danych; podgląd kolizji i pozostanie przedmiotu w źródle wystarczają. Rzeczywiste błędy IndexedDB i konflikt z inną kartą pozostają widoczne. Wyposażenie aktywnej wyprawy nie może rozpocząć gestu przenoszenia ani transferu.
+Rozpoczęcie wyprawy podczas choroby wydłuża jej czas o 50% (osiedle 1,5 min, warsztat 3 min). Termin jest stały: wyzdrowienie w trakcie nie skraca trwającej wyprawy. Kolejna wyprawa podczas tej samej choroby nie odnawia jej czasu.
 
-Schemat v6 sprawdza starsze v4/v5 według ich pierwotnych granic 10×10 przed migracją. Rzeczy poza nowymi granicami układa w wolnych miejscach albo zachowuje w odbiorze. Nie naprawia automatycznie uszkodzonych zapisów. 65/65 testów i build; testy pełnego schowka v5, nadmiaru przy migracji, maksymalnego rozmiaru i cichego braku zmiany przy kolizji. Chromium: rzeczywiste przeciąganie, brak alertu po niedozwolonym upuszczeniu, jednakowe rozmiary grafiki, 320/390/768/1440 px i emulowany dotyk.
-
-## Opis na hover, skrytka jako osobny widok, Użyj
-
-Usunięto podpisy z ikon siatki i podglądu przeciągania. Interaktywne okienko pokazuje nazwę, opis i działania; można wejść na nie myszą bez znikania, zamknąć poza nim, Escape lub krzyżykiem. Na telefonie otwiera się dotknięciem. Nazwy pozostają w etykietach dostępności. Skrytka jest osobnym ekranem otwieranym z Kryjówki i pokazuje obie siatki. Pięć pozycji nawigacji bez zmian, w Ekwipunku nie ma siatki skrytki ani przycisku „Do skrytki”. W skrytce transfer jest obok Użyj, w przeciwną stronę jako „Do ekwipunku”.
-
-Na doprecyzowane polecenie użytkownika Użyj zużywa jedną wodę, rację albo bandaż; bez dodawania efektów zdrowia, głodu i pragnienia. Dostępne po powrocie, ze stosu w ekwipunku lub otwartej skrytce. Wynik zapisywany atomowo, ostatnia sztuka zwalnia pola; blokada powtórzenia podczas zapisu i konfliktu kart zachowana. Nie zmieniono schematu zapisu.
-
-72/72 testy i build. Nowe testy zużycia trzech rodzajów, ostatniej sztuki, użycia ze skrytki, blokad w drodze i nieużywalnych rzeczy, konfliktu dwóch kart i przerwanej transakcji. Chromium: realna mysz przechodzi z ikony na okienko i klika Użyj/transfer, ilości zapisane po odświeżeniu, brak Użyj na materiałach, brak podpisów, brak transferu w Ekwipunku, oddzielny widok skrytki, okienko mieści się w 320/390/768/1440 px. Ponownie sprawdzono przeciąganie z centrowaniem bez zmiany wielkości, kolizje i emulowany dotyk. Bez fizycznego telefonu.
-
-
-## Etap 4 — pierwszy ciąg celów i zmiana zasad wypraw (31 października 2026)
-
-- [x] Wyprawa do starego warsztatu, odbiór raportu, zebranie materiałów i jednokrotna naprawa stołu w kryjówce.
-- [x] Koszt naprawy: roboczo 6 złomu i 2 tkaniny, pobierane atomowo z ekwipunku, potem skrytki. Odbiór nadmiaru nie służy jako magazyn materiałów.
-- [x] Naprawa zmienia ilustrację kryjówki i odblokowuje recepturę „Zestaw opatrunków”: 2 tkaniny + 1 woda → 3 bandaże. Pozostałe receptury pozostają dostępne wcześniej.
-- [x] Nowe wyprawy biorą pod uwagę obecny ekwipunek. Usunięto wybór zestawu i sprzętu; start nie pobiera wody ani racji. Przedmioty skrytki pozostają w domu.
-- [x] Podstawowy plecak jest oddzielnym, stale założonym wyposażeniem poza siatką 5×9. Nie można go przenosić ani używać. Większe plecaki i ich wymiana pozostają na przyszłość.
-- [x] Zmienne ilości łupu, losowanie raz przy starcie i trwały wynik; brak prognozy nagród w interfejsie. Roboczo jednostajny rozkład: złom 0–4 na osiedlu / 0–6 w warsztacie, woda do uzdatnienia 0–3, żywność 0–3, tkanina 0–2. Zero pomija dany przedmiot; możliwy pusty powrót. Kolejne wyniki mogą przypadkowo się powtórzyć. Brak zależności od umiejętności/sprzętu — to nadal prototyp balansu.
-- [x] Schemat v7. Migracja poprawnych v1–v6 zachowuje rzeczy, położenia pozostałych przedmiotów, trwającą wyprawę, termin, dawne koszty i wynik. Jeden dotychczasowy plecak przenosi do wyposażenia (pozostałe zachowuje); przy braku plecaka dodaje podstawowy. Nie nadpisuje błędnych ani nowszych danych. Dawny raport warsztatu zalicza odwiedziny; naprawa wymaga osobnej akcji.
-- [x] Drugi wariant ilustracji `/art/shelter-repaired.webp` powstał przez wygenerowaną edycję własnego obrazu kryjówki; bez materiałów z cudzych gier.
-
-Zakres nie obejmuje walki, backendu, płatności ani rozbudowanego silnika zdarzeń. Nowe reguły zastępują wcześniejsze demonstracyjne zestawy i stałe nagrody, zgodnie z bieżącym zleceniem.
-
-Weryfikacja tego etapu: 81/81 testów Vitest, kompilacja TypeScript strict i Vite. Chromium: pełny ciąg wyprawa → raport → naprawa → nowa receptura, wynik i postęp po odświeżeniu, założony plecak poza siatką, brak wyboru zestawów i zużycia przy starcie; szerokości 320, 390, 768 i 1440 px bez poziomego przepełnienia strony. Materiały naprawy w izolowanym profilu przeglądarki dodano do testu; losowe i puste wyniki sprawdzono testami domeny. Testy adaptera obejmują przerwanie naprawy, dwie karty i migrację plecaka v6 przy zapisie.
-
-## Rozdzielanie stosów
-
-Na polecenie użytkownika dodano „Rozdziel” dla stosów większych niż 1 w siatkach ekwipunku i skrytki oraz panelu szczegółów. Okienko pozwala wybrać całkowitą ilość od 1 do ilości stosu minus 1; domyślnie połowa. Zatwierdzenie tworzy drugi stos tego samego przedmiotu i stanu w pierwszym wolnym prostokącie tego samego kontenera. Brak miejsca jest cichym brakiem zmiany, bez zapisu i bez przenoszenia do skrytki/odbioru. Pojedyncza sztuka i założony plecak nie mają tej akcji. Nie można rozdzielać podczas wyprawy ani bezpośrednio z odbioru nadmiaru. Brak automatycznego scalania rozdzielonych stosów i zmiany schematu v7.
-
-Weryfikacja: 101/101 testów Vitest i build. Nowe przypadki sprawdzają sumę sztuk, osobne ID i pozycje, podział w obu kontenerach, niepoprawne ilości, brak całego prostokąta, pełne siatki bez przenoszenia do innej, blokadę w drodze, trwałość, konflikt kart i przerwanie transakcji.
-
-Chromium: rzeczywista mysz od ikony do przycisku, podział w ekwipunku i skrytce, brak akcji dla 1 sztuki, walidacja ilości, Enter/Escape, anulowanie bez zapisu, trwałość po odświeżeniu, pełny kontener bez podziału i bez błędu danych. Okienko mieści się w szerokościach 320/390/768/1440 px.
-
-## Postać połączona z ekwipunkiem — 1 listopada 2026
-
-Na polecenie użytkownika zakładka Ekwipunek pokazuje jedną wspólną kartę z postacią po lewej i siatką 5×9 po prawej. Wspólny komponent HeroPortrait zapewnia tę samą ilustrację, nazwę, poziom i zdrowie co w Postaci. Założony plecak znajduje się pod portretem. Na wąskim ekranie części są ułożone pionowo. To podstawa późniejszego zakładania odzieży i uzbrojenia; sam mechanizm wyposażania nie jest częścią tej zmiany. Skrytka zachowuje dotychczasowe dwie siatki. Brak zmian w regułach, wymiarach kratek, danych i schemacie zapisu.
-
-Weryfikacja: 101/101 istniejących testów i build. Chromium: zgodność portretu, nazwy i zdrowia między zakładkami, jeden plecak, połączenie paneli, układ poziomy/pionowy i kratki 52 px przy szerokościach 320, 390, 768, 1024 i 1440 px bez przepełnienia strony. Sprawdzono rzeczywistą myszą Rozdziel, Użyj, przeciąganie bez zmiany wielkości, transfer w skrytce i trwałość po odświeżeniu. Nawigacja i nowy widok nie zmieniają stanu zapisu.
-
-## Łączenie stosów przeciąganiem — 1 listopada 2026
-
-Na polecenie użytkownika upuszczenie stosu na drugi zgodny stos łączy ich ilości. Działa w ekwipunku, skrytce i między nimi, po powrocie do kryjówki. Cel zachowuje ID, stan i położenie; źródło i jego pozycja są usuwane w tej samej transakcji. Podświetlenie „Połącz” wskazuje cały docelowy prostokąt pod kursorem, niezależnie od przyciągania do pustych pól. Podgląd przeciągania nadal ma pierwotny rozmiar i środek pod kursorem.
-
-Istniejące `id` oznacza stos/egzemplarz wyposażenia, a `itemId` jego definicję. Nie wprowadzamy numerów seryjnych każdej sztuki zapasów. Łączyć można zgodne zapasy i materiały, również pojedyncze sztuki; sprzęt, różny typ/stan i przepełnienie ilości są cichym brakiem zmiany. Brak zmian schematu v7, limitów stosów lub automatycznego scalania wszystkich rzeczy w kontenerze.
-
-Weryfikacja: 114/114 testów i build. Testy sumy ilości, zachowania docelowego ID i pozycji, zwolnienia źródła, powtórzenia komendy, obu kierunków transferu, pełnej siatki, niezgodności, przepełnienia, blokady w drodze, trwałości, równoległych kart i przerwanej transakcji. Chromium: rzeczywista mysz i emulowany dotyk, łączenie po najechaniu narożnika wielopolowych przedmiotów 1×2 i 2×2, oba kontenery i kierunki, niewłaściwy cel bez zmiany i bez błędu zapisu, pełna siatka, zachowany rozmiar i centrowanie podglądu, odtworzenie po odświeżeniu, bez błędów JS.
-
-## Launcher do testowania przez Wi-Fi — 1 listopada 2026
-
-Plik „Uruchom STREFĘ.cmd” korzysta z poprawionego scripts/Start-Strefa.ps1: Vite nasłuchuje na 0.0.0.0:5173, komputer nadal otwiera http://localhost:5173, a okno instruuje o adresie Network dla telefonu. Kontrola zajętego portu obejmuje teraz IPv4 Any i IPv6 localhost. Zachowane menu U/Z, bezpieczne aktualizacje, blokada drugiej sesji i zatrzymywanie wyłącznie własnego serwera. Launcher nie zmienia zapory ani routera. Zmieniony skrypt trzeba po pierwszej aktualizacji zamknąć i uruchomić ponownie, bo PowerShell wczytuje go na początku sesji.
-
-Start wyprawy nie korzysta już z crypto.randomUUID, niedostępnego pod zwykłym adresem HTTP w LAN. ID ma 128 losowych bitów z crypto.getRandomValues, które działa również w takim kontekście. Nie zmienia to schematu ani dotychczasowych ID zapisanych wypraw.
-
-Weryfikacja: 115/115 testów i build; nowy test startu, odczytu i rozliczenia bez randomUUID. Vite uruchomiony na 0.0.0.0 (port testowy 5180), wyświetla Local i Network; nasłuch potwierdzony przez ss. Chromium w widoku telefonu: start, odświeżenie i odbiór raportu bez randomUUID. Weryfikację przeglądarki wykonano przez localhost z zasymulowanym brakiem tej funkcji, ponieważ proxy środowiska blokuje dostęp przeglądarki do lokalnego adresu sieciowego. Brak Windows/PowerShell i fizycznego telefonu w środowisku — samego launchera na Windows i połączenia przez domowe Wi-Fi nie uruchamiano.
-
-## Zdarzenia i dziennik wypraw — 1 listopada 2026
-
-Na zaakceptowane zlecenie dodano krótkie zdarzenia bez walki i ręcznych wyborów. Nowe wyprawy zapisują przy starcie całą kolejność zdarzeń, ich znaleziska i sumaryczny łup. Rozliczenie tylko odczytuje ten wynik; odświeżenie i późniejszy odbiór nie losują niczego ponownie. Przed odebraniem raportu interfejs nie ujawnia zdarzeń ani znalezisk. Ostatni raport nadal jest widoczny podczas kolejnej wyprawy jako rozliczona historia.
-
-Robocze reguły prototypu: 15% szansy na zatarasowaną drogę — jedno zdarzenie, brak dotarcia do celu i pusty powrót. W przeciwnym razie przeszukanie dwóch miejsc: na osiedlu mieszkanie (woda do uzdatnienia 0–3, żywność 0–3, tkanina 0–2) i podwórze (złom 0–4); w warsztacie zaplecze (złom 0–6, tkanina 0–2) i magazyn (woda do uzdatnienia 0–3, żywność 0–3). Pomiędzy nimi 30% szansy na zamkniętą skrzynię, z której na razie niczego nie można zabrać. Zera pomijają dany zasób, więc także odwiedzone miejsca mogą być puste. Nie zmieniono terminów powrotu, zdrowia, wyposażenia ani zużycia zapasów. Zawrócenie przed warsztatem nie zalicza celu naprawy stołu; faktyczne dotarcie zalicza go po odbiorze, nawet bez łupów. Bez zależności od narzędzi/umiejętności na tym etapie.
-
-Schemat v8: poprawne v1–v7 migrują bez utraty rzeczy, położeń, postępu, terminów, wyników i dawnych kosztów. Aktywna wyprawa i raport sprzed zmiany dostają events:null (brak historycznych danych), bez generowania zdarzeń. W v8 aktywny i rozliczony dziennik muszą mieć znane zdarzenia właściwe dla lokacji, dozwoloną kolejność, zasoby/ilości i sumę zgodną z łupem. Błędny lub nowszy zapis nie jest nadpisywany ani cicho naprawiany.
-
-Weryfikacja: 133/133 testy i build. Nowe testy obejmują zdarzenia, pusty powrót, zamkniętą skrzynię, źródła i sumę łupów, dotarcie do warsztatu, brak dodatkowego losowania, nieprawidłowy los, błędne dzienniki oraz migrację v7. Adapter sprawdza migrację wraz z kontrolą współbieżności i ochronę niezgodnego dziennika przed nadpisaniem; dotychczasowe testy transakcji obejmują nowe zdarzenia. Chromium: start bez ujawnienia zdarzeń, odświeżenie bez zmiany wyniku, odbiór dziennika, stary raport podczas następnej wyprawy, zatarasowana droga bez łupu i bez zaliczenia warsztatu, migracja aktywnej wyprawy i raportu v7 z zachowaniem nagrody; szerokości 320/390/768/1440 px, bez przepełnienia i błędów JS.
-
-## Karta wyposażenia z miejscami przy sylwetce — 1 listopada 2026
-
-Na polecenie użytkownika usunięto z widoku Ekwipunek „Kartę ocalałego”, nazwę bohatera, poziom i powtarzające się nagłówki „Ekwipunek postaci”. Lewą część zastępuje sylwetka w przyciemnionej ramie, z sześcioma metalowymi miejscami na hełm, ubranie, rękawice, buty, broń główną i boczną. Własne proste ikony SVG, ślady zużycia, nity i linie łączące ramki z sylwetką; ilustracja ocalałego pozostaje dotychczasowa. Siódmy slot pokazuje rzeczywiście założony plecak, z opisem na hover/focus/dotyk i bez zdejmowania.
-
-To przygotowanie wyglądu pod przyszłe zakładanie odzieży i uzbrojenia: sześć miejsc jest statycznych i nie przyjmuje przedmiotów; informacja o przygotowaniu jest widoczna. Brak nowych przedmiotów, mechanik lub zmian zapisu. Prawa część zachowuje siatkę 5×9 i kratki 52 px, nad nią tylko wymiary i masa. Pomoc przenoszenia przeniesiono do zwijanego panelu. Na telefonie sylwetka i siatka układają się pionowo, z miejscami w obrębie sylwetki. Zakładka Postać oraz układ skrytki zachowane.
-
-Weryfikacja: 133/133 istniejące testy i build. Chromium: brak wskazanych nazw i nagłówków, sześć miejsc przyszłego wyposażenia i jeden założony plecak, opis plecaka bez działań zdejmowania, brak zmiany zapisu przy nawigacji i upuszczeniu na przyszły slot. Sprawdzono rozmiar podglądu przeciągania, Rozdziel, transfer do skrytki, odświeżenie i zachowany widok Postać. Szerokości 320/390/768/1024/1440 px, wszystkie miejsca wewnątrz ilustracji, kratki 52 px i brak poziomego przepełnienia. Kontrola wizualna w Chromium na szerokim i wąskim ekranie, bez błędów JS.
-
-## Zakładanie, zdejmowanie i wymiana wyposażenia — 1 listopada 2026
-
-Zrealizowany zaakceptowany zakres: cztery przedmioty (zniszczony hełm, łatana kurtka, znoszone buty, zardzewiały łom), aktywne sloty głowy, tułowia, stóp i broni głównej. Rozmiary odpowiednio 2×2, 2×3, 2×2, 1×3; maksymalny rozmiar nadal 2×3. Każdy egzemplarz ma własne ID, ilość 1 i stan. Bez łączenia i rozdzielania sprzętu. Rękawice i broń boczna pozostają poglądowymi miejscami, plecaka nie można zdjąć ani wymienić w tym etapie.
-
-Przeciąganie z plecaka do pasującego slotu, ze slotu na wolny prostokąt plecaka, wymiana przez upuszczenie nowego egzemplarza na zajęty slot. Alternatywnie „Załóż” i „Zdejmij” w interaktywnych opisach, także na telefonie i z klawiatury. Przy wymianie stary egzemplarz trafia najpierw w zwolnione pola nowego, a jeśli nie pasuje, do pierwszego wolnego miejsca. Brak miejsca, niewłaściwy slot lub ponowienie tej samej operacji to brak zmiany; nie przenosimy zdejmowanej rzeczy do schowka/odbioru. Pełny plecak nadal może pozwolić na wymianę, gdy mieści się ona w zwalnianych polach. Ekwipunek zmieniamy po powrocie zgodnie z dotychczasową regułą.
-
-Wspólny mechanizm przeciągania siatki i wyposażenia zachowuje pod kursorem pierwotne wymiary ramki i grafiki. Podświetlenie wskazuje pasujący slot lub pełny prostokąt docelowy w siatce; niezgodny cel jest odrzucany. Po zdjęciu do siatki rzecz zajmuje swój rozmiar w kratkach, niezależnie od rozmiaru ramki slotu. Stosowanie, transfer i łączenie zapasów pozostają dostępne.
-
-Źródło przedmiotów: roboczo 25% szansy na dodatkowy egzemplarz za każde przeszukane miejsce. Mieszkanie — kurtka lub buty; podwórze — hełm; zaplecze warsztatu — hełm lub łom; magazyn — kurtka lub buty. Stan znaleziska roboczo 60%; nie jest losowany na nowo przy odbiorze. Cały wynik zapisany przy starcie, ID odbieranego sprzętu deterministyczne względem wyprawy i z kontrolą kolizji w całym stanie. Nie ma darmowego zestawu startowego ani dopisywania sprzętu do wcześniejszych wypraw. Wyniki bez miejsca przechodzą przez dotychczasowy bezpieczny schowek/odbiór. Łom nie zmienia jeszcze zamkniętej skrzyni ani zdarzeń. Premie, zużycie, wpływ na zdrowie/wyprawy i zmiana ilustracji ubioru to późniejszy etap.
-
-Schemat v9: migracja poprawnego v8 i starszych dodaje pustą mapę sześciu miejsc, zachowując rzeczy, położenia, postęp, wyprawę, raport i wyniki. Walidacja sprawdza właściwy slot, kategorię, ilość 1, stan 0–100, unikalność ID między noszonymi rzeczami, plecakiem, siatkami i odbiorem; sprzęt nie ma wpisów w pozycjach siatki. Starsze schematy nadal nie dopuszczają nowych typów wyposażenia. W nowych dziennikach sprzęt musi odpowiadać miejscu i ilości 1. Niepoprawny lub nowszy zapis pozostaje chroniony.
-
-Grafiki: własny wygenerowany atlas 2×2 `/art/equipment-worn.webp`, przezroczyste, zniszczone przedmioty pasujące do poprzednich ilustracji; bez materiałów z cudzych gier.
-
-Weryfikacja: 149/149 testów i build. Domena: cztery sloty, zdejmowanie, wymiana dwóch stanów i ID, pełny plecak, wskazany prostokąt/kolizje, niewłaściwy przedmiot, zakaz zdejmowania plecaka, brak zmian w drodze i premii, walidacja sprzętu i zdarzeń, migracja v8, przyznanie sprzętu raz i zachowanie nadmiaru. Adapter: przerwana wymiana i zdejmowanie, dwie karty i odtworzenie, zapis po migracji. Chromium: wszystkie cztery przedmioty przeciągane do slotów, zdejmowanie, wymiana, zły slot i pełny plecak bez utraty, zachowany rozmiar grafiki/ramki i centrowanie, emulowany dotyk, „Załóż”/„Zdejmij”, odświeżenie, raport z nowym sprzętem oraz migracja aktywnej wyprawy v8. Ponownie sprawdzono łączenie i rozdzielanie stosów myszą/dotykiem, anulowanie, walidację ilości i trwałość. Szerokości 320/390/768/1024/1440 px, kratki 52 px, brak przepełnienia i błędów JS. Bez fizycznego telefonu.
-
-## Łom założony lub zabrany w plecaku — otwieranie skrzyń
-
-Na doprecyzowane polecenie łom działa zarówno w slocie wyposażenia, jak i w inventory przy starcie wyprawy. Skrytka i overflow nie są zabierane; przedmiot znaleziony dopiero w drodze nie wpływa na tę próbę. Zdarzenie skrzyni zapisuje wynik no-tool/opened/jammed i łup w tym samym snapshotcie co reszta wyprawy. Rozliczenie i odświeżenie nie sprawdzają ponownie narzędzia ani nie losują.
-
-Roboczo 70% szans otwarcia, przy sukcesie 1–3 złomu i 1–2 tkaniny. Brak zużycia narzędzia, zmian czasu, zdrowia i pozostałych premii. Raport rozróżnia brak łomu, nieudaną próbę i sukces. Opcjonalne pole cacheResult zachowuje zgodność schematu v9: wcześniejsze zamknięte skrzynie bez pola pozostają bez zmian. Walidacja sprawdza wynik i zgodność nagrody; poza skrzynią to pole jest niedozwolone.
-
-158 testów i build: oba miejsca narzędzia, skrytka/odbiór/brak narzędzia, łom znaleziony w drodze, nieudana próba, utrwalony wynik po odłożeniu łomu po powrocie, brak zużycia i ponownych nagród, starszy dziennik oraz trwałość i równoległy odbiór.
-
-Chromium: raporty dla łomu w plecaku i w slocie, brak łomu ze skrytki, nieudane otwarcie oraz trwałość wyniku i nagrody po odświeżeniu; brak błędów JS.
+Antybiotyk zajmuje 1×1, jest znajdowany w mieszkaniu lub magazynie przy warsztacie (roboczo 20% szans na 1 sztukę). Przycisk Użyj po powrocie zużywa jedną sztukę i leczy chorobę. Zdrowa postać nie zużywa antybiotyku. Można użyć go ze skrytki w jej widoku. Stan choroby i czas do wyzdrowienia są widoczne nad ekranami; raport opisuje zachorowanie lub ochronę kurtki. Wcześniej rozpoczęte wyprawy zachowują termin i wynik, bez dopisywania ryzyka choroby.

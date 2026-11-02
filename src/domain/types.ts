@@ -40,7 +40,9 @@ export interface Cargo {
 }
 export type ExpeditionEventId = 'apartment' | 'courtyard' | 'workshop-floor' | 'storeroom' | 'locked-cache' | 'blocked-road';
 export interface ExpeditionEvent { id: ExpeditionEventId; loot: ResourceAmount[]; cacheResult?: 'no-tool' | 'opened' | 'jammed' }
+export interface ExpeditionHealth { jacketWorn: boolean; sickAtStart: boolean; contracted: boolean }
 export interface Expedition {
+  health: ExpeditionHealth | null;
   events: ExpeditionEvent[] | null;
   cargo: Cargo;
   id: string;
@@ -57,6 +59,7 @@ export interface Location {
 }
 
 export interface ExpeditionReport {
+  health: ExpeditionHealth | null;
   events: ExpeditionEvent[] | null;
   cargo: Cargo;
   expeditionId: string;
@@ -67,7 +70,8 @@ export interface ExpeditionReport {
 
 export interface Placement { x: number; y: number; page: number } // -1 = ekwipunek, 0 = schowek
 export interface GameState {
-  schemaVersion: 9;
+  schemaVersion: 10;
+  illness: { startedAt: number; endsAt: number } | null;
   equipped: Record<EquipmentSlot, InventoryEntry | null>;
   backpack: InventoryEntry;
   progress: { workshopVisited: boolean; workbenchRepaired: boolean };

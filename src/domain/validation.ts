@@ -123,18 +123,33 @@ function validEventState(value: unknown, version: number): boolean {
     && (!state.lastReport || validExpeditionEvents(state.lastReport.events, state.lastReport.locationId, state.lastReport.cargo.loot));
 }
 
-export function isGameState(value: unknown): value is GameState {
+function validEquipmentState(value: unknown, version: number): boolean {
   if (!record(value) || !record(value.equipped) || Object.keys(value.equipped).length !== equipmentSlots.length) return false;
   const equipment = value.equipped;
   if (!equipmentSlots.every((slot) => {
     const entry = equipment[slot];
     return entry === null || (record(entry) && typeof entry.itemId === 'string' && getItem(entry.itemId)?.slot === slot);
   })) return false;
-  return validEventState(value, 9);
+  return validEventState(value, version);
+}
+
+function validHealth(value: unknown): boolean {
+  if (value === null) return true;
+  return record(value) && typeof value.jacketWorn === 'boolean' && typeof value.sickAtStart === 'boolean' && typeof value.contracted === 'boolean'
+    && !(value.contracted && (value.jacketWorn || value.sickAtStart));
+}
+export function isGameState(value: unknown): value is GameState {
+  if (!validEquipmentState(value, 10)) return false;
+  const state = value as GameState;
+  if (state.illness !== null && (!record(state.illness) || !timestamp(state.illness.startedAt) || !timestamp(state.illness.endsAt) || state.illness.endsAt <= state.illness.startedAt)) return false;
+  if (state.activeExpedition && !validHealth(state.activeExpedition.health)) return false;
+  if (state.lastReport && !validHealth(state.lastReport.health)) return false;
+  if (state.illness && state.illness.startedAt > state.updatedAt && (!state.activeExpedition?.health?.contracted || state.illness.startedAt !== state.activeExpedition.expectedReturnAt)) return false;
+  return true;
 }
 
 export function validateSave(value: unknown): GameState {
-  if (record(value) && ![1, 2, 3, 4, 5, 6, 7, 8, 9].includes(Number(value.schemaVersion))) {
+  if (record(value) && ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(Number(value.schemaVersion))) {
     throw new Error('Nieobsługiwana wersja zapisu. Dane pozostawiono bez zmian.');
   }
   if (record(value) && value.schemaVersion === 1 && validStructure(value)) {
@@ -184,6 +199,12 @@ export function validateSave(value: unknown): GameState {
   }
   if (record(value) && value.schemaVersion === 8 && validEventState(value, 8)) {
     return validateSave({ ...value, schemaVersion: 9, equipped: emptyEquipment() });
+  }
+  if (record(value) && value.schemaVersion === 9 && validEquipmentState(value, 9)) {
+    const old = value as unknown as GameState;
+    return validateSave({ ...old, schemaVersion: 10, illness: null,
+      activeExpedition: old.activeExpedition ? { ...old.activeExpedition, health: null } : null,
+      lastReport: old.lastReport ? { ...old.lastReport, health: null } : null });
   }
   if (!isGameState(value)) throw new Error('Zapis jest nieprawidłowy. Dane pozostawiono bez zmian.');
   return value;

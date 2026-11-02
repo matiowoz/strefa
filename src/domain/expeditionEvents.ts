@@ -13,7 +13,7 @@ const routes: Record<string, readonly [ExpeditionEventId, ExpeditionEventId]> = 
   outskirts: ['apartment', 'courtyard'], workshop: ['workshop-floor', 'storeroom'],
 };
 const gearByEvent: Record<ExpeditionEventId, readonly string[]> = { apartment: ['jacket', 'boots'], courtyard: ['helmet'], 'workshop-floor': ['helmet', 'crowbar'], storeroom: ['jacket', 'boots'], 'locked-cache': [], 'blocked-road': [] };
-const resourceOrder = ['scrap', 'raw-water', 'food', 'cloth', 'helmet', 'jacket', 'boots', 'crowbar'];
+const resourceOrder = ['scrap', 'raw-water', 'food', 'cloth', 'helmet', 'jacket', 'boots', 'crowbar', 'antibiotic'];
 function roll(random: () => number): number {
   const value = random();
   if (!Number.isFinite(value) || value < 0 || value >= 1) throw new Error('Nieprawidłowe losowanie.');
@@ -44,6 +44,8 @@ export function resolveExpeditionEvents(locationId: string, random: () => number
       { itemId: 'cloth', quantity: 1 + Math.floor(roll(random) * 2) },
     ];
   }
+  const medicineSite = events.find((event) => event.id === 'apartment' || event.id === 'storeroom');
+  if (medicineSite && roll(random) < .2) medicineSite.loot.push({ itemId: 'antibiotic', quantity: 1 });
   return events;
 }
 
@@ -66,7 +68,7 @@ export function validExpeditionEvents(value: unknown, locationId: string, loot: 
       if (!record(resource) || typeof resource.itemId !== 'string' || typeof resource.quantity !== 'number' || !Number.isSafeInteger(resource.quantity) || resource.quantity < 1 || ids.has(resource.itemId)) return false;
       const drops = event.id === 'locked-cache' && event.cacheResult === 'opened' ? [{ itemId: 'scrap', maximum: 3 }, { itemId: 'cloth', maximum: 2 }] : definition.drops;
       const drop = drops.find((entry) => entry.itemId === resource.itemId);
-      if (drop ? resource.quantity > drop.maximum : !gearByEvent[event.id as ExpeditionEventId].includes(resource.itemId) || resource.quantity !== 1) return false;
+      if (drop ? resource.quantity > drop.maximum : !(gearByEvent[event.id as ExpeditionEventId].includes(resource.itemId) || (resource.itemId === 'antibiotic' && (event.id === 'apartment' || event.id === 'storeroom'))) || resource.quantity !== 1) return false;
       ids.add(resource.itemId);
     }
   }

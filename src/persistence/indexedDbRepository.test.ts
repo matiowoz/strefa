@@ -40,7 +40,7 @@ describe('adapter IndexedDB', () => {
   });
   it('nie traktuje nowszej wersji jako pustej gry i nie usuwa surowych danych', async () => {
     const factory = new IDBFactory();
-    await writeRaw(factory, { schemaVersion: 10, marker: 'keep' });
+    await writeRaw(factory, { schemaVersion: 11, marker: 'keep' });
     const repository = new IndexedDbRepository(factory, 'test');
     await expect(repository.load()).rejects.toThrow('wersja');
     await expect(repository.load()).rejects.toThrow('wersja');
@@ -106,13 +106,13 @@ describe('transakcje wyprawy', () => {
     await repository.save(result, started);
     expect(await repository.load()).toEqual(result);
   });
-  it('wczytuje v1 i zapisuje v9 dopiero przy udanej zmianie', async () => {
+  it('wczytuje v1 i zapisuje v10 dopiero przy udanej zmianie', async () => {
     const factory = new IDBFactory();
     const { lastReport: _, ...legacy } = createInitialState(0);
     await writeRaw(factory, { ...legacy, schemaVersion: 1 });
     const repository = new IndexedDbRepository(factory, 'test');
     const loaded = (await repository.load())!;
-    expect(loaded.schemaVersion).toBe(9);
+    expect(loaded.schemaVersion).toBe(10);
     await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
     expect((await repository.load())!.hero.name).toBe('Kruk');
   });
@@ -180,7 +180,7 @@ it('migruje starą drugą stronę schowka i zachowuje kontrolę poprzedniego sta
   await writeRaw(factory, { ...state, schemaVersion: 4, positions: { ...state.positions, 'starter-water': { x: 9, y: 5, page: 1 } } });
   const repository = new IndexedDbRepository(factory, 'test');
   const loaded = (await repository.load())!;
-  expect(loaded.schemaVersion).toBe(9);
+  expect(loaded.schemaVersion).toBe(10);
   expect(loaded.positions['starter-water'].page).toBe(0);
   const moved = moveItem(loaded, 'starter-water', -1, undefined, 2000);
   await repository.save(moved, loaded);
@@ -319,8 +319,8 @@ it('migruje wyprawę i raport v7 bez dopisywania historii, a zapis zachowuje kon
   await writeRaw(factory, { ...next, schemaVersion: 7, activeExpedition: active, lastReport: report });
   const repository = new IndexedDbRepository(factory, 'test');
   const loaded = (await repository.load())!;
-  expect(loaded.activeExpedition).toEqual({ ...active, events: null });
-  expect(loaded.lastReport).toEqual({ ...report, events: null });
+  expect(loaded.activeExpedition).toEqual({ ...active, events: null, health: null });
+  expect(loaded.lastReport).toEqual({ ...report, events: null, health: null });
   const changed = renameHero(loaded, 'Kruk', 63000);
   await repository.save(changed, loaded);
   expect(await new IndexedDbRepository(factory, 'test').load()).toEqual(changed);
@@ -367,17 +367,42 @@ it('przerwane zdejmowanie zachowuje sprzęt na postaci i nie zajmuje pól plecak
 it('migruje v8 do pustych slotów i zapisuje v9 bez zmiany rozpoczętej wyprawy',async()=>{
   const {startExpedition}=await import('../domain/game');const started=startExpedition(createInitialState(0),1000,()=>.5);
   const {equipped:_,...old}=started;const factory=new IDBFactory();await writeRaw(factory,{...old,schemaVersion:8});
-  const repository=new IndexedDbRepository(factory,'test');const loaded=(await repository.load())!;expect(loaded).toEqual(started);
+  const repository=new IndexedDbRepository(factory,'test');const loaded=(await repository.load())!;expect(loaded).toEqual({...started,activeExpedition:{...started.activeExpedition,health:null}});
   const next=renameHero(loaded,'Kruk',2000);await repository.save(next,loaded);expect(await new IndexedDbRepository(factory,'test').load()).toEqual(next);
 });
 
 it('zachowuje wynik otwarcia skrzyni po ponownym otwarciu i przyznaje łup tylko raz',async()=>{
   const {startExpedition,settleExpedition}=await import('../domain/game');
   const initial=createInitialState(0);const packed=arrange({...initial,inventory:[...initial.inventory,{id:'bar',itemId:'crowbar',quantity:1,condition:60}]});
-  const values=[.5,.5,.5,.5,.1,.5,.99,.99,.1,.5,.5];let i=0;
+  const values=[.5,.5,.5,.5,.1,.5,.99,.99,.1,.5,.5,.99,.99];let i=0;
   const trip=startExpedition(packed,1000,()=>values[i++]);const factory=new IDBFactory();const repository=new IndexedDbRepository(factory,'test');await repository.save(trip,null);
   const loaded=(await new IndexedDbRepository(factory,'test').load())!;expect(loaded.activeExpedition).toEqual(trip.activeExpedition);
   const result=settleExpedition(loaded,loaded.activeExpedition!.id,61000);
   const writes=await Promise.allSettled([repository.save(result,loaded),repository.save(result,loaded)]);
   expect(writes.filter(e=>e.status==='fulfilled')).toHaveLength(1);expect(await repository.load()).toEqual(result);
+});
+
+it('choroba zapisana przy starcie przetrwa odczyt, a dwie karty nie zużyją dwóch dawek',async()=>{
+  const {startExpedition,settleExpedition}=await import('../domain/game');const {useItem}=await import('../domain/useItem');
+  const initial=createInitialState(0);const packed=arrange({...initial,inventory:[...initial.inventory,{id:'med',itemId:'antibiotic',quantity:2,condition:null}]});
+  const trip=startExpedition(packed,1000,()=>0);const factory=new IDBFactory();const repository=new IndexedDbRepository(factory,'test');await repository.save(trip,null);
+  const loaded=(await new IndexedDbRepository(factory,'test').load())!;expect(loaded).toEqual(trip);
+  const cured=useItem(loaded,'med',61000);const results=await Promise.allSettled([repository.save(cured,loaded),repository.save(cured,loaded)]);
+  expect(results.filter(e=>e.status==='fulfilled')).toHaveLength(1);expect(await repository.load()).toEqual(cured);
+  const returned=settleExpedition(cured,trip.activeExpedition!.id,61000);await repository.save(returned,cured);
+  expect((await repository.load())!.illness).toBeNull();expect(returned.inventory.find(e=>e.id==='med')?.quantity).toBe(1);
+});
+
+it('przerwane leczenie nie usuwa choroby ani ostatniej dawki i jej pola',async()=>{
+  const {useItem}=await import('../domain/useItem');const initial=createInitialState(0);
+  const state=arrange({...initial,illness:{startedAt:0,endsAt:10000},inventory:[...initial.inventory,{id:'med',itemId:'antibiotic',quantity:1,condition:null}]});
+  const repository=new IndexedDbRepository(new IDBFactory(),'test');await repository.save(state,null);const next=useItem(state,'med',1000);
+  const original=IDBDatabase.prototype.transaction;const spy=vi.spyOn(IDBDatabase.prototype,'transaction').mockImplementation(function(this:IDBDatabase,...args:Parameters<typeof original>){const tx=original.apply(this,args);queueMicrotask(()=>tx.abort());return tx;});
+  await expect(repository.save(next,state)).rejects.toThrow();spy.mockRestore();expect(await repository.load()).toEqual(state);
+});
+
+it('migruje v9 bez zmiany terminu powrotu ani dopisywania choroby',async()=>{
+  const {startExpedition}=await import('../domain/game');const started=startExpedition(createInitialState(0),1000,()=>.5);const {illness:_,...old}=started;const {health:__,...active}=started.activeExpedition!;
+  const factory=new IDBFactory();await writeRaw(factory,{...old,schemaVersion:9,activeExpedition:active});const repository=new IndexedDbRepository(factory,'test');const loaded=(await repository.load())!;
+  expect(loaded.illness).toBeNull();expect(loaded.activeExpedition).toEqual({...active,health:null});const next=renameHero(loaded,'Kruk',2000);await repository.save(next,loaded);expect(await repository.load()).toEqual(next);
 });
