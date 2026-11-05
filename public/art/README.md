@@ -29,3 +29,7 @@ z pęknięciami i śladami rdzy, tło wspólne dla wszystkich ekranów. WebP
 źródłowego PNG, wyłącznie dekoracja; przy braku obrazu pozostaje ciemne tło CSS.
 
 `przystan-interior.webp` — własna wygenerowana ilustracja wnętrza dawnego domu kultury zamienionego we wspólne bezpieczne miejsce ocalałych, z ladą handlarza, radiostacją i mieszkańcami.
+
+Aktualny wariant Przystani: surowsza ilustracja postapo, z łatanym ubiorem, maskami podniesionymi na głowę, bronią na pasach, wzmocnionymi drzwiami i wyposażeniem odzyskanym z ruin.
+
+Przystań przedstawia współczesność po katastrofie: odzież outdoorową/taktyczną, maski z filtrami, współczesną broń, laptop i cyfrową radiostację, lampy LED i akumulatory. Zużyte wyposażenie nie jest stylizowane na historyczne.

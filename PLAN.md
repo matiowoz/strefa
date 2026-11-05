@@ -376,3 +376,13 @@ Usunięto kartę i odnośnik handlarza z Kryjówki. Wejście: Mapa → Przystań
 Wstęp do budynku i barter wymagają zakończenia aktywnej wyprawy oraz odbioru raportu. Zablokowano także przypadek, kiedy termin już minął, ale raport nadal czeka. Zapasy istniejącego handlarza, ceny, rzeczy i zapis v13 pozostają bez zmian — NPC jest przenoszony, nie tworzony ponownie z pełnym zapasem.
 
 Weryfikacja: 199 testów i build. Nowa regresja dostępu po odbiorze raportu. Chromium: brak handlarza w Kryjówce, wejście z mapy, trzy rozmowy, oferta wewnątrz budynku bez dostępu do skrytki, rzeczywista wymiana i trwałość wcześniej uszczuplonego zapasu po odświeżeniu, zachowanie celu wyprawy. Blokada wejścia przy nieodebranym raporcie, nawet po terminie. Mapa i Przystań: 320/390/768/1440 px bez przepełnienia i wyjątków JS; obejrzano wnętrze na telefonowym widoku. Bez fizycznego telefonu.
+
+## Surowszy wygląd Przystani i mieszkańców
+
+Na korektę użytkownika przerobiono własną ilustrację wnętrza: usunięto przytulne dywany, rośliny dekoracyjne i nadmiernie schludny ubiór. Dodano łatane, przetarte ubrania, pasy i ładownice, zużyte buty, rękawice, maski podniesione na głowę z widocznymi twarzami, broń noszoną na pasach/kaburze. Wnętrze: błoto, popękane płytki, sadza, rdza, prowizoryczna instalacja i akumulatory, worki z piaskiem i wzmocnione drzwi. Chłodniejsze, przygaszone światło z lokalnym ciepłem pieca i lamp roboczych. Zachowano duży budynek, układ trzech NPC i bezpieczny charakter miejsca; to scena wewnątrz, nie targ na zewnątrz.
+
+Zaktualizowano opisy NPC, tekst przy wejściu i teksty alternatywne. Ilustracja wspólna dla holu i widoku oferty. Wyłącznie zmiana wyglądu i opisów, bez funkcji walki/skażenia, nowych przedmiotów, zmian barteru, zapasów lub zapisu.
+
+Doprecyzowanie użytkownika w trakcie korekty: to współczesny świat po apokalipsie. Aktualna, ostateczna wersja sceny zastępuje historycznie wyglądające ubrania i rekwizyty współczesną odzieżą outdoorową/taktyczną, nylonowymi pasami i klamrami, nowoczesną bronią z tworzyw, maskami przemysłowymi z wymiennymi filtrami podniesionymi na głowę, cyfrową radiostacją, laptopem, krótkofalówką, przetwornicą, modułami akumulatorów i lampami LED. Stare mury i mural mogą pozostać architekturą; bohaterowie mają współczesny, zużyty ekwipunek. Stosować tę zasadę do kolejnych grafik świata i postaci, nie postarzać epoki przedmiotów wraz ze śladami użytkowania. Opisy NPC dostosowane.
+
+Weryfikacja korekty wyglądu: 199 testów i build; Chromium — wejście do holu, trzy rozmowy, oferta i działający barter, trwałość zapasu, blokada przed odbiorem raportu, 320/390/768/1440 px bez przepełnienia i wyjątków JS. Obejrzano ostateczną współczesną ilustrację w aplikacji. Bez fizycznego telefonu.
