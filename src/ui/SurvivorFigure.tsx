@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { startBlinking } from './blinking';
 import { getItem } from '../domain/catalog';
 import type { GameState } from '../domain/types';
 import './survivor-figure.css';
@@ -9,6 +10,11 @@ export function SurvivorFigure({ equipped }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [motion, setMotion] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [visible, setVisible] = useState(true);
+  const [eyesClosed, setEyesClosed] = useState(false);
+  useEffect(() => {
+    if (!motion || !visible) return;
+    return startBlinking(setEyesClosed);
+  }, [motion, visible]);
   useEffect(() => {
     let inView = true;
     const update = () => setVisible(inView && !document.hidden);
@@ -33,6 +39,7 @@ export function SurvivorFigure({ equipped }: Props) {
       <span className="survivor-layer figure-backpack" aria-hidden="true" />
       <span className={`survivor-layer figure-body-source ${jacketWorn ? 'figure-dressed' : 'figure-base'}`} data-figure-item={jacketWorn ? 'jacket' : undefined} aria-hidden="true" />
       <div className="survivor-chest" style={{ animationPlayState: visible ? 'running' : 'paused' }} aria-hidden="true"><span className={`survivor-layer figure-body-source ${jacketWorn ? 'figure-dressed' : 'figure-base'}`} /></div>
+      <span className={`survivor-layer figure-eyes ${jacketWorn ? 'figure-dressed' : 'figure-base'}`} data-eyes-closed={motion && visible && eyesClosed} aria-hidden="true" />
       {worn.filter(({ item }) => item !== 'jacket').map(({ item }) => <span key={item} className={`survivor-layer figure-${item}`} data-figure-item={item} aria-hidden="true" />)}
     </div>
     </div>

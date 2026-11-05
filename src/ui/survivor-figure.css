@@ -17,3 +17,6 @@
 
 .survivor-figure[data-boots=true]{--body-bottom:87%}
 .survivor-figure[data-armed=true] .figure-body-source{clip-path:polygon(0 0,100% 0,100% var(--body-bottom,100%),0 var(--body-bottom,100%),0 59%,36% 59%,36% 49%,0 49%)}
+
+.figure-eyes{background-image:url('/art/survivor-blink.webp');background-size:200% 100%;transform:translateY(2.5%) scaleY(.955);transform-origin:50% 0;clip-path:inset(6.1% 44% 91.3% 44%);mask-image:linear-gradient(transparent 6.1%,#000 6.5%,#000 8.1%,transparent 8.7%);opacity:0}
+.figure-eyes[data-eyes-closed=true]{opacity:1}

@@ -308,3 +308,11 @@ Na korektę użytkownika zastąpiono wojskowy wygląd kurtki cywilną, brązową
 Usunięto animację skalującą całą kompozycję. Głowa, nogi, stopy, dłonie i wyposażenie pozostają nieruchome. Oddycha wyłącznie osobna, płynnie maskowana warstwa klatki piersiowej z tym samym ubraniem: uniesienie do 0,45% wysokości i rozszerzenie klatki do 1,4%, cykl 4,2 s. Brak zmiany globalnego rozmiaru lub położenia postaci. Przycisk Ruch, uwzględnienie ustawień systemowych na wejściu i zatrzymanie poza ekranem zachowane.
 
 Weryfikacja: 179 testów i build. Chromium: macierz transformacji klatki zmienia się w czasie, prostokąt całej sylwetki pozostaje identyczny; przycisk zatrzymuje i wznawia ruch. Obie zakładki, zdejmowanie i zakładanie wszystkich czterech rzeczy, powrót luźnej dłoni po zdjęciu łomu, odświeżenie, 320/390/768/1440 px bez przepełnienia i wyjątków JS. Obejrzano zrzuty cywilnej kurtki, chwytu i sylwetki bez wyposażenia. Bez fizycznego telefonu.
+
+## Mruganie oczu — pierwszy etap mimiki
+
+Zaakceptowany etap: mruganie, bez spojrzeń na boki ani obrotów głowy. Własny wygenerowany atlas survivor-blink.webp z zamkniętymi oczami w obu wariantach ubioru. Nad statyczną sylwetką pojawia się tylko mały, maskowany pasek powiek; ułożenie głowy, reszta twarzy, oddech i sprzęt bez zmian. Warstwa oczu jest pod hełmem — nie maluje powiek na jego daszku. Przy nisko położonym daszku oczy pozostają zasłonięte.
+
+Jeden aktywny timeout: losowa przerwa 2800–7000 ms i zamknięcie 130 ms. Zatrzymanie/odmontowanie, wyłączenie Ruchu, zniknięcie z widoku lub ukrycie karty usuwa timeout i otwiera oczy. Brak zapisów gry, zmian schematu i zależności. Brak interwału działającego w tle.
+
+Weryfikacja: 181 testów i build; dwa nowe testy schedulerów z kontrolowanym zegarem sprawdzają nieregularne przerwy, czas zamknięcia, pojedynczy timer i cleanup. Chromium: rzeczywiste mrugnięcie i otwarcie, identyczny prostokąt całej sylwetki, zatrzymanie ruchem, obie zakładki, 320/390/768/1440 px, bez wyjątków JS. Obejrzano powiększone powieki bez hełmu i warstwowanie z kurtką/hełmem. Bez fizycznego telefonu.
