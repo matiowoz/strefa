@@ -5,6 +5,7 @@
 .figure-body-source{background-image:url('/art/survivor-civilian.webp');background-size:200% 100%;transform:translateY(2.5%) scaleY(.955);transform-origin:50% 0;clip-path:polygon(0 0,100% 0,100% var(--body-bottom,100%),0 var(--body-bottom,100%))}
 .figure-base{background-position:0 0}
 .figure-dressed{background-position:100% 0}
+.figure-boots{background-position:100% 0}
 .figure-helmet{background-position:0 100%;transform:translateY(-1.7%) scaleX(.9);transform-origin:50% 0}
 .figure-crowbar{background-image:url('/art/crowbar-grip.webp');background-size:100% 100%;transform:translateY(-5.4%);}
 .survivor-shadow{position:absolute;bottom:2%;left:33%;width:34%;height:4%;border-radius:50%;background:#0009;filter:blur(5px)}
@@ -14,27 +15,8 @@
 .survivor-image{position:absolute;inset:0}
 .survivor-motion{position:absolute;z-index:1;top:5px;right:8px;min-height:0;pointer-events:auto;font-size:.6rem;padding:.3rem .5rem;color:#c3c6af;background:#18211be6;border:1px solid #6b7357;white-space:nowrap}
 
+.survivor-figure[data-boots=true]{--body-bottom:87%}
 .survivor-figure[data-armed=true] .figure-body-source{clip-path:polygon(0 0,100% 0,100% var(--body-bottom,100%),0 var(--body-bottom,100%),0 59%,36% 59%,36% 49%,0 49%)}
 
 .figure-eyes{background-image:url('/art/survivor-blink.webp');background-size:200% 100%;transform:translateY(2.5%) scaleY(.955);transform-origin:50% 0;clip-path:none;mask-image:radial-gradient(ellipse 2.1% .85% at 47.8% 7.1%,#000 55%,transparent 100%),radial-gradient(ellipse 2.1% .85% at 53.3% 7.1%,#000 55%,transparent 100%);opacity:0}
 .figure-eyes[data-eyes-closed=true]{opacity:1}
-
-
-/* Foot positions and bent knees are drawn frames, without skewing leg artwork. */
-.survivor-figure{--hip-x:0%;--upper-lean:0deg}
-.survivor-figure[data-stance=lift-left]{--hip-x:1.5%;--upper-lean:.3deg}
-.survivor-figure[data-stance=left]{--hip-x:6%;--upper-lean:1.5deg}
-.survivor-figure[data-stance=lift-right]{--hip-x:-1.5%;--upper-lean:-.3deg}
-.survivor-figure[data-stance=right]{--hip-x:-6%;--upper-lean:-1.5deg}
-.survivor-upper{position:absolute;inset:0;transform-origin:50% 51%;transform:translateX(var(--hip-x)) skewX(var(--upper-lean));transition:transform .6s ease-in-out}
-.survivor-torso{position:absolute;inset:0;clip-path:polygon(0 0,100% 0,100% 61%,70% 61%,70% 51.5%,30% 51.5%,30% 61%,0 61%)}
-.survivor-steps{position:absolute;inset:0;mask-image:linear-gradient(transparent 50.5%,#000 52%)}
-.survivor-step{position:absolute;inset:0;background-image:url('/art/survivor-steps.webp');background-size:500% 200%;background-repeat:no-repeat;clip-path:polygon(var(--short-left) 50%,var(--short-right) 50%,var(--short-right) 61%,100% 61%,100% 100%,0 100%,0 61%,var(--short-left) 61%);opacity:0;transition:opacity .18s ease-out;transform-origin:50% 0;transform:translateX(var(--step-registration)) translateY(2.5%) scaleY(.955)}
-.step-even{background-position:0 0;--step-registration:-7.4%;--short-left:42%;--short-right:74%}
-.step-lift-left{background-position:25% 0;--step-registration:-1.2%;--short-left:38%;--short-right:72%}
-.step-left{background-position:50% 0;--step-registration:6.5%;--short-left:33%;--short-right:67%}
-.step-lift-right{background-position:75% 0;--step-registration:7%;--short-left:27%;--short-right:62%}
-.step-right{background-position:100% 0;--step-registration:12.6%;--short-left:21%;--short-right:55%}
-.survivor-figure[data-boots=true] .survivor-step{background-position-y:100%}
-.survivor-figure[data-stance=even] .step-even,.survivor-figure[data-stance=lift-left] .step-lift-left,.survivor-figure[data-stance=left] .step-left,.survivor-figure[data-stance=lift-right] .step-lift-right,.survivor-figure[data-stance=right] .step-right{opacity:1}
-.survivor-figure[data-motion=off] .survivor-upper,.survivor-figure[data-motion=off] .survivor-step,.survivor-figure[data-visible=false] .survivor-upper,.survivor-figure[data-visible=false] .survivor-step{transition:none}

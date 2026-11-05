@@ -338,3 +338,11 @@ Poprzednia deformacja statycznych ud i łydek została wycofana po uwagach użyt
 Sekwencja: odpoczynek 5,5–9,5 s → uniesienie odciążonej stopy przez 600 ms → ustawienie w nowym miejscu i odpoczynek. Powrót do równomiernego podparcia również przez klatkę uniesienia. Krótkie przenikanie klatek 180 ms i dopasowany ruch tułowia 600 ms. To prototypowa animacja klatkowa 2D, nie ciągły model fizyczny ani animacja 3D. Wyłączenie ruchu, niewidoczność i odmontowanie przerywają oczekujący krok i wracają do pozycji równej. Bez zmian danych i zasad gry.
 
 Weryfikacja: 183 testy i build. Zaktualizowane testy sekwencji sprawdzają uniesienie przed postawieniem stopy i przed powrotem, obie strony oraz przerwanie w środku kroku bez pozostawiania timerów. Chromium: pięć klatek, zmiana po rzeczywistym czasie, wyłączenie, obie zakładki, 320/390/768/1440 px bez przepełnienia i wyjątków JS. Obejrzano pozycje z butami i bez oraz połączenie z tułowiem. Bez fizycznego telefonu.
+
+## Wycofanie nieudanej animacji zmiany podparcia
+
+Po zgłoszeniu użytkownika, że grafika się rozjechała, wycofano oba eksperymenty z ruchem nóg: deformowanie fragmentów i podmianę dolnej części ilustracji klatkami. Wcześniejsza weryfikacja techniczna nie potwierdzała spójności animacji wizualnej; pozytywne testy nie były wystarczającym kryterium jej akceptacji. Przywrócono SurvivorFigure i CSS z 6f9dec6, czyli spójną sylwetkę sprzed ruchu nóg, z cywilną kurtką, luźnymi dłońmi, widocznym wyposażeniem, oddechem klatki i poprawioną maską mrugania. Usunięto nieużywany scheduler, jego testy i atlas kroków. Żadne dane gry nie są zmieniane.
+
+Naturalne przestawianie stóp pozostaje niezrealizowanym celem. Wymaga jednej spójnej animowanej sylwetki z dopasowanym wyposażeniem, a nie łączenia niezgodnych części różnych klatek. Nie oznaczać tego celu jako ukończonego na podstawie samych testów technicznych.
+
+Weryfikacja wycofania: 181 testów i build. Chromium: oba widoki, pełne wyposażenie, zdejmowanie i ponowne zakładanie, odświeżenie, ruch klatki bez zmiany rozmiaru całej postaci, przycisk Ruch, 320/390/768/1440 px bez wyjątków JS i przepełnienia. Obejrzano przywróconą sylwetkę. Testy dotyczą przywróconej funkcjonalności, nie realizacji naturalnego ruchu nóg.
