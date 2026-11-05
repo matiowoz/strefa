@@ -1,4 +1,5 @@
-import { arrange, atShelter } from './inventory';
+import { arrange } from './inventory';
+import { canVisitSettlement } from './settlement';
 import { addResources } from './preparation';
 import type { GameState, InventoryEntry } from './types';
 
@@ -19,7 +20,7 @@ export function tradeQuote(state: GameState, id: string, amount: number, good: s
   return Math.floor(total / buyCost[good as TradeGood]);
 }
 export function tradeItem(state: GameState, id: string, amount: number, good: string, now = Date.now()): GameState {
-  if (!atShelter(state, now)) throw new Error('Wymiana jest dostępna po powrocie do kryjówki.');
+  if (!canVisitSettlement(state)) throw new Error('Wymiana jest dostępna po powrocie z wyprawy i odebraniu raportu.');
   const output = tradeQuote(state, id, amount, good);
   if (output < 1) throw new Error('Nieprawidłowa wymiana lub za mała wartość przedmiotów.');
   const itemId = good as TradeGood;

@@ -170,8 +170,14 @@ W Ekwipunku składniki receptur są przedstawione jako ikonki z liczbą „posia
 
 ## Pierwszy handlarz — barter
 
-Kryjówka → „Odwiedź handlarza”: wybierz przedmiot z plecaka i liczbę sztuk, a potem jedną z ofert wody, racji lub bandaży. Przed zatwierdzeniem widać dokładną liczbę oddawanych i otrzymywanych rzeczy. To wymiana całej wybranej ilości bez wydawania reszty; możesz zmienić ilość przed decyzją. Stan sprzętu wpływa na wycenę. Wymiana jest możliwa po powrocie do kryjówki.
+Mapa → Przystań → Handlarz → „Pokaż ofertę”: wybierz przedmiot z plecaka i liczbę sztuk, a potem jedną z ofert wody, racji lub bandaży. Przed zatwierdzeniem widać dokładną liczbę oddawanych i otrzymywanych rzeczy. To wymiana całej wybranej ilości bez wydawania reszty; możesz zmienić ilość przed decyzją. Stan sprzętu wpływa na wycenę. Wymiana jest możliwa po powrocie do kryjówki.
 
 Założonego wyposażenia, stałego plecaka, rzeczy ze skrytki ani z odbioru nadmiaru nie można oddać bezpośrednio. Antybiotyk ze starych zapisów nie jest przyjmowany. Otrzymane rzeczy trafiają do plecaka, potem skrytki, a przy braku miejsca do bezpiecznego odbioru. Oddanie rzeczy i zmniejszenie zapasu handlarza zapisują się razem.
 
 Roboczy zapas: 6 wód, 4 racje i 4 bandaże. Jest ograniczony i utrwalony — odświeżenie nie uzupełnia towaru. Ten etap nie obejmuje odnawiania oferty, waluty, negocjacji ani rynku graczy. To lokalny prototyp barteru, a docelowy rynek z GDD pozostaje osobnym etapem. Migracja starych zapisów dodaje początkowy zapas handlarza, zachowując całą postać i rzeczy.
+
+## Przystań — bezpieczny budynek i NPC
+
+Osobna lokalizacja na mapie, w południowo-wschodniej części dzielnicy: roboczo „Przystań”, dawny dom kultury. Wejście prowadzi do ilustrowanego wnętrza dużego budynku, ze wspólnym holem, ladą, radiostacją i mieszkańcami. To odrębne miejsce od prywatnej kryjówki. Handlarz nie ma już dostępu ani oferty w Kryjówce; handel otwierasz rozmową przy jego ladzie w Przystani.
+
+Pierwsze trzy osoby: Handlarz (barter), Mira (operatorka radia, krótka rozmowa) i Dozorca (gospodarz budynku, krótka rozmowa). Kolejne NPC i usługi można dodawać w tym samym miejscu. Radio i dozorca nie przyznają jeszcze zadań ani premii. Wyprawę trzeba zakończyć i odebrać raport przed wejściem. Wybrany cel następnej wyprawy pozostaje bez zmian, wejście do budynku nie jest wyprawą z łupem. W tym prototypie wejście działa przez nawigację, bez osobnego czasu podróży. Dotychczasowy zapas handlarza i przedmioty pozostają zachowane.

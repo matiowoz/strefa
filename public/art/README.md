@@ -27,3 +27,5 @@ dodatkowych lokacji ani symulacji podróży.
 `bunker-wall.webp`: wygenerowana na potrzeby STREFY tekstura zużytego betonu
 z pęknięciami i śladami rdzy, tło wspólne dla wszystkich ekranów. WebP
 źródłowego PNG, wyłącznie dekoracja; przy braku obrazu pozostaje ciemne tło CSS.
+
+`przystan-interior.webp` — własna wygenerowana ilustracja wnętrza dawnego domu kultury zamienionego we wspólne bezpieczne miejsce ocalałych, z ladą handlarza, radiostacją i mieszkańcami.

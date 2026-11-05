@@ -6,7 +6,7 @@ import type { GameState } from '../domain/types';
 import { ItemArt } from './ItemArt';
 import './shelter.css';
 
-type Destination = 'hero' | 'expeditions' | 'inventory' | 'map' | 'storage' | 'quests' | 'trader';
+type Destination = 'hero' | 'expeditions' | 'inventory' | 'map' | 'storage' | 'quests';
 type Props = { saving: boolean; update: (change: (state: GameState) => GameState) => Promise<boolean>; state: GameState; navigate: (screen: Destination) => void };
 
 export function ShelterScreen({ state, navigate, saving, update }: Props) {
@@ -40,7 +40,6 @@ export function ShelterScreen({ state, navigate, saving, update }: Props) {
       <div><button className="shelter-primary" onClick={() => navigate('expeditions')}>{action}<span aria-hidden="true"> →</span></button><button className="shelter-secondary" onClick={() => navigate('map')}>Mapa okolicy</button></div>
     </div>
 
-    <section className="shelter-goals" aria-label="Wymiana zapasów"><span className="eyebrow">Barter</span><h2>Wędrowny handlarz</h2><p>Wymień zbędne znaleziska na wodę, racje lub bandaże. Handlarz ma ograniczony zapas.</p><button onClick={() => navigate('trader')}>Odwiedź handlarza →</button></section>
     <section className="shelter-goals" aria-label="Dziennik zadań"><span className="eyebrow">Notatnik ocalałego · {journal.quests.claimed.length}/4 nagród odebranych</span><h2>{nextQuest?.name ?? 'Gotowy na kolejny dzień'}</h2><p>{nextQuest?.description ?? 'Wszystkie cztery cele zostały ukończone.'}</p><button onClick={() => navigate('quests')}>Otwórz dziennik zadań →</button></section>
     <section className="shelter-goals" aria-label="Odbudowa kryjówki"><span className="eyebrow">Stół roboczy · Miejsce do pracy</span><h2>{state.progress.workbenchRepaired ? 'Stół roboczy naprawiony' : 'Przywróć stół do użytku'}</h2>
       <ol><li>{state.progress.workshopVisited ? '✓' : '○'} Wróć z wyprawy do starego warsztatu i odbierz raport.</li><li>{state.progress.workbenchRepaired ? '✓' : '○'} Zbierz 6 złomu i 2 tkaniny, aby naprawić stół.</li><li>{state.progress.workbenchRepaired ? '✓' : '○'} Odblokuj recepturę „Zestaw opatrunków”.</li></ol>

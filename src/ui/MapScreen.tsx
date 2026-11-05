@@ -1,3 +1,5 @@
+import { canVisitSettlement, settlement } from '../domain/settlement';
+import './settlement.css';
 import { locations } from '../domain/catalog';
 import { expeditionRules, selectLocation } from '../domain/game';
 import type { GameState } from '../domain/types';
@@ -7,7 +9,7 @@ type Props = {
   state: GameState;
   update: (change: (state: GameState) => GameState) => Promise<boolean>;
   saving: boolean;
-  navigate: (screen: 'shelter' | 'expeditions') => void;
+  navigate: (screen: 'shelter' | 'expeditions' | 'settlement') => void;
 };
 const pins: Record<string, { x: number; y: number; label: string }> = {
   outskirts: { x: 43, y: 28, label: 'Osiedle' },
@@ -23,10 +25,10 @@ export function MapScreen({ state, update, saving, navigate }: Props) {
   }
 
   return <div className="neighborhood">
-    <div className="map-introduction"><div><span className="eyebrow">Ślady na papierze. Drogi wśród ruin.</span><h2>Znana okolica</h2></div><p>Wybierz oznaczone miejsce<br />i przygotuj następną wyprawę.</p></div>
+    <div className="map-introduction"><div><span className="eyebrow">Ślady na papierze. Drogi wśród ruin.</span><h2>Znana okolica</h2></div><p>Wybierz cel wyprawy<br />lub wejdź do bezpiecznej Przystani.</p></div>
     <div className="neighborhood-layout">
       <section className="field-map-panel" aria-labelledby="field-map-title">
-        <div className="field-map-heading"><h3 id="field-map-title">Plan okolicy</h3><span>Dwa znane cele</span></div>
+        <div className="field-map-heading"><h3 id="field-map-title">Plan okolicy</h3><span>Dwie wyprawy · bezpieczna lokalizacja</span></div>
         <div className="field-map">
           <img src="/art/neighborhood-map.webp" alt="Zniszczony papierowy plan dzielnicy: kryjówka na dole po lewej, osiedle w górnej części, warsztat po prawej. Miejsca wybierzesz przyciskami na planie lub z listy poniżej." width="1448" height="1086" fetchPriority="high" />
           <span className="map-compass" aria-hidden="true">N<br /><b>↑</b></span>
@@ -34,9 +36,11 @@ export function MapScreen({ state, update, saving, navigate }: Props) {
           {locations.map((location, index) => <button key={location.id} className={`field-marker ${location.discovery === 'known' ? 'known-marker' : ''} ${selected.id === location.id ? 'chosen-marker' : ''}`} style={{ left: `${pins[location.id].x}%`, top: `${pins[location.id].y}%` }} disabled={saving} aria-label={`Wybierz cel: ${location.name}`} aria-pressed={selected.id === location.id} aria-controls="location-details" onClick={() => choose(location.id)}>
             <span className="pin-symbol" aria-hidden="true">0{index + 1}</span><span className="pin-caption">{pins[location.id].label}</span>
           </button>)}
+          <button className="field-marker safe-location-marker" style={{ left: `${settlement.pin.x}%`, top: `${settlement.pin.y}%` }} onClick={() => navigate('settlement')} disabled={!canVisitSettlement(state)} aria-label="Wejdź do Przystani — bezpieczny budynek"><span className="pin-symbol" aria-hidden="true">▥</span><span className="pin-caption">Przystań</span></button>
           <span className="field-map-stamp" aria-hidden="true">Plan poglądowy</span>
         </div>
-        <div className="map-legend" aria-label="Legenda mapy"><span><i className="legend-base" />Kryjówka</span><span><i className="legend-visited" />Odwiedzone</span><span><i className="legend-known" />Znane z informacji</span></div>
+        <div className="map-legend" aria-label="Legenda mapy"><span><i className="legend-base" />Kryjówka</span><span><i className="legend-visited" />Odwiedzone</span><span><i className="legend-known" />Znane z informacji</span><span><i className="legend-safe" />Bezpieczny budynek</span></div>
+        <section className="safe-location-card" aria-label="Bezpieczna lokalizacja"><span className="eyebrow">Bezpieczna lokalizacja · południowo-wschodnia część dzielnicy</span><h3>{settlement.name} — {settlement.building.toLowerCase()}</h3><p>Duży budynek zajęty przez ocalałych. W środku znajdziesz handlarza, operatorkę radia i gospodarza.</p><button onClick={() => navigate('settlement')} disabled={!canVisitSettlement(state)}>Wejdź do Przystani</button>{!canVisitSettlement(state) && <p>Najpierw zakończ wyprawę i odbierz raport.</p>}</section>
         <p className="map-instruction">Wybór zapisuje cel następnej wyprawy. Plan nie pokazuje rzeczywistego ruchu bohatera ani rozpoznania zagrożeń.</p>
         <div className="map-location-list" role="group" aria-label="Lista celów wyprawy">{locations.map((location, index) => <button key={location.id} disabled={saving} aria-pressed={selected.id === location.id} aria-controls="location-details" onClick={() => choose(location.id)}>
           <img src={`/art/${location.id}.webp`} alt="" width="100" height="70" loading="lazy" /><span><small>0{index + 1} / {location.discovery === 'visited' ? 'Odwiedzone' : 'Znane z informacji'}</small><strong>{location.name}</strong><small className="location-choice">{selected.id === location.id ? 'Wybrany cel' : 'Wybierz cel'}</small></span><span className="location-choice-mark" aria-hidden="true">{selected.id === location.id ? '●' : '→'}</span>

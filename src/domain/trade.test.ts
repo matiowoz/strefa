@@ -56,3 +56,14 @@ it('migruje v12 bez utraty rzeczy i odrzuca uszkodzony zapas w v13', () => {
   for (const water of [-1, 7, .5, NaN]) expect(() => validateSave({ ...state, trader: { stock: { water, ration: 4, bandage: 4 } } })).toThrow();
   expect(() => validateSave({ ...state, trader: null })).toThrow();
 });
+
+it('do bezpiecznej lokalizacji i handlu wpuszcza dopiero po odebraniu raportu', async () => {
+  const { canVisitSettlement } = await import('./settlement');
+  const { settleExpedition } = await import('./game');
+  const trip = startExpedition(packed(), 1000, () => 0);
+  expect(canVisitSettlement(trip)).toBe(false);
+  expect(() => tradeItem(trip, 'helmet', 1, 'water', 61000)).toThrow('raportu');
+  const returned = settleExpedition(trip, trip.activeExpedition!.id, 61000);
+  expect(canVisitSettlement(returned)).toBe(true);
+  expect(tradeItem(returned, 'helmet', 1, 'water', 61001).trader.stock.water).toBe(5);
+});
