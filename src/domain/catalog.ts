@@ -7,7 +7,7 @@ export const items = [
   { id: 'jacket', name: 'Łatana kurtka', category: 'equipment', slot: 'body', weightKg: 1.8, description: 'Ciężka kurtka zszywana różnymi nićmi. Przetarte mankiety i plamy po wielu wyprawach. Założona kurtka chroni przed zachorowaniem na wyprawie.' },
   { id: 'boots', name: 'Znoszone buty', category: 'equipment', slot: 'feet', weightKg: 1.2, description: 'Popękana skóra, błoto i niedopasowane sznurowadła. Para butów, która przeszła już sporo.' },
   { id: 'crowbar', name: 'Zardzewiały łom', category: 'equipment', slot: 'weapon', weightKg: 2.5, description: 'Stalowy łom z resztkami czerwonej farby. Zabrany w plecaku lub założony jako broń główna pozwala spróbować otworzyć zamkniętą skrzynię.' },
-  { id: 'antibiotic', name: 'Antybiotyk', category: 'supply', weightKg: 0.05, description: 'Znalezione lekarstwo. Jedna sztuka leczy chorobę. Można użyć po powrocie do kryjówki.' },
+  { id: 'antibiotic', name: 'Antybiotyk', category: 'supply', weightKg: 0.05, description: 'Zachowane lekarstwo. Obecnie nie ma zastosowania; mechanika leczenia jest w przygotowaniu.' },
   { id: 'water', name: 'Woda', category: 'supply', weightKg: 1, description: 'Zapas wyprawowy. Bez stale opadającego paska pragnienia.' },
   { id: 'ration', name: 'Racja żywnościowa', category: 'supply', weightKg: 0.4, description: 'Zapas na drogę.' },
   { id: 'bandage', name: 'Bandaż', category: 'supply', weightKg: 0.1, description: 'Środek medyczny. Leczenie nie jest jeszcze wdrożone.' },

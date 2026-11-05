@@ -44,8 +44,6 @@ export function resolveExpeditionEvents(locationId: string, random: () => number
       { itemId: 'cloth', quantity: 1 + Math.floor(roll(random) * 2) },
     ];
   }
-  const medicineSite = events.find((event) => event.id === 'apartment' || event.id === 'storeroom');
-  if (medicineSite && roll(random) < .2) medicineSite.loot.push({ itemId: 'antibiotic', quantity: 1 });
   return events;
 }
 

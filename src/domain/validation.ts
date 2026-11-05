@@ -1,3 +1,4 @@
+import { expeditionRules } from './game';
 import { questIds, syncQuestProgress } from './quests';
 import { emptyEquipment, equipmentSlots } from './equipment';
 import { validExpeditionEvents } from './expeditionEvents';
@@ -149,15 +150,22 @@ function validIllnessState(value: unknown, version: number): boolean {
   return true;
 }
 
-export function isGameState(value: unknown): value is GameState {
-  if (!validIllnessState(value, 11) || !record(value) || !record(value.quests)) return false;
+function validQuestState(value: unknown, version: number): boolean {
+  if (!validIllnessState(value, version) || !record(value) || !record(value.quests)) return false;
   const { completed, claimed } = value.quests;
   const validIds = (ids: unknown): ids is string[] => Array.isArray(ids) && new Set(ids).size === ids.length && ids.every((id) => questIds.includes(id));
   return validIds(completed) && validIds(claimed) && claimed.every((id) => completed.includes(id));
 }
 
+export function isGameState(value: unknown): value is GameState {
+  if (!validQuestState(value, 12)) return false;
+  const state = value as GameState;
+  return state.illness === null && (!state.activeExpedition || state.activeExpedition.health === null)
+    && (!state.lastReport || state.lastReport.health === null);
+}
+
 export function validateSave(value: unknown): GameState {
-  if (record(value) && ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(Number(value.schemaVersion))) {
+  if (record(value) && ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].includes(Number(value.schemaVersion))) {
     throw new Error('Nieobsługiwana wersja zapisu. Dane pozostawiono bez zmian.');
   }
   if (record(value) && value.schemaVersion === 1 && validStructure(value)) {
@@ -215,7 +223,16 @@ export function validateSave(value: unknown): GameState {
       lastReport: old.lastReport ? { ...old.lastReport, health: null } : null });
   }
   if (record(value) && value.schemaVersion === 10 && validIllnessState(value, 10)) {
-    return syncQuestProgress({ ...value, schemaVersion: 11, quests: { completed: [], claimed: [] } } as unknown as GameState);
+    return validateSave(syncQuestProgress({ ...value, schemaVersion: 11, quests: { completed: [], claimed: [] } } as unknown as GameState));
+  }
+  if (record(value) && value.schemaVersion === 11 && validQuestState(value, 11)) {
+    const old = value as unknown as GameState;
+    const active = old.activeExpedition;
+    const baseDuration = active ? expeditionRules[active.plan.locationId as keyof typeof expeditionRules].durationMs : 0;
+    return validateSave({ ...old, schemaVersion: 12, illness: null,
+      activeExpedition: active ? { ...active, health: null, expectedReturnAt: active.health?.sickAtStart
+        ? Math.min(active.expectedReturnAt, active.startedAt + baseDuration) : active.expectedReturnAt } : null,
+      lastReport: old.lastReport ? { ...old.lastReport, health: null } : null });
   }
   if (!isGameState(value)) throw new Error('Zapis jest nieprawidłowy. Dane pozostawiono bez zmian.');
   return value;

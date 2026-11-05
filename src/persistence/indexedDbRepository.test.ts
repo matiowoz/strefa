@@ -40,7 +40,7 @@ describe('adapter IndexedDB', () => {
   });
   it('nie traktuje nowszej wersji jako pustej gry i nie usuwa surowych danych', async () => {
     const factory = new IDBFactory();
-    await writeRaw(factory, { schemaVersion: 12, marker: 'keep' });
+    await writeRaw(factory, { schemaVersion: 13, marker: 'keep' });
     const repository = new IndexedDbRepository(factory, 'test');
     await expect(repository.load()).rejects.toThrow('wersja');
     await expect(repository.load()).rejects.toThrow('wersja');
@@ -112,7 +112,7 @@ describe('transakcje wyprawy', () => {
     await writeRaw(factory, { ...legacy, schemaVersion: 1 });
     const repository = new IndexedDbRepository(factory, 'test');
     const loaded = (await repository.load())!;
-    expect(loaded.schemaVersion).toBe(11);
+    expect(loaded.schemaVersion).toBe(12);
     await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
     expect((await repository.load())!.hero.name).toBe('Kruk');
   });
@@ -180,7 +180,7 @@ it('migruje starą drugą stronę schowka i zachowuje kontrolę poprzedniego sta
   await writeRaw(factory, { ...state, schemaVersion: 4, positions: { ...state.positions, 'starter-water': { x: 9, y: 5, page: 1 } } });
   const repository = new IndexedDbRepository(factory, 'test');
   const loaded = (await repository.load())!;
-  expect(loaded.schemaVersion).toBe(11);
+  expect(loaded.schemaVersion).toBe(12);
   expect(loaded.positions['starter-water'].page).toBe(0);
   const moved = moveItem(loaded, 'starter-water', -1, undefined, 2000);
   await repository.save(moved, loaded);
@@ -382,25 +382,6 @@ it('zachowuje wynik otwarcia skrzyni po ponownym otwarciu i przyznaje łup tylko
   expect(writes.filter(e=>e.status==='fulfilled')).toHaveLength(1);expect(await repository.load()).toEqual(result);
 });
 
-it('choroba zapisana przy starcie przetrwa odczyt, a dwie karty nie zużyją dwóch dawek',async()=>{
-  const {startExpedition,settleExpedition}=await import('../domain/game');const {useItem}=await import('../domain/useItem');
-  const initial=createInitialState(0);const packed=arrange({...initial,inventory:[...initial.inventory,{id:'med',itemId:'antibiotic',quantity:2,condition:null}]});
-  const trip=startExpedition(packed,1000,()=>0);const factory=new IDBFactory();const repository=new IndexedDbRepository(factory,'test');await repository.save(trip,null);
-  const loaded=(await new IndexedDbRepository(factory,'test').load())!;expect(loaded).toEqual(trip);
-  const cured=useItem(loaded,'med',61000);const results=await Promise.allSettled([repository.save(cured,loaded),repository.save(cured,loaded)]);
-  expect(results.filter(e=>e.status==='fulfilled')).toHaveLength(1);expect(await repository.load()).toEqual(cured);
-  const returned=settleExpedition(cured,trip.activeExpedition!.id,61000);await repository.save(returned,cured);
-  expect((await repository.load())!.illness).toBeNull();expect(returned.inventory.find(e=>e.id==='med')?.quantity).toBe(1);
-});
-
-it('przerwane leczenie nie usuwa choroby ani ostatniej dawki i jej pola',async()=>{
-  const {useItem}=await import('../domain/useItem');const initial=createInitialState(0);
-  const state=arrange({...initial,illness:{startedAt:0,endsAt:10000},inventory:[...initial.inventory,{id:'med',itemId:'antibiotic',quantity:1,condition:null}]});
-  const repository=new IndexedDbRepository(new IDBFactory(),'test');await repository.save(state,null);const next=useItem(state,'med',1000);
-  const original=IDBDatabase.prototype.transaction;const spy=vi.spyOn(IDBDatabase.prototype,'transaction').mockImplementation(function(this:IDBDatabase,...args:Parameters<typeof original>){const tx=original.apply(this,args);queueMicrotask(()=>tx.abort());return tx;});
-  await expect(repository.save(next,state)).rejects.toThrow();spy.mockRestore();expect(await repository.load()).toEqual(state);
-});
-
 it('migruje v9 bez zmiany terminu powrotu ani dopisywania choroby',async()=>{
   const {startExpedition}=await import('../domain/game');const started=startExpedition(createInitialState(0),1000,()=>.5);const {illness:_,...old}=started;const {health:__,...active}=started.activeExpedition!;
   const factory=new IDBFactory();await writeRaw(factory,{...old,schemaVersion:9,activeExpedition:active});const repository=new IndexedDbRepository(factory,'test');const loaded=(await repository.load())!;
@@ -418,7 +399,7 @@ it('nagroda zadania i znacznik zapisują się razem, druga karta nie powiela nag
   await expect(repository.save(claimQuest(second, 'workbench', 2001), second)).rejects.toThrow('innej karcie');
   const loaded = (await repository.load())!;
   expect(loaded.quests.claimed).toEqual(['workbench']);
-  expect(loaded.inventory.filter((e) => e.itemId === 'antibiotic').reduce((sum, e) => sum + e.quantity, 0)).toBe(1);
+  expect(loaded.inventory.filter((e) => e.itemId === 'bandage').reduce((sum, e) => sum + e.quantity, 0)).toBe(4);
 });
 
 it('przerwana transakcja nagrody pozostawia możliwość odbioru', async () => {
@@ -437,4 +418,22 @@ it('przerwana transakcja nagrody pozostawia możliwość odbioru', async () => {
   expect(await repository.load()).toEqual(state);
   await repository.save(claimQuest(state, 'workbench', 2000), state);
   expect((await repository.load())!.quests.claimed).toEqual(['workbench']);
+});
+
+it('migracja chorej postaci v11 zachowuje znaleziska i znacznik nagrody po pierwszym zapisie', async () => {
+  const { startExpedition } = await import('../domain/game');
+  const trip = startExpedition(createInitialState(0), 1000, () => 0);
+  const raw = { ...trip, schemaVersion: 11, illness: { startedAt: 0, endsAt: 100000 },
+    quests: { completed: ['workbench'], claimed: ['workbench'] },
+    activeExpedition: { ...trip.activeExpedition!, expectedReturnAt: 91000, health: { jacketWorn: false, sickAtStart: true, contracted: false } } };
+  const factory = new IDBFactory();await writeRaw(factory, raw);
+  const repository = new IndexedDbRepository(factory, 'test');
+  const loaded = (await repository.load())!;
+  expect(loaded.illness).toBeNull();expect(loaded.activeExpedition!.expectedReturnAt).toBe(61000);
+  expect(loaded.activeExpedition!.cargo).toEqual(trip.activeExpedition!.cargo);
+  expect(loaded.quests.claimed).toEqual(['workbench']);
+  const next = renameHero(loaded, 'Kruk', 2000);
+  await repository.save(next, loaded);
+  expect(await repository.load()).toEqual(next);
+  await expect(repository.save(next, loaded)).rejects.toThrow('innej karcie');
 });

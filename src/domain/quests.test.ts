@@ -64,11 +64,11 @@ describe('dziennik zadań', () => {
     expect(claimQuest(trip, 'reserve', 1001)).toBe(trip);
   });
   it('nie gubi nagrody przy pełnym plecaku i skrytce', () => {
-    const entries = Array.from({ length: 117 }, (_, i) => ({ id: `full-${i}`, itemId: 'bandage', quantity: 1, condition: null }));
+    const entries = Array.from({ length: 117 }, (_, i) => ({ id: `full-${i}`, itemId: 'ration', quantity: 1, condition: null }));
     const state = arrange({ ...initial(), inventory: entries, positions: {}, quests: { completed: ['workbench'], claimed: [] } });
     expect(state.overflow).toHaveLength(0);
     const claimed = claimQuest(state, 'workbench', 2000);
-    expect(claimed.overflow.some((e) => e.itemId === 'antibiotic')).toBe(true);
+    expect(claimed.overflow.some((e) => e.itemId === 'bandage')).toBe(true);
     expect(isGameState(claimed)).toBe(true);
   });
   it('migruje v10 z widocznymi osiągnięciami bez przyznawania nagród', () => {

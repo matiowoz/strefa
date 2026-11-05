@@ -65,7 +65,7 @@ npm.cmd run preview
 6. Sprawdź, że start nie zużył wody ani racji, a plecak pozostaje założony. W raporcie przeczytaj zdarzenia i sprawdź znaleziska. Gdy znajdziesz surowce, w Ekwipunku uzdatnij wodę, przygotuj rację lub bandaż. Widać koszt i wynik każdej receptury. Brak zasobów blokuje operację.
 7. Przy błędzie zapisu zmiana nie zostaje zastosowana; ponów odbiór. Przy konflikcie z inną kartą odśwież stronę.
 
-Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v10 (migracja poprawnych v1, v2, v3, v4, v5, v6, v7, v8 i v9 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
+Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v12 (migracja poprawnych v1–v11 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
 
 Zapis jest osobny dla urządzenia, przeglądarki i adresu z portem. localhost i adres LAN mają różne zapisy; telefon nie współdzieli zapisu komputera. Czyszczenie danych witryny lub tryb prywatny może usunąć postęp. Brak synchronizacji, eksportu i kopii chmurowej. Nieaktualny zapis z drugiej karty jest odrzucany atomowo; odśwież ją przed kolejną zmianą. Czas wypraw opiera się na zegarze urządzenia, bez zabezpieczeń serwerowych.
 
@@ -118,7 +118,7 @@ Na papierowym planie wybierz osiedle lub warsztat, albo użyj listy pod mapą. W
 
 Zniszczony hełm (2×2), łatana kurtka (2×3), znoszone buty (2×2) i zardzewiały łom (1×3) mogą wypaść przy przeszukiwaniu miejsc. Każdy znaleziony egzemplarz ma własne ID, ilość 1 i roboczy stan 60%. Przedmioty nie łączą się w stosy. Zmiana wyposażenia wymaga powrotu do kryjówki. Sprzęt w skrytce trzeba najpierw przenieść do plecaka.
 
-Założony sprzęt przetrwa odświeżenie i wyprawę. Założona kurtka chroni przed chorobą; pozostałe wyposażenie nie daje jeszcze premii liczbowych, a sprzęt się nie zużywa; rysunek sylwetki pozostaje poglądowy. Stare zapisy otrzymują puste nowe sloty bez zmiany rzeczy i rozpoczętych wypraw. Nowe grafiki wyposażenia są własnym wygenerowanym atlasem `/art/equipment-worn.webp`.
+Założony sprzęt przetrwa odświeżenie i wyprawę. Ubranie nie daje jeszcze premii liczbowych, a sprzęt się nie zużywa; rysunek sylwetki pozostaje poglądowy. Stare zapisy otrzymują puste nowe sloty bez zmiany rzeczy i rozpoczętych wypraw. Nowe grafiki wyposażenia są własnym wygenerowanym atlasem `/art/equipment-worn.webp`.
 
 ## Wyprawa i raport
 
@@ -140,16 +140,14 @@ Siatki nie pokazują nazw pod ilustracjami — nazwa i opis pojawiają się w in
 
 Łom liczy się według stanu przy starcie wyprawy: slot broni i plecak działają tak samo; skrytka, odbiór nadmiaru i łom znaleziony dopiero w drodze nie pomagają. Wynik próby i dodatkowy łup zapisują się przy starcie. Roboczo próba ma 70% szans powodzenia; sukces daje 1–3 złomu i 1–2 tkaniny. Łom nie jest zużywany. Wcześniej zapisane wyprawy zachowują swój wynik.
 
-## Choroba i antybiotyk
+## Zdrowie — obecny zakres
 
-Nowa wyprawa bez założonej kurtki ma 50% szans na zachorowanie. Kurtka musi być w slocie ubrania; niesiona w plecaku lub zostawiona w skrytce nie chroni. Wynik zapisuje się przy wyjściu, a choroba zaczyna się przy planowanym powrocie, nawet jeśli raport nie zostanie od razu odebrany. Roboczo trwa 30 minut i ustępuje także podczas nieobecności. Nie zmniejsza punktów zdrowia.
+Zwykła choroba została usunięta: brak losowania zachorowania, ochrony kurtki, leczenia i kary czasu wyprawy. Osiedle trwa 1 minutę, warsztat 2 minuty. Migracja usuwa także aktywne i zaplanowane zachorowania oraz skraca rozpoczęte wyprawy wydłużone przez dawną chorobę do ich podstawowego czasu, liczonego od pierwotnego startu. Łupy, ekwipunek i postęp zadań pozostają zachowane.
 
-Rozpoczęcie wyprawy podczas choroby wydłuża jej czas o 50% (osiedle 1,5 min, warsztat 3 min). Termin jest stały: wyzdrowienie w trakcie nie skraca trwającej wyprawy. Kolejna wyprawa podczas tej samej choroby nie odnawia jej czasu.
-
-Antybiotyk zajmuje 1×1, jest znajdowany w mieszkaniu lub magazynie przy warsztacie (roboczo 20% szans na 1 sztukę). Przycisk Użyj po powrocie zużywa jedną sztukę i leczy chorobę. Zdrowa postać nie zużywa antybiotyku. Można użyć go ze skrytki w jej widoku. Stan choroby i czas do wyzdrowienia są widoczne nad ekranami; raport opisuje zachorowanie lub ochronę kurtki. Wcześniej rozpoczęte wyprawy zachowują termin i wynik, bez dopisywania ryzyka choroby.
+Antybiotyki ze starszych zapisów pozostają w posiadaniu gracza, ale nie można ich używać i nie pojawiają się w nowych losowaniach. Za naprawę stołu dziennik przyznaje teraz 2 bandaże; wcześniej odebrana nagroda nie jest przyznawana ponownie ani zamieniana. Choroba popromienna jest planowana na przyszłość, obecnie nie działa.
 
 ## Dziennik zadań
 
 Kryjówka → „Otwórz dziennik zadań”: cztery cele z postępem i jednorazowym odbiorem nagrody. Można je realizować w dowolnej kolejności. Pierwsze zapasy wymagają odebranego raportu ze znaleziskami; Miejsce do pracy — naprawy stołu po powrocie z warsztatu; Przygotowany ocalały — założenia kurtki; Rezerwa na jutro — 3 wód, 3 racji i 2 bandaży jednocześnie w skrytce. Zapasy nie są pobierane przez zadanie. Po zaliczeniu postęp pozostaje, nawet jeśli zużyjesz rzeczy lub zdejmiesz kurtkę.
 
-Nagrody: kolejno 2 tkaniny, 1 antybiotyk, 2 racje i 4 złomu. Odbiór po powrocie dodaje rzeczy do plecaka; nadmiar trafia do skrytki lub odbioru nadmiaru. Starsze zapisy zachowują wyposażenie i postęp: dziennik rozpoznaje naprawiony stół, obecnie założoną kurtkę, obecne zapasy skrytki oraz znaleziska z ostatniego raportu. Nie odtwarza historii, której poprzedni zapis nie przechowywał.
+Nagrody: kolejno 2 tkaniny, 2 bandaże, 2 racje i 4 złomu. Odbiór po powrocie dodaje rzeczy do plecaka; nadmiar trafia do skrytki lub odbioru nadmiaru. Starsze zapisy zachowują wyposażenie i postęp: dziennik rozpoznaje naprawiony stół, obecnie założoną kurtkę, obecne zapasy skrytki oraz znaleziska z ostatniego raportu. Nie odtwarza historii, której poprzedni zapis nie przechowywał.

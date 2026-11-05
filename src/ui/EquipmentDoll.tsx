@@ -57,7 +57,7 @@ export function EquipmentDoll({ state, disabled, selectedId, drag, equip, unequi
       </button>
       <span className="equipment-stencil" aria-hidden="true">STREFA / OSOBISTE</span>
     </div>
-    <p className="equipment-future">Sylwetka poglądowa · założona kurtka chroni przed chorobą.</p>
+    <p className="equipment-future">Sylwetka poglądowa · wygląd postaci nie zmienia się jeszcze wraz z wyposażeniem.</p>
     {hover && viewed && !drag.active && <ItemPopover id={popoverId} entry={viewed} anchor={hover.anchor} keep={keep} leave={leave} close={close}>{viewed.id === backpack.id ? <p>Założony na stałe · 5 × 9 pól.</p> : <><p>Stan: {viewed.condition}%</p><button disabled={disabled || unequipItem(state, viewed.id) === state} title="Zdejmij do wolnego miejsca w plecaku" onClick={() => { close(); unequip(viewed.id); }}>Zdejmij</button></>}</ItemPopover>}
   </section>;
 }

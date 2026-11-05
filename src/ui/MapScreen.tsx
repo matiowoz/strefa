@@ -1,5 +1,3 @@
-import { expeditionDuration } from '../domain/illness';
-import { useNow } from './useNow';
 import { locations } from '../domain/catalog';
 import { expeditionRules, selectLocation } from '../domain/game';
 import type { GameState } from '../domain/types';
@@ -17,7 +15,6 @@ const pins: Record<string, { x: number; y: number; label: string }> = {
 };
 
 export function MapScreen({ state, update, saving, navigate }: Props) {
-  const now = useNow(!!state.illness && Date.now() < state.illness.endsAt);
   const selected = locations.find((location) => location.id === state.selectedLocationId)!;
   const rule = expeditionRules[selected.id];
   const activeLocation = locations.find((location) => location.id === state.activeExpedition?.plan.locationId);
@@ -49,7 +46,7 @@ export function MapScreen({ state, update, saving, navigate }: Props) {
       <section className="location-details" id="location-details" aria-labelledby="location-heading">
         <div className="location-image"><img src={`/art/${selected.id}.webp`} alt={selected.id === 'outskirts' ? 'Opuszczone bloki wokół zarośniętego podwórka, zardzewiałe auto i pusty plac zabaw.' : 'Stary warsztat z cegły i blachy, skorodowana brama, stare opony i zarośnięty dziedziniec.'} width="1672" height="941" /><span>{selected.discovery === 'visited' ? 'Odwiedzone' : 'Znane z informacji'}</span></div>
         <div className="location-description"><span className="eyebrow">Cel następnej wyprawy</span><h2 id="location-heading">{selected.name}</h2><p>{selected.description}</p>
-          <dl><div><dt>Czas wyprawy</dt><dd>{(expeditionDuration(state, rule.durationMs, now) / 60000).toLocaleString('pl-PL')} min</dd></div></dl>
+          <dl><div><dt>Czas wyprawy</dt><dd>{(rule.durationMs / 60000).toLocaleString('pl-PL')} min</dd></div></dl>
           <p className="location-loot-note">Nie wiesz, co znajdziesz na miejscu. Zdobycze poznasz dopiero z raportu po powrocie.</p>
           <div className="map-kit-note"><span className="eyebrow">Twój obecny ekwipunek</span><p>Wyruszasz z tym, co niesiesz przy postaci.</p><small>Przedmioty w skrytce pozostają w kryjówce.</small></div>
           {state.activeExpedition && <p className="map-active-note">Trwa już wyprawa do: <strong>{activeLocation?.name}</strong>. Zmiana celu na mapie nie zmieni jej planu.</p>}

@@ -50,7 +50,7 @@ describe('krótkie historie wypraw', () => {
   });
   it('odrzuca błędny los na każdym etapie i nieznaną trasę', () => {
     expect(() => resolveExpeditionEvents('unknown', () => .5)).toThrow();
-    for (let i = 0; i < 9; i++) expect(() => resolveExpeditionEvents('outskirts', sequence(...Array(i).fill(.5), NaN))).toThrow('losowanie');
+    for (let i = 0; i < 8; i++) expect(() => resolveExpeditionEvents('outskirts', sequence(...Array(i).fill(.5), NaN))).toThrow('losowanie');
   });
 });
 
@@ -91,7 +91,7 @@ describe('walidacja dziennika i migracja', () => {
     const { events: _reportEvents, ...report } = next.lastReport!;
     const old = { ...next, schemaVersion: 7, activeExpedition: active, lastReport: report };
     const loaded = validateSave(old);
-    expect(loaded.schemaVersion).toBe(11);
+    expect(loaded.schemaVersion).toBe(12);
     expect(loaded.activeExpedition).toEqual({ ...active, events: null, health: null });
     expect(loaded.lastReport).toEqual({ ...report, events: null, health: null });
     expect(loaded.inventory).toEqual(old.inventory);

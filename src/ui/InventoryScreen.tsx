@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNow } from './useNow';
-import { isSick } from '../domain/illness';
 import { getItem } from '../domain/catalog';
 import { equipItem, equipmentSlot, unequipItem, wornItems } from '../domain/equipment';
 import { useInventoryDrag } from './useInventoryDrag';
@@ -18,7 +17,7 @@ import './inventory-grid.css';
 
 type Props = { state: GameState; saving: boolean; storage: boolean; update: (change: (state: GameState) => GameState) => Promise<boolean> };
 export function InventoryScreen({ state, update, saving, storage }: Props) {
-  const now = useNow(!!state.activeExpedition || (!!state.illness && Date.now() < state.illness.endsAt));
+  const now = useNow(!!state.activeExpedition);
   const page = 0;
   const [selectedId, setSelectedId] = useState<string | null>(state.inventory[0]?.id ?? null);
   const [moving, setMoving] = useState(false);
@@ -58,7 +57,7 @@ export function InventoryScreen({ state, update, saving, storage }: Props) {
     setNotice('');
     let used = false;
     void update((previous) => { const next = useItem(previous, entry.id); used = next !== previous; return next; }).then((ok) => {
-      if (ok && used) setNotice(entry.itemId === 'antibiotic' ? 'Wyleczono chorobę.' : entry.itemId === 'water' ? 'Wypito wodę.' : entry.itemId === 'ration' ? 'Zjedzono rację.' : 'Zużyto bandaż.');
+      if (ok && used) setNotice(entry.itemId === 'water' ? 'Wypito wodę.' : entry.itemId === 'ration' ? 'Zjedzono rację.' : 'Zużyto bandaż.');
     });
   }
   function openSplit(entry: InventoryEntry) {
@@ -79,7 +78,7 @@ export function InventoryScreen({ state, update, saving, storage }: Props) {
     const isCarried = state.inventory.some((item) => item.id === entry.id);
     const locked = disabled || state.activeExpedition?.cargo.equipmentId === entry.id;
     return <>
-      {consumableIds.has(entry.itemId) && <button disabled={locked || (entry.itemId === 'antibiotic' && !isSick(state, now))} title={entry.itemId === 'antibiotic' ? 'Wylecz chorobę jedną sztuką' : 'Zużyj 1 sztukę; na razie bez zmiany statystyk'} onClick={() => useThis(entry)}>Użyj</button>}
+      {consumableIds.has(entry.itemId) && <button disabled={locked} title="Zużyj 1 sztukę; na razie bez zmiany statystyk" onClick={() => useThis(entry)}>Użyj</button>}
       {storage && isCarried && <button disabled={locked} onClick={() => place(entry.id, 0)}>Do skrytki</button>}
       {storage && !isCarried && <button disabled={locked} onClick={() => place(entry.id, -1)}>Do ekwipunku</button>}
       {isCarried && equipmentSlot(entry) && <button disabled={locked} onClick={() => equip(entry.id, equipmentSlot(entry)!)}>Załóż</button>}
@@ -102,7 +101,7 @@ export function InventoryScreen({ state, update, saving, storage }: Props) {
     <p className="inventory-notice" role="status">{notice}</p>
     <details className="selected-item-details"><summary>Szczegóły i układanie zaznaczonego przedmiotu</summary><section id="item-details" className="stash-panel storage-details" aria-label="Szczegóły przedmiotu">{selected && item ? <><div className="detail-top"><div className="detail-art"><ItemArt itemId={item.id} /></div><div><span className="eyebrow">{carried ? 'Przy postaci' : state.stash.some((entry) => entry.id === selected.id) ? 'Schowek' : 'Odbiór'}</span><h3>{item.name}</h3><p>{item.description}</p></div></div>
       <dl><div><dt>Ilość</dt><dd>{selected.quantity}</dd></div><div><dt>Rozmiar</dt><dd>{itemSizes[item.id].width} × {itemSizes[item.id].height}</dd></div><div><dt>Masa sztuki</dt><dd>{item.weightKg} kg</dd></div>{selected.condition !== null && <div><dt>Stan</dt><dd>{selected.condition}%</dd></div>}</dl>
-      <div className="storage-actions">{carried && equipmentSlot(selected) && <button disabled={disabled} onClick={() => equip(selected.id, equipmentSlot(selected)!)}>Załóż</button>}{selected.quantity > 1 && !state.overflow.some((entry) => entry.id === selected.id) && <button disabled={disabled} onClick={() => openSplit(selected)}>Rozdziel</button>}{consumableIds.has(selected.itemId) && <button disabled={disabled || (selected.itemId === 'antibiotic' && !isSick(state, now))} onClick={() => useThis(selected)}>Użyj</button>}{storage && <button disabled={disabled || state.activeExpedition?.cargo.equipmentId === selected.id} onClick={() => place(selected.id, carried ? page : -1)}>{carried ? 'Do skrytki' : 'Do ekwipunku'}</button>}{storage && !carried && <button disabled={disabled || state.activeExpedition?.cargo.equipmentId === selected.id} onClick={() => place(selected.id, page)}>Do skrytki</button>}<button disabled={disabled || state.activeExpedition?.cargo.equipmentId === selected.id} aria-pressed={moving} onClick={() => setMoving(!moving)}>{moving ? 'Anuluj przenoszenie' : 'Zmień położenie'}</button>
+      <div className="storage-actions">{carried && equipmentSlot(selected) && <button disabled={disabled} onClick={() => equip(selected.id, equipmentSlot(selected)!)}>Załóż</button>}{selected.quantity > 1 && !state.overflow.some((entry) => entry.id === selected.id) && <button disabled={disabled} onClick={() => openSplit(selected)}>Rozdziel</button>}{consumableIds.has(selected.itemId) && <button disabled={disabled} onClick={() => useThis(selected)}>Użyj</button>}{storage && <button disabled={disabled || state.activeExpedition?.cargo.equipmentId === selected.id} onClick={() => place(selected.id, carried ? page : -1)}>{carried ? 'Do skrytki' : 'Do ekwipunku'}</button>}{storage && !carried && <button disabled={disabled || state.activeExpedition?.cargo.equipmentId === selected.id} onClick={() => place(selected.id, page)}>Do skrytki</button>}<button disabled={disabled || state.activeExpedition?.cargo.equipmentId === selected.id} aria-pressed={moving} onClick={() => setMoving(!moving)}>{moving ? 'Anuluj przenoszenie' : 'Zmień położenie'}</button>
       </div>{moving && <p>Wskaż puste pole w wybranej siatce.</p>}
     </> : <p>Wybierz przedmiot w siatce, aby przenieść go lub zobaczyć szczegóły.</p>}</section></details>
     {state.overflow.length > 0 && <section className="stash-panel storage-recovery"><h2>Przedmioty do odebrania</h2><p>Nie zmieściły się w siatkach. Są bezpieczne — zwolnij miejsce i przenieś je do ekwipunku lub schowka. Nie są to dodatkowe pola użytkowe.</p>{state.overflow.map((entry) => <button key={entry.id} onClick={() => setSelectedId(entry.id)}>{getItem(entry.itemId)?.name} ×{entry.quantity}</button>)}</section>}

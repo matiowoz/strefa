@@ -9,7 +9,7 @@ export interface QuestProgress { completed: QuestId[]; claimed: QuestId[] }
 export const reserveCosts = [{ itemId: 'water', quantity: 3 }, { itemId: 'ration', quantity: 3 }, { itemId: 'bandage', quantity: 2 }] as const;
 export const quests: { id: QuestId; name: string; description: string; rewards: ResourceAmount[] }[] = [
   { id: 'supplies', name: 'Pierwsze zapasy', description: 'Wróć z wyprawy ze znaleziskami i odbierz raport.', rewards: [{ itemId: 'cloth', quantity: 2 }] },
-  { id: 'workbench', name: 'Miejsce do pracy', description: 'Odwiedź stary warsztat, odbierz raport i napraw stół roboczy w kryjówce.', rewards: [{ itemId: 'antibiotic', quantity: 1 }] },
+  { id: 'workbench', name: 'Miejsce do pracy', description: 'Odwiedź stary warsztat, odbierz raport i napraw stół roboczy w kryjówce.', rewards: [{ itemId: 'bandage', quantity: 2 }] },
   { id: 'jacket', name: 'Przygotowany ocalały', description: 'Znajdź kurtkę i załóż ją w Ekwipunku.', rewards: [{ itemId: 'ration', quantity: 2 }] },
   { id: 'reserve', name: 'Rezerwa na jutro', description: 'Odłóż w skrytce 3 wody, 3 racje i 2 bandaże. Zapasy zostają Twoje.', rewards: [{ itemId: 'scrap', quantity: 4 }] },
 ];

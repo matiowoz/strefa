@@ -255,7 +255,7 @@ Roboczo 70% szans otwarcia, przy sukcesie 1–3 złomu i 1–2 tkaniny. Brak zu�
 
 Chromium: raporty dla łomu w plecaku i w slocie, brak łomu ze skrytki, nieudane otwarcie oraz trwałość wyniku i nagrody po odświeżeniu; brak błędów JS.
 
-## Choroba bez kurtki i antybiotyk
+## Choroba bez kurtki i antybiotyk — etap historyczny, wycofany poniżej
 
 Nowa wyprawa bez założonej kurtki ma 50% szans na zachorowanie przy planowanym powrocie. Kurtka w plecaku i skrytce nie chroni. Wynik jest utrwalony przy starcie; wcześniejsze wyprawy nie otrzymują nowego losowania. Robocze wartości przedstawione użytkownikowi: 30 minut choroby, +50% czasu wyprawy rozpoczętej podczas choroby. Opcjonalne pytanie o inne wartości pozostało bez odpowiedzi; przyjęto zakomunikowane domyślne.
 
@@ -274,3 +274,13 @@ Dodatkowy widok otwierany z Kryjówki, bez zmiany pięciu głównych zakładek. 
 Schemat v11: quests.completed i quests.claimed, walidowane unikalne znane ID; nagroda wymaga zaliczonego celu. Centralny applyGameChange sprawdza osiągnięcia przed i po każdej komendzie gracza, dzięki czemu zużycie zapasów, zdjęcie kurtki lub zastąpienie raportu nie cofa celu. Znacznik odbioru i przedmioty zapisują się w jednej transakcji; konflikt kart nie powiela nagrody. Migracja v1–v10 rozpoznaje tylko dowody obecne w stanie: naprawę, założoną kurtkę, obecne zapasy oraz niepusty ostatni raport. Nie zgaduje wcześniejszych wypraw ani nie dopisuje nagród automatycznie. Nie zmienia terminów, choroby ani rzeczy.
 
 Weryfikacja: 190 testów i build, w tym nowe przypadki zaliczenia, utrzymania osiągnięć, rozdzielonych stosów, pełnych siatek, migracji, błędnych ID, ponownego odbioru, konfliktu kart i przerwanej transakcji. Chromium: nowy dziennik, migracja v10, odbiór i trwałość nagrody po odświeżeniu, 320/390/768/1440 px bez przepełnienia i wyjątków JS. Bez fizycznego telefonu. Dalszy kierunek: rozbudowa kryjówki i receptury, następnie rozwój umiejętności — poza tym zleceniem.
+
+## Usunięcie zwykłej choroby — aktualne ustalenie
+
+Na polecenie użytkownika usunięto zwykłą chorobę: losowanie 50/50, ochronę kurtki, status i odliczanie, opisy w raporcie, leczenie oraz mnożnik czasu wypraw. Choroba popromienna ma być osobnym przyszłym etapem, bez implementacji teraz. Kurtka nadal jest wyposażeniem i zalicza cel dziennika.
+
+Schemat v12: dawne pola illness i health mają wartość null; ich wcześniejszy kształt jest obsługiwany wyłącznie przy walidacji i migracji zapisów v10/v11. Aktywne lub zaplanowane zachorowanie jest usuwane, stara informacja zdrowotna raportu znika. Trwająca wyprawa rozpoczęta podczas choroby ma usunięte wydłużenie: powrót najpóźniej po bazowej minucie/dwóch od pierwotnego startu; terminy historycznych raportów nie zmieniają się. Łupy nie są losowane ponownie, zapasy, sprzęt, cele i odebrane nagrody pozostają.
+
+Antybiotyk ze starego zapisu zostaje zachowany jako nieaktywny przedmiot, bez Użyj i nowych losowań. Walidacja nadal akceptuje go w już zapisanym łupie. Nagroda Miejsce do pracy zmieniona na 2 bandaże; odebrany wcześniej antybiotyk nie jest odbierany ani zamieniany i nie daje prawa do drugiego odbioru. Pozostałe trzy nagrody bez zmian.
+
+Weryfikacja wycofania: 179 testów i build. Zastąpiono testy usuniętego leczenia regresjami braku ryzyka i migracji v10/v11; sprawdzono brak nowego antybiotyku, blokadę użycia, zachowanie rzeczy i nagród oraz pierwszy zapis po migracji i konflikt kart. Chromium: chora postać v11, usunięcie kary czasu i odbiór raportu, brak dawnych komunikatów, bazowy czas na mapie, zachowane antybiotyki bez Użyj, odświeżenie v12, szerokości 390/1440 px bez przepełnienia i wyjątków JS.

@@ -70,9 +70,9 @@ export interface ExpeditionReport {
 
 export interface Placement { x: number; y: number; page: number } // -1 = ekwipunek, 0 = schowek
 export interface GameState {
-  schemaVersion: 11;
+  schemaVersion: 12;
   quests: import('./quests').QuestProgress;
-  illness: { startedAt: number; endsAt: number } | null;
+  illness: { startedAt: number; endsAt: number } | null; // Legacy shape for migration; v12 requires null.
   equipped: Record<EquipmentSlot, InventoryEntry | null>;
   backpack: InventoryEntry;
   progress: { workshopVisited: boolean; workbenchRepaired: boolean };
