@@ -1,3 +1,4 @@
+import { SurvivorFigure } from './SurvivorFigure';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { EquipmentSlot, GameState } from '../domain/types';
 import { unequipItem, wornItems } from '../domain/equipment';
@@ -39,7 +40,7 @@ export function EquipmentDoll({ state, disabled, selectedId, drag, equip, unequi
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
   return <section className="equipment-doll" aria-label="Wyposażenie postaci">
     <div className="equipment-stage">
-      <img className="equipment-survivor" src="/art/survivor.png" alt="Ocalały w zużytym płaszczu. Założone przedmioty pokazują miejsca przy sylwetce." width="1024" height="1536" />
+      <div className="equipment-survivor"><SurvivorFigure equipped={state.equipped} /></div>
       <span className="equipment-crosshair" aria-hidden="true" />
       {slots.map(({ kind, label }) => {
         const entry = state.equipped[kind];
@@ -57,7 +58,7 @@ export function EquipmentDoll({ state, disabled, selectedId, drag, equip, unequi
       </button>
       <span className="equipment-stencil" aria-hidden="true">STREFA / OSOBISTE</span>
     </div>
-    <p className="equipment-future">Sylwetka poglądowa · wygląd postaci nie zmienia się jeszcze wraz z wyposażeniem.</p>
+    <p className="equipment-future">Założone przedmioty są widoczne na postaci.</p>
     {hover && viewed && !drag.active && <ItemPopover id={popoverId} entry={viewed} anchor={hover.anchor} keep={keep} leave={leave} close={close}>{viewed.id === backpack.id ? <p>Założony na stałe · 5 × 9 pól.</p> : <><p>Stan: {viewed.condition}%</p><button disabled={disabled || unequipItem(state, viewed.id) === state} title="Zdejmij do wolnego miejsca w plecaku" onClick={() => { close(); unequip(viewed.id); }}>Zdejmij</button></>}</ItemPopover>}
   </section>;
 }

@@ -118,7 +118,7 @@ Na papierowym planie wybierz osiedle lub warsztat, albo użyj listy pod mapą. W
 
 Zniszczony hełm (2×2), łatana kurtka (2×3), znoszone buty (2×2) i zardzewiały łom (1×3) mogą wypaść przy przeszukiwaniu miejsc. Każdy znaleziony egzemplarz ma własne ID, ilość 1 i roboczy stan 60%. Przedmioty nie łączą się w stosy. Zmiana wyposażenia wymaga powrotu do kryjówki. Sprzęt w skrytce trzeba najpierw przenieść do plecaka.
 
-Założony sprzęt przetrwa odświeżenie i wyprawę. Ubranie nie daje jeszcze premii liczbowych, a sprzęt się nie zużywa; rysunek sylwetki pozostaje poglądowy. Stare zapisy otrzymują puste nowe sloty bez zmiany rzeczy i rozpoczętych wypraw. Nowe grafiki wyposażenia są własnym wygenerowanym atlasem `/art/equipment-worn.webp`.
+Założony sprzęt przetrwa odświeżenie i wyprawę. Ubranie nie daje jeszcze premii liczbowych, a sprzęt się nie zużywa; sylwetka pokazuje obecnie założony hełm, kurtkę, buty i łom. Stare zapisy otrzymują puste nowe sloty bez zmiany rzeczy i rozpoczętych wypraw. Nowe grafiki wyposażenia są własnym wygenerowanym atlasem `/art/equipment-worn.webp`.
 
 ## Wyprawa i raport
 
@@ -126,7 +126,7 @@ Przygotowanie pokazuje cel, czas oraz informację o zabraniu obecnego ekwipunku.
 
 ## Bohater i tło strony
 
-Karta Bohatera pokazuje ilustrację poglądową, faktyczne zdrowie, poziom, pseudonim i osiem zapisanych wartości umiejętności. Rozwój i premie nie są jeszcze aktywne. Zmiana pseudonimu jest wyłączona; dotychczasowa nazwa pozostaje. Podgląd plecaka odzwierciedla wybór na następną lub wyposażenie aktywnej wyprawy; przycisk prowadzi do Ekwipunku. Wszystkie ekrany mają wspólne tło zużytego betonu, bez zmiany danych gry.
+Karta Bohatera pokazuje postać z aktualnym wyposażeniem, faktyczne zdrowie, poziom, pseudonim i osiem zapisanych wartości umiejętności. Rozwój i premie nie są jeszcze aktywne. Zmiana pseudonimu jest wyłączona; dotychczasowa nazwa pozostaje. Podgląd plecaka odzwierciedla wybór na następną lub wyposażenie aktywnej wyprawy; przycisk prowadzi do Ekwipunku. Wszystkie ekrany mają wspólne tło zużytego betonu, bez zmiany danych gry.
 
 ## Kolejność nawigacji
 
@@ -151,3 +151,9 @@ Antybiotyki ze starszych zapisów pozostają w posiadaniu gracza, ale nie można
 Kryjówka → „Otwórz dziennik zadań”: cztery cele z postępem i jednorazowym odbiorem nagrody. Można je realizować w dowolnej kolejności. Pierwsze zapasy wymagają odebranego raportu ze znaleziskami; Miejsce do pracy — naprawy stołu po powrocie z warsztatu; Przygotowany ocalały — założenia kurtki; Rezerwa na jutro — 3 wód, 3 racji i 2 bandaży jednocześnie w skrytce. Zapasy nie są pobierane przez zadanie. Po zaliczeniu postęp pozostaje, nawet jeśli zużyjesz rzeczy lub zdejmiesz kurtkę.
 
 Nagrody: kolejno 2 tkaniny, 2 bandaże, 2 racje i 4 złomu. Odbiór po powrocie dodaje rzeczy do plecaka; nadmiar trafia do skrytki lub odbioru nadmiaru. Starsze zapisy zachowują wyposażenie i postęp: dziennik rozpoznaje naprawiony stół, obecnie założoną kurtkę, obecne zapasy skrytki oraz znaleziska z ostatniego raportu. Nie odtwarza historii, której poprzedni zapis nie przechowywał.
+
+## Widoczny ubiór i ruch postaci
+
+Postać i Ekwipunek korzystają ze wspólnej sylwetki 2D. Bazowy ubiór to zużyta krótka koszulka i bokserki, bose stopy. Hełm, kurtka, buty i łom pojawiają się dopiero po założeniu w odpowiednim slocie; rzeczy w plecaku lub skrytce nie zmieniają wyglądu. Podstawowy plecak jest stale widoczny za plecami. Zakładanie i zdejmowanie aktualizuje obraz od razu, a zapis wyposażenia zachowuje go po odświeżeniu.
+
+Delikatny oddech obejmuje sylwetkę i wszystkie warstwy. Animacja nie porusza slotów ani siatek, zatrzymuje się poza widokiem i w ukrytej karcie. Ustawienie systemowe „ogranicz ruch” wyłącza animację. Własny wygenerowany atlas `/art/survivor-layers.webp`, bez nowych bibliotek i bez zmiany schematu zapisu. Kolejne rodzaje sprzętu będą wymagały własnych dopasowanych warstw.
