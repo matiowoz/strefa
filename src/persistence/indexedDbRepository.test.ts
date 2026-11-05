@@ -40,7 +40,7 @@ describe('adapter IndexedDB', () => {
   });
   it('nie traktuje nowszej wersji jako pustej gry i nie usuwa surowych danych', async () => {
     const factory = new IDBFactory();
-    await writeRaw(factory, { schemaVersion: 13, marker: 'keep' });
+    await writeRaw(factory, { schemaVersion: 14, marker: 'keep' });
     const repository = new IndexedDbRepository(factory, 'test');
     await expect(repository.load()).rejects.toThrow('wersja');
     await expect(repository.load()).rejects.toThrow('wersja');
@@ -112,7 +112,7 @@ describe('transakcje wyprawy', () => {
     await writeRaw(factory, { ...legacy, schemaVersion: 1 });
     const repository = new IndexedDbRepository(factory, 'test');
     const loaded = (await repository.load())!;
-    expect(loaded.schemaVersion).toBe(12);
+    expect(loaded.schemaVersion).toBe(13);
     await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
     expect((await repository.load())!.hero.name).toBe('Kruk');
   });
@@ -180,7 +180,7 @@ it('migruje starą drugą stronę schowka i zachowuje kontrolę poprzedniego sta
   await writeRaw(factory, { ...state, schemaVersion: 4, positions: { ...state.positions, 'starter-water': { x: 9, y: 5, page: 1 } } });
   const repository = new IndexedDbRepository(factory, 'test');
   const loaded = (await repository.load())!;
-  expect(loaded.schemaVersion).toBe(12);
+  expect(loaded.schemaVersion).toBe(13);
   expect(loaded.positions['starter-water'].page).toBe(0);
   const moved = moveItem(loaded, 'starter-water', -1, undefined, 2000);
   await repository.save(moved, loaded);
@@ -436,4 +436,23 @@ it('migracja chorej postaci v11 zachowuje znaleziska i znacznik nagrody po pierw
   await repository.save(next, loaded);
   expect(await repository.load()).toEqual(next);
   await expect(repository.save(next, loaded)).rejects.toThrow('innej karcie');
+});
+
+it('dwie karty nie sprzedają tego samego przedmiotu ani nie przekraczają zapasu handlarza', async () => {
+  const { tradeItem } = await import('../domain/trade');
+  const state = arrange({ ...createInitialState(0), inventory: [...createInitialState(0).inventory, { id: 'sale-helmet', itemId: 'helmet', quantity: 1, condition: 60 }] });
+  const repository = new IndexedDbRepository(new IDBFactory(), 'test');await repository.save(state);
+  const first = (await repository.load())!;const second = (await repository.load())!;
+  const results = await Promise.allSettled([repository.save(tradeItem(first, 'sale-helmet', 1, 'water', 1000), first), repository.save(tradeItem(second, 'sale-helmet', 1, 'water', 1001), second)]);
+  expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+  const loaded = (await repository.load())!;expect(loaded.trader.stock.water).toBe(5);expect(loaded.inventory.some((e) => e.id === 'sale-helmet')).toBe(false);
+});
+
+it('przerwana transakcja barteru zachowuje przedmiot gracza i zapas handlarza', async () => {
+  const { tradeItem } = await import('../domain/trade');
+  const state = createInitialState(0);const repository = new IndexedDbRepository(new IDBFactory(), 'test');await repository.save(state);
+  const original = IDBDatabase.prototype.transaction;
+  const spy = vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(function (this: IDBDatabase, ...args: Parameters<typeof original>) { const tx = original.apply(this, args);queueMicrotask(() => tx.abort());return tx; });
+  await expect(repository.save(tradeItem(state, 'starter-scrap', 3, 'water', 1000), state)).rejects.toThrow();spy.mockRestore();
+  expect(await repository.load()).toEqual(state);
 });

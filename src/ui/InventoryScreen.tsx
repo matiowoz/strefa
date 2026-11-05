@@ -1,3 +1,4 @@
+import { ResourceIcons } from './ResourceIcons';
 import { useState } from 'react';
 import { useNow } from './useNow';
 import { getItem } from '../domain/catalog';
@@ -107,7 +108,7 @@ export function InventoryScreen({ state, update, saving, storage }: Props) {
     {state.overflow.length > 0 && <section className="stash-panel storage-recovery"><h2>Przedmioty do odebrania</h2><p>Nie zmieściły się w siatkach. Są bezpieczne — zwolnij miejsce i przenieś je do ekwipunku lub schowka. Nie są to dodatkowe pola użytkowe.</p>{state.overflow.map((entry) => <button key={entry.id} onClick={() => setSelectedId(entry.id)}>{getItem(entry.itemId)?.name} ×{entry.quantity}</button>)}</section>}
     <section className="inventory-crafting"><div className="crafting-heading"><h2>Przygotowanie zapasów</h2><p>Surowce muszą być w ekwipunku postaci. Wynik bez miejsca trafi do schowka lub odbioru.</p></div><div className="crafting-grid">{recipes.filter((recipe) => recipe.id !== 'dressings' || state.progress.workbenchRepaired).map((recipe) => {
       const available = recipe.costs.every((cost) => quantity(state.inventory, cost.itemId) >= cost.quantity);
-      return <article className="recipe-card" key={recipe.id}><div className="recipe-title"><ItemArt itemId={recipe.output[0].itemId} /><h3>{recipe.name}</h3></div><p>Koszt: {recipe.costs.map((cost) => `${getItem(cost.itemId)?.name} ×${cost.quantity}`).join(', ')}</p><p>Wynik: {recipe.output.map((entry) => `${getItem(entry.itemId)?.name} ×${entry.quantity}`).join(', ')} · natychmiast</p><button disabled={saving || !home || !available} onClick={() => { void update((previous) => craft(previous, recipe.id)); }}>{available ? recipe.name : 'Brak surowców w ekwipunku'}</button></article>;
+      return <article className="recipe-card" key={recipe.id}><div className="recipe-title"><ItemArt itemId={recipe.output[0].itemId} /><h3>{recipe.name}</h3></div><span className="eyebrow">Potrzebujesz</span><ResourceIcons items={recipe.costs} owned={(id) => quantity(state.inventory, id)} label="Wymagane składniki" /><span className="eyebrow">Otrzymasz</span><ResourceIcons items={recipe.output} label="Wynik receptury" /><button disabled={saving || !home || !available} onClick={() => { void update((previous) => craft(previous, recipe.id)); }}>{available ? recipe.name : 'Brak surowców w ekwipunku'}</button></article>;
     })}</div></section>
   </div>;
 }

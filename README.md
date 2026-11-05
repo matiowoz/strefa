@@ -65,7 +65,7 @@ npm.cmd run preview
 6. Sprawdź, że start nie zużył wody ani racji, a plecak pozostaje założony. W raporcie przeczytaj zdarzenia i sprawdź znaleziska. Gdy znajdziesz surowce, w Ekwipunku uzdatnij wodę, przygotuj rację lub bandaż. Widać koszt i wynik każdej receptury. Brak zasobów blokuje operację.
 7. Przy błędzie zapisu zmiana nie zostaje zastosowana; ponów odbiór. Przy konflikcie z inną kartą odśwież stronę.
 
-Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v12 (migracja poprawnych v1–v11 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
+Zapis: IndexedDB, baza `strefa-prototype`, magazyn `saves`, klucz `main`, schemat stanu v13 (migracja poprawnych v1–v12 bez utraty postępu, bez nowych kosztów dla już rozpoczętych wypraw). Sukces zapisu jest ogłaszany po zatwierdzeniu transakcji. Nieprawidłowe dane i nieobsługiwane wersje pozostają nietknięte; aplikacja pokazuje błąd zamiast cicho tworzyć nową grę. Odmowa dostępu do IndexedDB również daje widoczny błąd.
 
 Zapis jest osobny dla urządzenia, przeglądarki i adresu z portem. localhost i adres LAN mają różne zapisy; telefon nie współdzieli zapisu komputera. Czyszczenie danych witryny lub tryb prywatny może usunąć postęp. Brak synchronizacji, eksportu i kopii chmurowej. Nieaktualny zapis z drugiej karty jest odrzucany atomowo; odśwież ją przed kolejną zmianą. Czas wypraw opiera się na zegarze urządzenia, bez zabezpieczeń serwerowych.
 
@@ -163,3 +163,15 @@ Kurtka ma teraz cywilny brązowy krój z zamkiem, dwoma bocznymi kieszeniami i �
 Postać mruga w nieregularnych odstępach (około 2,8–7 s przerwy, 0,13 s zamknięcia powiek). Osobna grafika zmienia tylko obszar oczu; głowa i reszta twarzy nie poruszają się. Hełm pozostaje przed twarzą, więc jego daszek może zasłaniać oczy. Przycisk Ruch zatrzymuje także mruganie; wyłączenie ruchu lub ukrycie postaci otwiera powieki i usuwa oczekujący timer. Spojrzenia na boki nie są jeszcze wdrożone.
 
 Zmiana podparcia i przestawianie stóp są obecnie wyłączone. Po nieudanej próbie animacji nóg przywrócono jedną spójną sylwetkę. Działają nadal oddech samej klatki piersiowej, mruganie oraz widoczne wyposażenie. Naturalna zmiana pozycji i spojrzenia na boki wymagają osobnego dopracowania grafiki i animacji.
+
+## Ikonki receptur
+
+W Ekwipunku składniki receptur są przedstawione jako ikonki z liczbą „posiadane / wymagane”, a wynik jako ikonka i ilość. Brakujący składnik ma wyróżnioną ramkę. Nazwę i opis zobaczysz po najechaniu, ustawieniu fokusu klawiaturą lub dotknięciu ikonki. Ilości posiadane obejmują wyłącznie plecak. Zasady i koszty receptur nie zmieniają się; bandaże nadal powstają wyłącznie z tkaniny.
+
+## Pierwszy handlarz — barter
+
+Kryjówka → „Odwiedź handlarza”: wybierz przedmiot z plecaka i liczbę sztuk, a potem jedną z ofert wody, racji lub bandaży. Przed zatwierdzeniem widać dokładną liczbę oddawanych i otrzymywanych rzeczy. To wymiana całej wybranej ilości bez wydawania reszty; możesz zmienić ilość przed decyzją. Stan sprzętu wpływa na wycenę. Wymiana jest możliwa po powrocie do kryjówki.
+
+Założonego wyposażenia, stałego plecaka, rzeczy ze skrytki ani z odbioru nadmiaru nie można oddać bezpośrednio. Antybiotyk ze starych zapisów nie jest przyjmowany. Otrzymane rzeczy trafiają do plecaka, potem skrytki, a przy braku miejsca do bezpiecznego odbioru. Oddanie rzeczy i zmniejszenie zapasu handlarza zapisują się razem.
+
+Roboczy zapas: 6 wód, 4 racje i 4 bandaże. Jest ograniczony i utrwalony — odświeżenie nie uzupełnia towaru. Ten etap nie obejmuje odnawiania oferty, waluty, negocjacji ani rynku graczy. To lokalny prototyp barteru, a docelowy rynek z GDD pozostaje osobnym etapem. Migracja starych zapisów dodaje początkowy zapas handlarza, zachowując całą postać i rzeczy.

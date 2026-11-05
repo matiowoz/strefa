@@ -20,7 +20,7 @@ it.each([10, 11])('migracja v%s usuwa chorobę i karę czasu, zachowując rzeczy
   const old = { ...trip, schemaVersion, illness: { startedAt: 0, endsAt: 100000 },
     activeExpedition: { ...trip.activeExpedition!, expectedReturnAt: 91000, health: { jacketWorn: false, sickAtStart: true, contracted: false } } };
   const next = validateSave(old);
-  expect(next.schemaVersion).toBe(12);expect(next.illness).toBeNull();
+  expect(next.schemaVersion).toBe(13);expect(next.illness).toBeNull();
   expect(next.activeExpedition).toEqual({ ...trip.activeExpedition!, health: null });
   expect(next.inventory).toEqual(state.inventory);expect(next.quests).toEqual(state.quests);
   const returned = settleExpedition(next, next.activeExpedition!.id, 61000);
