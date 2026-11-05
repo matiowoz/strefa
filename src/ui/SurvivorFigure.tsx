@@ -7,7 +7,7 @@ import type { GameState } from '../domain/types';
 import './survivor-figure.css';
 
 type Props = { equipped: GameState['equipped'] };
-// Segmented legs shift support while feet stay anchored; the chest breathes separately.
+// Drawn footstep frames replace leg deformation; chest and eyelids animate separately.
 export function SurvivorFigure({ equipped }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [motion, setMotion] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -43,8 +43,9 @@ export function SurvivorFigure({ equipped }: Props) {
     <div className="survivor-image" role="img" aria-label={`Ocalały w krótkiej, zużytej koszulce i bieliźnie. ${description} Podstawowy plecak na plecach.`}>
     <div className="survivor-shadow" />
     <div className="survivor-idle">
-      {['thigh-left', 'thigh-right', 'calf-left', 'calf-right', 'feet'].map((part) => <div key={part} className={`survivor-limb pose-${part}`} aria-hidden="true"><span className={`survivor-layer figure-body-source ${jacketWorn ? 'figure-dressed' : 'figure-base'}`} /></div>)}
-      {equipped.feet?.itemId === 'boots' && <span className="survivor-layer figure-boots" data-figure-item="boots" aria-hidden="true" />}
+      <div className="survivor-steps" data-figure-item={equipped.feet?.itemId === 'boots' ? 'boots' : undefined} aria-hidden="true">
+        {(['even', 'lift-left', 'left', 'lift-right', 'right'] as const).map((frame) => <span key={frame} className={`survivor-step step-${frame}`} />)}
+      </div>
       <div className="survivor-upper"><div className="survivor-torso">
       <span className="survivor-layer figure-backpack" aria-hidden="true" />
       <span className={`survivor-layer figure-body-source ${jacketWorn ? 'figure-dressed' : 'figure-base'}`} data-figure-item={jacketWorn ? 'jacket' : undefined} aria-hidden="true" />

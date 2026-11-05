@@ -1,16 +1,22 @@
-export type Stance = 'even' | 'left' | 'right';
+export type Stance = 'even' | 'lift-left' | 'left' | 'lift-right' | 'right';
 
-// Always pass through even support before moving weight onto the other leg.
+// A foot is lifted before it is replanted, including the return to even support.
 export function startStances(change: (stance: Stance) => void, random = Math.random): () => void {
-  let current: Stance = 'even';
+  let resting: 'even' | 'left' | 'right' = 'even';
   let timer: ReturnType<typeof setTimeout>;
   let stopped = false;
   function schedule() {
     timer = setTimeout(() => {
       if (stopped) return;
-      current = current === 'even' ? (random() < .5 ? 'left' : 'right') : 'even';
-      change(current);
-      schedule();
+      const side = resting === 'even' ? (random() < .5 ? 'left' : 'right') : resting;
+      const target = resting === 'even' ? side : 'even';
+      change(side === 'left' ? 'lift-left' : 'lift-right');
+      timer = setTimeout(() => {
+        if (stopped) return;
+        resting = target;
+        change(target);
+        schedule();
+      }, 600);
     }, 5500 + random() * 4000);
   }
   schedule();
