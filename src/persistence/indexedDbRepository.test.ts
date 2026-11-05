@@ -40,7 +40,7 @@ describe('adapter IndexedDB', () => {
   });
   it('nie traktuje nowszej wersji jako pustej gry i nie usuwa surowych danych', async () => {
     const factory = new IDBFactory();
-    await writeRaw(factory, { schemaVersion: 11, marker: 'keep' });
+    await writeRaw(factory, { schemaVersion: 12, marker: 'keep' });
     const repository = new IndexedDbRepository(factory, 'test');
     await expect(repository.load()).rejects.toThrow('wersja');
     await expect(repository.load()).rejects.toThrow('wersja');
@@ -112,7 +112,7 @@ describe('transakcje wyprawy', () => {
     await writeRaw(factory, { ...legacy, schemaVersion: 1 });
     const repository = new IndexedDbRepository(factory, 'test');
     const loaded = (await repository.load())!;
-    expect(loaded.schemaVersion).toBe(10);
+    expect(loaded.schemaVersion).toBe(11);
     await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
     expect((await repository.load())!.hero.name).toBe('Kruk');
   });
@@ -180,7 +180,7 @@ it('migruje starą drugą stronę schowka i zachowuje kontrolę poprzedniego sta
   await writeRaw(factory, { ...state, schemaVersion: 4, positions: { ...state.positions, 'starter-water': { x: 9, y: 5, page: 1 } } });
   const repository = new IndexedDbRepository(factory, 'test');
   const loaded = (await repository.load())!;
-  expect(loaded.schemaVersion).toBe(10);
+  expect(loaded.schemaVersion).toBe(11);
   expect(loaded.positions['starter-water'].page).toBe(0);
   const moved = moveItem(loaded, 'starter-water', -1, undefined, 2000);
   await repository.save(moved, loaded);
@@ -405,4 +405,36 @@ it('migruje v9 bez zmiany terminu powrotu ani dopisywania choroby',async()=>{
   const {startExpedition}=await import('../domain/game');const started=startExpedition(createInitialState(0),1000,()=>.5);const {illness:_,...old}=started;const {health:__,...active}=started.activeExpedition!;
   const factory=new IDBFactory();await writeRaw(factory,{...old,schemaVersion:9,activeExpedition:active});const repository=new IndexedDbRepository(factory,'test');const loaded=(await repository.load())!;
   expect(loaded.illness).toBeNull();expect(loaded.activeExpedition).toEqual({...active,health:null});const next=renameHero(loaded,'Kruk',2000);await repository.save(next,loaded);expect(await repository.load()).toEqual(next);
+});
+
+it('nagroda zadania i znacznik zapisują się razem, druga karta nie powiela nagrody', async () => {
+  const { claimQuest } = await import('../domain/quests');
+  const repository = new IndexedDbRepository(new IDBFactory(), 'test');
+  const state = { ...createInitialState(1000), quests: { completed: ['workbench' as const], claimed: [] } };
+  await repository.save(state);
+  const first = (await repository.load())!;
+  const second = (await repository.load())!;
+  await repository.save(claimQuest(first, 'workbench', 2000), first);
+  await expect(repository.save(claimQuest(second, 'workbench', 2001), second)).rejects.toThrow('innej karcie');
+  const loaded = (await repository.load())!;
+  expect(loaded.quests.claimed).toEqual(['workbench']);
+  expect(loaded.inventory.filter((e) => e.itemId === 'antibiotic').reduce((sum, e) => sum + e.quantity, 0)).toBe(1);
+});
+
+it('przerwana transakcja nagrody pozostawia możliwość odbioru', async () => {
+  const { claimQuest } = await import('../domain/quests');
+  const repository = new IndexedDbRepository(new IDBFactory(), 'test');
+  const state = { ...createInitialState(1000), quests: { completed: ['workbench' as const], claimed: [] } };
+  await repository.save(state);
+  const original = IDBDatabase.prototype.transaction;
+  const spy = vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(function (this: IDBDatabase, ...args: Parameters<typeof original>) {
+    const transaction = original.apply(this, args);
+    queueMicrotask(() => transaction.abort());
+    return transaction;
+  });
+  await expect(repository.save(claimQuest(state, 'workbench', 2000), state)).rejects.toThrow();
+  spy.mockRestore();
+  expect(await repository.load()).toEqual(state);
+  await repository.save(claimQuest(state, 'workbench', 2000), state);
+  expect((await repository.load())!.quests.claimed).toEqual(['workbench']);
 });

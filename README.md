@@ -147,3 +147,9 @@ Nowa wyprawa bez założonej kurtki ma 50% szans na zachorowanie. Kurtka musi by
 Rozpoczęcie wyprawy podczas choroby wydłuża jej czas o 50% (osiedle 1,5 min, warsztat 3 min). Termin jest stały: wyzdrowienie w trakcie nie skraca trwającej wyprawy. Kolejna wyprawa podczas tej samej choroby nie odnawia jej czasu.
 
 Antybiotyk zajmuje 1×1, jest znajdowany w mieszkaniu lub magazynie przy warsztacie (roboczo 20% szans na 1 sztukę). Przycisk Użyj po powrocie zużywa jedną sztukę i leczy chorobę. Zdrowa postać nie zużywa antybiotyku. Można użyć go ze skrytki w jej widoku. Stan choroby i czas do wyzdrowienia są widoczne nad ekranami; raport opisuje zachorowanie lub ochronę kurtki. Wcześniej rozpoczęte wyprawy zachowują termin i wynik, bez dopisywania ryzyka choroby.
+
+## Dziennik zadań
+
+Kryjówka → „Otwórz dziennik zadań”: cztery cele z postępem i jednorazowym odbiorem nagrody. Można je realizować w dowolnej kolejności. Pierwsze zapasy wymagają odebranego raportu ze znaleziskami; Miejsce do pracy — naprawy stołu po powrocie z warsztatu; Przygotowany ocalały — założenia kurtki; Rezerwa na jutro — 3 wód, 3 racji i 2 bandaży jednocześnie w skrytce. Zapasy nie są pobierane przez zadanie. Po zaliczeniu postęp pozostaje, nawet jeśli zużyjesz rzeczy lub zdejmiesz kurtkę.
+
+Nagrody: kolejno 2 tkaniny, 1 antybiotyk, 2 racje i 4 złomu. Odbiór po powrocie dodaje rzeczy do plecaka; nadmiar trafia do skrytki lub odbioru nadmiaru. Starsze zapisy zachowują wyposażenie i postęp: dziennik rozpoznaje naprawiony stół, obecnie założoną kurtkę, obecne zapasy skrytki oraz znaleziska z ostatniego raportu. Nie odtwarza historii, której poprzedni zapis nie przechowywał.

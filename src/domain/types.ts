@@ -70,7 +70,8 @@ export interface ExpeditionReport {
 
 export interface Placement { x: number; y: number; page: number } // -1 = ekwipunek, 0 = schowek
 export interface GameState {
-  schemaVersion: 10;
+  schemaVersion: 11;
+  quests: import('./quests').QuestProgress;
   illness: { startedAt: number; endsAt: number } | null;
   equipped: Record<EquipmentSlot, InventoryEntry | null>;
   backpack: InventoryEntry;

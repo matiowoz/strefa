@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
+import { quests, syncQuestProgress } from '../domain/quests';
 import { locations } from '../domain/catalog';
 import { quantity, repairWorkbench, workbenchCosts } from '../domain/preparation';
 import type { GameState } from '../domain/types';
 import { ItemArt } from './ItemArt';
 import './shelter.css';
 
-type Destination = 'hero' | 'expeditions' | 'inventory' | 'map' | 'storage';
+type Destination = 'hero' | 'expeditions' | 'inventory' | 'map' | 'storage' | 'quests';
 type Props = { saving: boolean; update: (change: (state: GameState) => GameState) => Promise<boolean>; state: GameState; navigate: (screen: Destination) => void };
 
 export function ShelterScreen({ state, navigate, saving, update }: Props) {
+  const journal = syncQuestProgress(state);
+  const nextQuest = quests.find((quest) => !journal.quests.claimed.includes(quest.id));
   const [panel, setPanel] = useState(true);
   const [now, setNow] = useState(Date.now());
   const active = state.activeExpedition;
@@ -37,7 +40,8 @@ export function ShelterScreen({ state, navigate, saving, update }: Props) {
       <div><button className="shelter-primary" onClick={() => navigate('expeditions')}>{action}<span aria-hidden="true"> →</span></button><button className="shelter-secondary" onClick={() => navigate('map')}>Mapa okolicy</button></div>
     </div>
 
-    <section className="shelter-goals" aria-label="Odbudowa kryjówki"><span className="eyebrow">Pierwszy cel · Miejsce do pracy</span><h2>{state.progress.workbenchRepaired ? 'Stół roboczy naprawiony' : 'Przywróć stół do użytku'}</h2>
+    <section className="shelter-goals" aria-label="Dziennik zadań"><span className="eyebrow">Notatnik ocalałego · {journal.quests.claimed.length}/4 nagród odebranych</span><h2>{nextQuest?.name ?? 'Gotowy na kolejny dzień'}</h2><p>{nextQuest?.description ?? 'Wszystkie cztery cele zostały ukończone.'}</p><button onClick={() => navigate('quests')}>Otwórz dziennik zadań →</button></section>
+    <section className="shelter-goals" aria-label="Odbudowa kryjówki"><span className="eyebrow">Stół roboczy · Miejsce do pracy</span><h2>{state.progress.workbenchRepaired ? 'Stół roboczy naprawiony' : 'Przywróć stół do użytku'}</h2>
       <ol><li>{state.progress.workshopVisited ? '✓' : '○'} Wróć z wyprawy do starego warsztatu i odbierz raport.</li><li>{state.progress.workbenchRepaired ? '✓' : '○'} Zbierz 6 złomu i 2 tkaniny, aby naprawić stół.</li><li>{state.progress.workbenchRepaired ? '✓' : '○'} Odblokuj recepturę „Zestaw opatrunków”.</li></ol>
       {state.progress.workbenchRepaired ? <p>Nowa receptura jest dostępna w Ekwipunku. Z 2 tkanin i 1 wody przygotujesz 3 bandaże.</p> : <><p>Materiały pobierane z ekwipunku i skrytki: złom {quantity([...state.inventory, ...state.stash], 'scrap')}/6 · tkanina {quantity([...state.inventory, ...state.stash], 'cloth')}/2.</p><button disabled={saving || !!active || !state.progress.workshopVisited || !workbenchCosts.every((cost) => quantity([...state.inventory, ...state.stash], cost.itemId) >= cost.quantity)} onClick={() => { void update((previous) => repairWorkbench(previous)); }}>Napraw stół roboczy</button></>}
     </section>
@@ -60,7 +64,7 @@ export function ShelterScreen({ state, navigate, saving, update }: Props) {
       </div>
       <div className="shelter-corners">
         <article><span className="shelter-corner-mark" aria-hidden="true">◇</span><div><span className="eyebrow">Stół roboczy</span><h3>{state.progress.workbenchRepaired ? 'Gotowy do pracy.' : 'Wymaga naprawy.'}</h3><p>Wodę, racje i bandaże przygotujesz w Ekwipunku. Każda receptura pokazuje koszt i wynik.</p><button className="shelter-card-link" onClick={() => navigate('inventory')}>Przygotuj zapasy <span aria-hidden="true">→</span></button></div></article>
-        <article><span className="shelter-corner-mark" aria-hidden="true">⌁</span><div><span className="eyebrow">Radio</span><h3>Na razie tylko szum.</h3><p>Transmisje i zadania pojawią się w kolejnych etapach. Dziś czeka na Ciebie znana okolica.</p><span className="shelter-future-note">Nasłuch — w przygotowaniu</span></div></article>
+        <article><span className="shelter-corner-mark" aria-hidden="true">⌁</span><div><span className="eyebrow">Radio</span><h3>Na razie tylko szum.</h3><p>Transmisje pojawią się w kolejnych etapach. Dziś czeka na Ciebie znana okolica.</p><span className="shelter-future-note">Nasłuch — w przygotowaniu</span></div></article>
       </div>
     </div>
   </div>;

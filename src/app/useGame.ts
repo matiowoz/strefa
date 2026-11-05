@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { applyGameChange } from '../domain/quests';
 import { createInitialState } from '../domain/game';
 import type { GameRepository, GameState } from '../domain/types';
 
@@ -35,7 +36,7 @@ export function useGame(repository: GameRepository) {
     setSaving(true);
     setError(null);
     try {
-      const next = change(current.current);
+      const next = applyGameChange(current.current, change);
       if (next === current.current) return true;
       await repository.save(next, current.current);
       current.current = next;

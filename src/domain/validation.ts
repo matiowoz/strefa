@@ -1,3 +1,4 @@
+import { questIds, syncQuestProgress } from './quests';
 import { emptyEquipment, equipmentSlots } from './equipment';
 import { validExpeditionEvents } from './expeditionEvents';
 import { arrange, fits } from './inventory';
@@ -138,8 +139,8 @@ function validHealth(value: unknown): boolean {
   return record(value) && typeof value.jacketWorn === 'boolean' && typeof value.sickAtStart === 'boolean' && typeof value.contracted === 'boolean'
     && !(value.contracted && (value.jacketWorn || value.sickAtStart));
 }
-export function isGameState(value: unknown): value is GameState {
-  if (!validEquipmentState(value, 10)) return false;
+function validIllnessState(value: unknown, version: number): boolean {
+  if (!validEquipmentState(value, version)) return false;
   const state = value as GameState;
   if (state.illness !== null && (!record(state.illness) || !timestamp(state.illness.startedAt) || !timestamp(state.illness.endsAt) || state.illness.endsAt <= state.illness.startedAt)) return false;
   if (state.activeExpedition && !validHealth(state.activeExpedition.health)) return false;
@@ -148,8 +149,15 @@ export function isGameState(value: unknown): value is GameState {
   return true;
 }
 
+export function isGameState(value: unknown): value is GameState {
+  if (!validIllnessState(value, 11) || !record(value) || !record(value.quests)) return false;
+  const { completed, claimed } = value.quests;
+  const validIds = (ids: unknown): ids is string[] => Array.isArray(ids) && new Set(ids).size === ids.length && ids.every((id) => questIds.includes(id));
+  return validIds(completed) && validIds(claimed) && claimed.every((id) => completed.includes(id));
+}
+
 export function validateSave(value: unknown): GameState {
-  if (record(value) && ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(Number(value.schemaVersion))) {
+  if (record(value) && ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(Number(value.schemaVersion))) {
     throw new Error('Nieobsługiwana wersja zapisu. Dane pozostawiono bez zmian.');
   }
   if (record(value) && value.schemaVersion === 1 && validStructure(value)) {
@@ -205,6 +213,9 @@ export function validateSave(value: unknown): GameState {
     return validateSave({ ...old, schemaVersion: 10, illness: null,
       activeExpedition: old.activeExpedition ? { ...old.activeExpedition, health: null } : null,
       lastReport: old.lastReport ? { ...old.lastReport, health: null } : null });
+  }
+  if (record(value) && value.schemaVersion === 10 && validIllnessState(value, 10)) {
+    return syncQuestProgress({ ...value, schemaVersion: 11, quests: { completed: [], claimed: [] } } as unknown as GameState);
   }
   if (!isGameState(value)) throw new Error('Zapis jest nieprawidłowy. Dane pozostawiono bez zmian.');
   return value;
