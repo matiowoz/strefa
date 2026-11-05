@@ -322,3 +322,11 @@ Weryfikacja: 181 testów i build; dwa nowe testy schedulerów z kontrolowanym ze
 Po zgłoszeniu ruchu fragmentu twarzy przy lewym uchu zastąpiono szeroki poziomy pasek dwiema osobnymi, miękko wygaszanymi maskami eliptycznymi wokół powiek. Obszary skroni, uszu, nosa pomiędzy oczami i dolnej twarzy nie są już podmieniane. Grafika, scheduler, zapis gry i geometria postaci bez zmian.
 
 Weryfikacja: 181 testów i build. Chromium: klatki z otwartymi i zamkniętymi oczami przy wyłączonym oddechu, oględziny powiększenia i analiza różnicy pikseli. Zmiana ograniczona do obszaru oczu (prostokąt 149,101–283,135 w zrzucie 412×320); obie skronie, uszy i dolna twarz są identyczne piksel po pikselu. Bez wyjątków JS.
+
+## Zmiana podparcia — lewa noga / obie / prawa
+
+Zaakceptowano spokojne przenoszenie ciężaru ciała pomiędzy trzema pozycjami. Wykorzystano rig 2D z aktualnej grafiki, bez nowych obrazów i bez skalowania całej postaci: osobne maskowane uda, łydki i stopy, tułów z niewielkim przesunięciem bioder i pochyleniem. Stopa podpierająca pozostaje zakotwiczona; noga odciążona lekko zmienia kąt w kolanie. Hełm, plecak, powieki, ubranie i cały łom z dłonią są we wspólnym układzie tułowia; buty i sloty pozostają nieruchome. Oddychanie i mruganie zachowane.
+
+Jeden timeout zmienia pozycję po 5,5–9,5 s. Z pozycji jednostronnej następuje powrót na obie nogi, następny wybór lewej/prawej losowy. Transformacje fragmentów interpolowane przez 1,6 s. Wyłączenie Ruchu przywraca równą postawę bez przejścia; cleanup po ukryciu/odmontowaniu usuwa timeout, ukryta postać nie wykonuje przejść. Ustawienie systemowe ograniczenia ruchu nadal wyłącza całość na wejściu. Pozycja nie jest zapisywana i nie zmienia mechaniki, schematu ani zależności. Ruch spojrzeń pozostaje na przyszły etap.
+
+Weryfikacja: 183 testy i build, w tym dwa nowe testy przejść przez pozycję równą i cleanup timera. Chromium: faktyczna zmiana po czasie, powrót po wyłączeniu, obie zakładki, trzy zrzuty pozycji, 320/390/768/1440 px bez przepełnienia i wyjątków JS. Buty mają identyczny prostokąt w każdej pozycji; analiza porównawcza potwierdziła identyczne piksele w obszarze stóp (z wyłączeniem otaczających kontrolek). Obejrzano stawy nóg i wyposażenie w trzech pozycjach. Bez fizycznego telefonu.

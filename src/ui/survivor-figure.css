@@ -20,3 +20,20 @@
 
 .figure-eyes{background-image:url('/art/survivor-blink.webp');background-size:200% 100%;transform:translateY(2.5%) scaleY(.955);transform-origin:50% 0;clip-path:none;mask-image:radial-gradient(ellipse 2.1% .85% at 47.8% 7.1%,#000 55%,transparent 100%),radial-gradient(ellipse 2.1% .85% at 53.3% 7.1%,#000 55%,transparent 100%);opacity:0}
 .figure-eyes[data-eyes-closed=true]{opacity:1}
+
+/* Rig: independent leg segments meet at the hips/knees; feet stay anchored. */
+.survivor-figure{--hip-x:0%;--upper-lean:0deg;--thigh-left-x:0%;--thigh-right-x:0%;--thigh-left-angle:0deg;--thigh-right-angle:0deg;--calf-left-angle:0deg;--calf-right-angle:0deg}
+.survivor-figure[data-stance=left]{--hip-x:2.5%;--upper-lean:.65deg;--thigh-left-x:-.9%;--thigh-left-angle:-8deg;--thigh-right-angle:-5.6deg;--calf-left-angle:2.7deg}
+.survivor-figure[data-stance=right]{--hip-x:-2.5%;--upper-lean:-.65deg;--thigh-right-x:.9%;--thigh-left-angle:5.6deg;--thigh-right-angle:8deg;--calf-right-angle:-2.7deg}
+.survivor-upper{position:absolute;inset:0;transform-origin:50% 59%;transform:translateX(var(--hip-x)) skewX(var(--upper-lean));transition:transform 1.6s ease-in-out}
+.survivor-limb{position:absolute;inset:0;transition:transform 1.6s ease-in-out}
+.pose-thigh-left,.pose-thigh-right{transform-origin:50% 74.8%}
+.pose-thigh-left{clip-path:inset(58.5% 50% 24.7% 0);transform:translateX(var(--thigh-left-x)) skewX(var(--thigh-left-angle))}
+.pose-thigh-right{clip-path:inset(58.5% 0 24.7% 50%);transform:translateX(var(--thigh-right-x)) skewX(var(--thigh-right-angle))}
+.pose-calf-left,.pose-calf-right{transform-origin:50% 87.5%}
+.pose-calf-left{clip-path:inset(74.7% 50% 12% 0);transform:skewX(var(--calf-left-angle))}
+.pose-calf-right{clip-path:inset(74.7% 0 12% 50%);transform:skewX(var(--calf-right-angle))}
+.pose-feet{clip-path:inset(87.5% 0 0);transition:none}
+.survivor-figure[data-motion=off] .survivor-upper,.survivor-figure[data-motion=off] .survivor-limb,.survivor-figure[data-visible=false] .survivor-upper,.survivor-figure[data-visible=false] .survivor-limb{transition:none}
+
+.survivor-torso{position:absolute;inset:0;clip-path:inset(0 0 40% 0)}
