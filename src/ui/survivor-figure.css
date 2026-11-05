@@ -1,12 +1,16 @@
 .survivor-figure{position:relative;width:100%;height:100%;pointer-events:none;isolation:isolate;overflow:hidden}
-.survivor-idle{position:absolute;height:100%;aspect-ratio:2/3;left:50%;margin-left:0;transform-origin:50% 96%;animation:survivor-breathe 5.6s ease-in-out infinite;will-change:transform}
+.survivor-idle{position:absolute;height:100%;aspect-ratio:2/3;left:50%;margin-left:0;transform-origin:50% 96%;animation:survivor-breathe 3.8s ease-in-out infinite;will-change:transform}
 .survivor-layer{position:absolute;inset:0;background-image:url('/art/survivor-layers.webp');background-size:300% 200%;background-repeat:no-repeat;clip-path:inset(.8%);}
 .figure-backpack{background-position:100% 100%;transform:scaleX(1.08)}
 .figure-base{background-position:0 0}
-.figure-jacket{background-position:50% 0;transform:scaleX(.94);transform-origin:50% 0}
+.figure-dressed{background-image:url('/art/survivor-jacket-worn.webp');background-size:100% 100%;transform:translateY(1.5%) scaleY(.96);transform-origin:50% 0}
 .figure-boots{background-position:100% 0}
 .figure-helmet{background-position:0 100%;transform:translateY(-1.7%) scaleX(.9);transform-origin:50% 0}
 .figure-crowbar{background-position:50% 100%;transform:translateY(2.5%) scale(.87);transform-origin:28% 53%}
 .survivor-shadow{position:absolute;bottom:2%;left:33%;width:34%;height:4%;border-radius:50%;background:#0009;filter:blur(5px)}
-@keyframes survivor-breathe{0%,100%{transform:translateX(-50%) scaleY(1) rotate(-.12deg)}50%{transform:translateX(-50%) scaleY(1.008) rotate(.12deg)}}
-@media(prefers-reduced-motion:reduce){.survivor-idle{animation:none;transform:translateX(-50%);will-change:auto}}
+@keyframes survivor-breathe{0%,100%{transform:translateX(-50%) scaleY(1) rotate(-.2deg)}50%{transform:translateX(-50%) scaleY(1.02) scaleX(1.008) rotate(.2deg)}}
+ .survivor-figure[data-motion=off] .survivor-idle{animation:none;transform:translateX(-50%);will-change:auto}
+.survivor-image{position:absolute;inset:0}
+.survivor-motion{position:absolute;z-index:1;top:5px;right:8px;min-height:0;pointer-events:auto;font-size:.6rem;padding:.3rem .5rem;color:#c3c6af;background:#18211be6;border:1px solid #6b7357;white-space:nowrap}
+
+.survivor-figure[data-boots=true] .figure-dressed{clip-path:inset(.8% .8% 13%)}

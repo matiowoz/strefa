@@ -292,3 +292,11 @@ Zaakceptowany zakres: nowa dorosła sylwetka w nieprzezroczystych bokserkach i k
 Spokojna animacja oddechu całej kompozycji (5,6 s), bez ruchu ramek, slotów i ikon. Obecny zakres nie obejmuje animacji szkieletowej, mrugania ani spacerowania. IntersectionObserver i visibilitychange zatrzymują animację poza widokiem i w ukrytej karcie; prefers-reduced-motion wyłącza ją całkowicie. Warstwy dekoracyjne ukryte przed czytnikiem, wspólny opis dostępności zawiera faktycznie widoczny sprzęt. Bez nowych zależności, zmian domeny ani schematu v12.
 
 Weryfikacja: 179 testów i build. Chromium: obie zakładki, pełne wyposażenie, zdejmowanie wszystkich czterech rzeczy przyciskami, bazowa sylwetka na telefonie, ponowne zakładanie i odświeżenie z zachowaniem widocznego ubioru, ograniczenie ruchu, szerokości 320/390/768/1440 px bez przepełnienia i wyjątków JS. Obejrzano zrzuty bazowej i ubranej sylwetki; poprawiono dopasowanie kołnierza, hełmu i ręki z łomem. Bez fizycznego telefonu.
+
+## Korekta dopasowania kurtki i widoczności oddechu
+
+Po zgłoszeniu użytkownika zastąpiono warstwę pustej kurtki dopasowanym wariantem całej sylwetki z założoną kurtką (własna wygenerowana grafika survivor-jacket-worn.webp). Kołnierz dotyka szyi, rękawy i barki są narysowane na postaci. Pozostały sprzęt nadal nakłada się osobno. Przy butach dolna część bosego wariantu jest ukryta, aby palce nie wystawały poza obuwie. Bez zmiany wyposażenia lub zapisu gry.
+
+Poprzedni oddech był zbyt subtelny (0,8% skali, 5,6 s). Zwiększono ruch do 2% pionowo, 0,8% poziomo i lekkiego kołysania, cykl 3,8 s. Przycisk Ruch jawnie steruje animacją w bieżącym widoku, początkowo uwzględnia systemowe ograniczenie ruchu. Zatrzymanie poza ekranem i ukrytą kartą zachowane. Przycisk jest poza rolą img i nie zasłania sylwetki ani slotów.
+
+Weryfikacja: 179 testów i build; Chromium — rzeczywista zmiana macierzy transformacji w czasie, zatrzymanie/wznowienie przyciskiem, cztery elementy wyposażenia w obu widokach, zdjęcie i ponowne założenie, trwałość po odświeżeniu, szerokości 320/390/768/1440 px, brak wyjątków JS. Obejrzano poprawiony ubiór w zrzucie ekranu.

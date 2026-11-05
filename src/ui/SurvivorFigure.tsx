@@ -7,6 +7,7 @@ type Props = { equipped: GameState['equipped'] };
 // Each layer shares one portrait canvas. Gear follows the figure's idle movement.
 export function SurvivorFigure({ equipped }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const [motion, setMotion] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [visible, setVisible] = useState(true);
   useEffect(() => {
     let inView = true;
@@ -17,18 +18,22 @@ export function SurvivorFigure({ equipped }: Props) {
     update();
     return () => { observer.disconnect(); document.removeEventListener('visibilitychange', update); };
   }, []);
+  const jacketWorn = equipped.body?.itemId === 'jacket';
   const layers = [
     { slot: 'body', item: 'jacket' }, { slot: 'feet', item: 'boots' },
     { slot: 'head', item: 'helmet' }, { slot: 'weapon', item: 'crowbar' },
   ] as const;
   const worn = layers.filter(({ slot, item }) => equipped[slot]?.itemId === item);
   const description = worn.length ? `Założone: ${worn.map(({ item }) => getItem(item)!.name).join(', ')}.` : 'Bez założonej kurtki, hełmu, butów i broni.';
-  return <div ref={ref} className="survivor-figure" role="img" aria-label={`Ocalały w krótkiej, zużytej koszulce i bieliźnie. ${description} Podstawowy plecak na plecach.`}>
+  return <div ref={ref} className="survivor-figure" data-boots={equipped.feet?.itemId === 'boots'} data-motion={motion ? 'on' : 'off'}>
+    <button className="survivor-motion" aria-pressed={motion} onClick={() => setMotion(!motion)}>Ruch: {motion ? 'włączony' : 'wyłączony'}</button>
+    <div className="survivor-image" role="img" aria-label={`Ocalały w krótkiej, zużytej koszulce i bieliźnie. ${description} Podstawowy plecak na plecach.`}>
     <div className="survivor-shadow" />
     <div className="survivor-idle" style={{ animationPlayState: visible ? 'running' : 'paused' }}>
       <span className="survivor-layer figure-backpack" aria-hidden="true" />
-      <span className="survivor-layer figure-base" aria-hidden="true" />
-      {worn.map(({ item }) => <span key={item} className={`survivor-layer figure-${item}`} data-figure-item={item} aria-hidden="true" />)}
+      <span className={`survivor-layer ${jacketWorn ? 'figure-dressed' : 'figure-base'}`} data-figure-item={jacketWorn ? 'jacket' : undefined} aria-hidden="true" />
+      {worn.filter(({ item }) => item !== 'jacket').map(({ item }) => <span key={item} className={`survivor-layer figure-${item}`} data-figure-item={item} aria-hidden="true" />)}
+    </div>
     </div>
   </div>;
 }
