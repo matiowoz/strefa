@@ -316,3 +316,9 @@ Zaakceptowany etap: mruganie, bez spojrzeń na boki ani obrotów głowy. Własny
 Jeden aktywny timeout: losowa przerwa 2800–7000 ms i zamknięcie 130 ms. Zatrzymanie/odmontowanie, wyłączenie Ruchu, zniknięcie z widoku lub ukrycie karty usuwa timeout i otwiera oczy. Brak zapisów gry, zmian schematu i zależności. Brak interwału działającego w tle.
 
 Weryfikacja: 181 testów i build; dwa nowe testy schedulerów z kontrolowanym zegarem sprawdzają nieregularne przerwy, czas zamknięcia, pojedynczy timer i cleanup. Chromium: rzeczywiste mrugnięcie i otwarcie, identyczny prostokąt całej sylwetki, zatrzymanie ruchem, obie zakładki, 320/390/768/1440 px, bez wyjątków JS. Obejrzano powiększone powieki bez hełmu i warstwowanie z kurtką/hełmem. Bez fizycznego telefonu.
+
+## Korekta maski mrugnięcia przy skroni
+
+Po zgłoszeniu ruchu fragmentu twarzy przy lewym uchu zastąpiono szeroki poziomy pasek dwiema osobnymi, miękko wygaszanymi maskami eliptycznymi wokół powiek. Obszary skroni, uszu, nosa pomiędzy oczami i dolnej twarzy nie są już podmieniane. Grafika, scheduler, zapis gry i geometria postaci bez zmian.
+
+Weryfikacja: 181 testów i build. Chromium: klatki z otwartymi i zamkniętymi oczami przy wyłączonym oddechu, oględziny powiększenia i analiza różnicy pikseli. Zmiana ograniczona do obszaru oczu (prostokąt 149,101–283,135 w zrzucie 412×320); obie skronie, uszy i dolna twarz są identyczne piksel po pikselu. Bez wyjątków JS.
