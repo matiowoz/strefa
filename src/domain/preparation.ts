@@ -6,7 +6,7 @@ export const recipes = [
   { id: 'water', name: 'Uzdatnij wodę', costs: [{ itemId: 'raw-water', quantity: 1 }], output: [{ itemId: 'water', quantity: 1 }] },
   { id: 'ration', name: 'Przygotuj rację', costs: [{ itemId: 'food', quantity: 1 }], output: [{ itemId: 'ration', quantity: 1 }] },
   { id: 'bandage', name: 'Przygotuj bandaż', costs: [{ itemId: 'cloth', quantity: 2 }], output: [{ itemId: 'bandage', quantity: 1 }] },
-  { id: 'dressings', name: 'Zestaw opatrunków', costs: [{ itemId: 'cloth', quantity: 2 }, { itemId: 'water', quantity: 1 }], output: [{ itemId: 'bandage', quantity: 3 }] },
+  { id: 'dressings', name: 'Zestaw opatrunków', costs: [{ itemId: 'cloth', quantity: 2 }], output: [{ itemId: 'bandage', quantity: 3 }] },
 ] as const;
 
 export function quantity(inventory: InventoryEntry[], itemId: string): number {

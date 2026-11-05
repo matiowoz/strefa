@@ -346,3 +346,11 @@ Po zgłoszeniu użytkownika, że grafika się rozjechała, wycofano oba eksperym
 Naturalne przestawianie stóp pozostaje niezrealizowanym celem. Wymaga jednej spójnej animowanej sylwetki z dopasowanym wyposażeniem, a nie łączenia niezgodnych części różnych klatek. Nie oznaczać tego celu jako ukończonego na podstawie samych testów technicznych.
 
 Weryfikacja wycofania: 181 testów i build. Chromium: oba widoki, pełne wyposażenie, zdejmowanie i ponowne zakładanie, odświeżenie, ruch klatki bez zmiany rozmiaru całej postaci, przycisk Ruch, 320/390/768/1440 px bez wyjątków JS i przepełnienia. Obejrzano przywróconą sylwetkę. Testy dotyczą przywróconej funkcjonalności, nie realizacji naturalnego ruchu nóg.
+
+## Receptury bandaży i zakres skrytki — korekta użytkownika
+
+Na razie pozostaje jedna skrytka 8×9. Nie dodawać teraz kolejnej; przyszłe skrytki nie będą budowane z tkaniny. Ich materiałów i kosztów jeszcze nie ustalono. Nie dotyczy to obecnej naprawy stołu, której koszt pozostaje bez zmian.
+
+Bandaże nie wymagają wody. Podstawowa receptura już używała wyłącznie 2 tkanin na 1 bandaż. Usunięto 1 wodę z receptury zestawu opatrunków po naprawie stołu: teraz 2 tkaniny → 3 bandaże. Dotychczasowe ilości tkanin i wyników zachowane jako parametry prototypu; wyższa wydajność po naprawie stołu bez dodatkowej mechaniki sterylizacji. Widok kosztów i opis w kryjówce zgodne z recepturą. Zapis i dotychczasowe przedmioty bez zmian.
+
+Weryfikacja korekty receptur: 184 testy i build. Nowe regresje obejmują obie receptury bez posiadania wody oraz zachowanie całego zapasu wody podczas przygotowania zestawu opatrunków. Istniejące blokady naprawy stołu i używania surowców z ekwipunku pozostają aktywne.

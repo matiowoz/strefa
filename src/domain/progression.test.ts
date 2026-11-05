@@ -91,3 +91,23 @@ it('waliduje osobny plecak i postęp bez cichego naprawiania aktualnego zapisu',
   expect(isGameState({ ...state, progress: { workshopVisited: false, workbenchRepaired: true } })).toBe(false);
   expect(isGameState({ ...state, backpack: { ...state.backpack, condition: 101 } })).toBe(false);
 });
+
+it.each([['bandage', 1], ['dressings', 3]] as const)('receptura %s działa bez wody', (recipe, output) => {
+  const initial = createInitialState(0);
+  const state = arrange({ ...initial, progress: { workshopVisited: true, workbenchRepaired: true },
+    inventory: [{ id: 'cloth-only', itemId: 'cloth', quantity: 2, condition: null }], positions: {} });
+  const crafted = craft(state, recipe, 1000);
+  expect(quantity(crafted.inventory, 'bandage')).toBe(output);
+  expect(quantity(crafted.inventory, 'cloth')).toBe(0);
+  expect(quantity(crafted.inventory, 'water')).toBe(0);
+  expect(isGameState(crafted)).toBe(true);
+});
+
+it('przygotowanie zestawu opatrunków zachowuje posiadany zapas wody', () => {
+  const initial = createInitialState(0);
+  const state = arrange({ ...initial, progress: { workshopVisited: true, workbenchRepaired: true }, inventory: addResources(initial.inventory, [{ itemId: 'cloth', quantity: 2 }]) });
+  const water = state.inventory.find((entry) => entry.itemId === 'water');
+  const crafted = craft(state, 'dressings', 1000);
+  expect(crafted.inventory.find((entry) => entry.itemId === 'water')).toEqual(water);
+  expect(quantity(crafted.inventory, 'bandage')).toBe(5);
+});
