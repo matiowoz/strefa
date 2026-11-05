@@ -300,3 +300,11 @@ Po zgłoszeniu użytkownika zastąpiono warstwę pustej kurtki dopasowanym waria
 Poprzedni oddech był zbyt subtelny (0,8% skali, 5,6 s). Zwiększono ruch do 2% pionowo, 0,8% poziomo i lekkiego kołysania, cykl 3,8 s. Przycisk Ruch jawnie steruje animacją w bieżącym widoku, początkowo uwzględnia systemowe ograniczenie ruchu. Zatrzymanie poza ekranem i ukrytą kartą zachowane. Przycisk jest poza rolą img i nie zasłania sylwetki ani slotów.
 
 Weryfikacja: 179 testów i build; Chromium — rzeczywista zmiana macierzy transformacji w czasie, zatrzymanie/wznowienie przyciskiem, cztery elementy wyposażenia w obu widokach, zdjęcie i ponowne założenie, trwałość po odświeżeniu, szerokości 320/390/768/1440 px, brak wyjątków JS. Obejrzano poprawiony ubiór w zrzucie ekranu.
+
+## Cywilna kurtka, rozluźnione dłonie i oddech bez rośnięcia
+
+Na korektę użytkownika zastąpiono wojskowy wygląd kurtki cywilną, brązową kurtką na zamek, z dwoma bocznymi kieszeniami i łatą. Nowy własny atlas dwóch sylwetek (koszulka / kurtka), obie z rozluźnionymi dłońmi; nowa dopasowana ikona kurtki i warstwa chwytu łomu. Identyfikatory, stan, pozycje, rozmiary sprzętu oraz postęp gry bez zmian. Stary sprzęt zachowuje funkcje. Dłoń jest maskowana i zastępowana chwytem wyłącznie z założonym łomem.
+
+Usunięto animację skalującą całą kompozycję. Głowa, nogi, stopy, dłonie i wyposażenie pozostają nieruchome. Oddycha wyłącznie osobna, płynnie maskowana warstwa klatki piersiowej z tym samym ubraniem: uniesienie do 0,45% wysokości i rozszerzenie klatki do 1,4%, cykl 4,2 s. Brak zmiany globalnego rozmiaru lub położenia postaci. Przycisk Ruch, uwzględnienie ustawień systemowych na wejściu i zatrzymanie poza ekranem zachowane.
+
+Weryfikacja: 179 testów i build. Chromium: macierz transformacji klatki zmienia się w czasie, prostokąt całej sylwetki pozostaje identyczny; przycisk zatrzymuje i wznawia ruch. Obie zakładki, zdejmowanie i zakładanie wszystkich czterech rzeczy, powrót luźnej dłoni po zdjęciu łomu, odświeżenie, 320/390/768/1440 px bez przepełnienia i wyjątków JS. Obejrzano zrzuty cywilnej kurtki, chwytu i sylwetki bez wyposażenia. Bez fizycznego telefonu.
