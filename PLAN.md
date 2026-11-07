@@ -386,3 +386,9 @@ Zaktualizowano opisy NPC, tekst przy wejściu i teksty alternatywne. Ilustracja 
 Doprecyzowanie użytkownika w trakcie korekty: to współczesny świat po apokalipsie. Aktualna, ostateczna wersja sceny zastępuje historycznie wyglądające ubrania i rekwizyty współczesną odzieżą outdoorową/taktyczną, nylonowymi pasami i klamrami, nowoczesną bronią z tworzyw, maskami przemysłowymi z wymiennymi filtrami podniesionymi na głowę, cyfrową radiostacją, laptopem, krótkofalówką, przetwornicą, modułami akumulatorów i lampami LED. Stare mury i mural mogą pozostać architekturą; bohaterowie mają współczesny, zużyty ekwipunek. Stosować tę zasadę do kolejnych grafik świata i postaci, nie postarzać epoki przedmiotów wraz ze śladami użytkowania. Opisy NPC dostosowane.
 
 Weryfikacja korekty wyglądu: 199 testów i build; Chromium — wejście do holu, trzy rozmowy, oferta i działający barter, trwałość zapasu, blokada przed odbiorem raportu, 320/390/768/1440 px bez przepełnienia i wyjątków JS. Obejrzano ostateczną współczesną ilustrację w aplikacji. Bez fizycznego telefonu.
+
+## Ograniczenie oddechu do środka klatki piersiowej
+
+Po zgłoszeniu powiększania rąk przy oddychaniu zastąpiono maskę pełnej szerokości poziomego pasa maską eliptyczną, skupioną na środku tułowia (promienie 12,5% szerokości i 15% wysokości). Kopia animowanej grafiki nie obejmuje już ramion ani dłoni. Parametry oddechu, ubranie, chwyt łomu, mruganie i zapis gry pozostają bez zmian.
+
+Weryfikacja: 199 testów i build. Chromium: zatrzymanie animacji w fazach 0 i 2100 ms, osobno koszulka oraz kurtka z łomem. Porównano piksele zrzutów: różnice tylko w środkowym obszarze klatki, ramiona/dłonie, głowa i dół postaci identyczne. Obejrzano klatkę maksymalnego wdechu, brak animacji całej sylwetki i wyjątków JS. Bez fizycznego telefonu.

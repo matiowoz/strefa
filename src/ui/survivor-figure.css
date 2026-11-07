@@ -9,7 +9,7 @@
 .figure-helmet{background-position:0 100%;transform:translateY(-1.7%) scaleX(.9);transform-origin:50% 0}
 .figure-crowbar{background-image:url('/art/crowbar-grip.webp');background-size:100% 100%;transform:translateY(-5.4%);}
 .survivor-shadow{position:absolute;bottom:2%;left:33%;width:34%;height:4%;border-radius:50%;background:#0009;filter:blur(5px)}
-.survivor-chest{position:absolute;inset:0;transform-origin:50% 48%;mask-image:linear-gradient(transparent 19%,#000 25%,#000 43%,transparent 49%);animation:survivor-chest-breathe 4.2s ease-in-out infinite;will-change:transform}
+.survivor-chest{position:absolute;inset:0;transform-origin:50% 48%;mask-image:radial-gradient(ellipse 12.5% 15% at 50% 34%,#000 55%,transparent 100%);animation:survivor-chest-breathe 4.2s ease-in-out infinite;will-change:transform}
 @keyframes survivor-chest-breathe{0%,100%{transform:translateY(0) scaleX(1)}50%{transform:translateY(-.45%) scaleX(1.014)}}
 .survivor-figure[data-motion=off] .survivor-chest{animation:none;transform:none;will-change:auto}
 .survivor-image{position:absolute;inset:0}
