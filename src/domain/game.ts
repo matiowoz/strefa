@@ -8,7 +8,7 @@ import type { GameState } from './types';
 
 export function createInitialState(now = Date.now()): GameState {
   return arrange({
-    schemaVersion: 13, trader: { stock: initialTraderStock() }, quests: { completed: [], claimed: [] }, illness: null, equipped: emptyEquipment(), backpack: { id: 'starter-backpack', itemId: 'backpack', quantity: 1, condition: 100 }, progress: { workshopVisited: false, workbenchRepaired: false }, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
+    schemaVersion: 14, miraQuest: 'available', trader: { stock: initialTraderStock() }, quests: { completed: [], claimed: [] }, illness: null, equipped: emptyEquipment(), backpack: { id: 'starter-backpack', itemId: 'backpack', quantity: 1, condition: 100 }, progress: { workshopVisited: false, workbenchRepaired: false }, positions: {}, stash: [], overflow: [], preparation: { kit: 'light', equipmentId: null }, lastReport: null, updatedAt: now,
     hero: {
       id: 'survivor', name: 'Ocalały', level: 1, health: 100, maxHealth: 100,
       skills: { combat: 1, scouting: 1, survival: 1, medicine: 1, crafting: 1, electronics: 1, trade: 1, transport: 1 },
@@ -54,7 +54,7 @@ export function startExpedition(state: GameState, now = Date.now(), random: () =
   }
   const problem = preparationError(state);
   if (problem) throw new Error(problem);
-  const events = resolveExpeditionEvents(state.selectedLocationId, random, [...state.inventory, ...wornItems(state)].some((entry) => entry.itemId === 'crowbar'));
+  const events = resolveExpeditionEvents(state.selectedLocationId, random, [...state.inventory, ...wornItems(state)].some((entry) => entry.itemId === 'crowbar'), state.miraQuest === 'active');
   const loot = eventLoot(events);
   const expectedReturnAt = now + rule.durationMs;
 

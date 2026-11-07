@@ -33,3 +33,5 @@ z pęknięciami i śladami rdzy, tło wspólne dla wszystkich ekranów. WebP
 Aktualny wariant Przystani: surowsza ilustracja postapo, z łatanym ubiorem, maskami podniesionymi na głowę, bronią na pasach, wzmocnionymi drzwiami i wyposażeniem odzyskanym z ruin.
 
 Przystań przedstawia współczesność po katastrofie: odzież outdoorową/taktyczną, maski z filtrami, współczesną broń, laptop i cyfrową radiostację, lampy LED i akumulatory. Zużyte wyposażenie nie jest stylizowane na historyczne.
+
+`electronic-parts.webp` — własna wygenerowana ikona współczesnych odzyskanych modułów elektronicznych, przewodów i złączy, używana w zleceniu Miry (materiał 1×1).

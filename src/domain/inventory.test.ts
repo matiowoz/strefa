@@ -71,7 +71,7 @@ describe('migracja i walidacja siatki', () => {
     const old = { ...state, schemaVersion: 3, inventory: [...state.inventory, ...state.stash, ...state.overflow], hero: { ...state.hero, name: 'Kruk' } };
     const migrated = validateSave(old);
     expect(totals(migrated)).toEqual(totals(state)); expect(migrated.hero.name).toBe('Kruk');
-    expect(migrated.schemaVersion).toBe(13); expect(isGameState(migrated)).toBe(true);
+    expect(migrated.schemaVersion).toBe(14); expect(isGameState(migrated)).toBe(true);
   });
   it('odrzuca uszkodzone położenia i powielony ID między kontenerami', () => {
     const state = createInitialState(0); const id = state.inventory[0].id;
@@ -101,7 +101,7 @@ it('migruje pełne dwie strony v4 do mniejszego schowka bez utraty rzeczy', () =
   const result = validateSave(old);
   expect(totals(result)).toEqual(entries.map((entry) => entry.id).sort());
   expect(result.stash).toHaveLength(72); expect(result.overflow).toHaveLength(128);
-  expect(result.schemaVersion).toBe(13);
+  expect(result.schemaVersion).toBe(14);
 });
 
 it('przenosi przedmiot z dawnej drugiej strony na wolne miejsce, ale nie naprawia uszkodzonego zapisu v4', () => {

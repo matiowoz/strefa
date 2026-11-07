@@ -16,6 +16,7 @@ const atlas: Record<string, readonly [number, number]> = {
 const gearAtlas: Record<string, readonly [number, number]> = { helmet: [0, 0], jacket: [1, 0], boots: [0, 1], crowbar: [1, 1] };
 
 export function ItemArt({ itemId }: { itemId: string }) {
+  if (itemId === 'electronic-parts') return <span className="item-art" aria-hidden="true" style={{ backgroundImage: "url('/art/electronic-parts.webp')", backgroundSize: '100% 100%', backgroundPosition: 'center' }} />;
   if (itemId === 'jacket') return <span className="item-art" aria-hidden="true" style={{ backgroundImage: "url('/art/jacket-civilian.webp')", backgroundSize: '100% 100%', backgroundPosition: 'center' }} />;
   if (itemId === 'antibiotic') return <span className="item-art" aria-hidden="true" style={{ backgroundImage: "url('/art/antibiotic.webp')", backgroundSize: '100% 100%', backgroundPosition: 'center' }} />;
   const gear = gearAtlas[itemId];

@@ -13,7 +13,7 @@ const routes: Record<string, readonly [ExpeditionEventId, ExpeditionEventId]> = 
   outskirts: ['apartment', 'courtyard'], workshop: ['workshop-floor', 'storeroom'],
 };
 const gearByEvent: Record<ExpeditionEventId, readonly string[]> = { apartment: ['jacket', 'boots'], courtyard: ['helmet'], 'workshop-floor': ['helmet', 'crowbar'], storeroom: ['jacket', 'boots'], 'locked-cache': [], 'blocked-road': [] };
-const resourceOrder = ['scrap', 'raw-water', 'food', 'cloth', 'helmet', 'jacket', 'boots', 'crowbar', 'antibiotic'];
+const resourceOrder = ['scrap', 'raw-water', 'food', 'cloth', 'helmet', 'jacket', 'boots', 'crowbar', 'antibiotic', 'electronic-parts'];
 function roll(random: () => number): number {
   const value = random();
   if (!Number.isFinite(value) || value < 0 || value >= 1) throw new Error('Nieprawidłowe losowanie.');
@@ -24,7 +24,7 @@ export function eventLoot(events: readonly ExpeditionEvent[]): ResourceAmount[] 
   return resourceOrder.map((itemId) => ({ itemId, quantity: events.reduce((sum, event) => sum + event.loot.filter((entry) => entry.itemId === itemId).reduce((total, entry) => total + entry.quantity, 0), 0) })).filter((entry) => entry.quantity > 0);
 }
 
-export function resolveExpeditionEvents(locationId: string, random: () => number, hasCrowbar = false): ExpeditionEvent[] {
+export function resolveExpeditionEvents(locationId: string, random: () => number, hasCrowbar = false, searchElectronics = false): ExpeditionEvent[] {
   const route = routes[locationId];
   if (!route) throw new Error('Nieznana trasa wyprawy.');
   if (roll(random) < 0.15) return [{ id: 'blocked-road', loot: [] }];
@@ -44,6 +44,7 @@ export function resolveExpeditionEvents(locationId: string, random: () => number
       { itemId: 'cloth', quantity: 1 + Math.floor(roll(random) * 2) },
     ];
   }
+  if (searchElectronics && locationId === 'workshop' && roll(random) < .6) first.loot.push({ itemId: 'electronic-parts', quantity: 1 });
   return events;
 }
 
@@ -66,7 +67,7 @@ export function validExpeditionEvents(value: unknown, locationId: string, loot: 
       if (!record(resource) || typeof resource.itemId !== 'string' || typeof resource.quantity !== 'number' || !Number.isSafeInteger(resource.quantity) || resource.quantity < 1 || ids.has(resource.itemId)) return false;
       const drops = event.id === 'locked-cache' && event.cacheResult === 'opened' ? [{ itemId: 'scrap', maximum: 3 }, { itemId: 'cloth', maximum: 2 }] : definition.drops;
       const drop = drops.find((entry) => entry.itemId === resource.itemId);
-      if (drop ? resource.quantity > drop.maximum : !(gearByEvent[event.id as ExpeditionEventId].includes(resource.itemId) || (resource.itemId === 'antibiotic' && (event.id === 'apartment' || event.id === 'storeroom'))) || resource.quantity !== 1) return false;
+      if (drop ? resource.quantity > drop.maximum : !(gearByEvent[event.id as ExpeditionEventId].includes(resource.itemId) || (resource.itemId === 'antibiotic' && (event.id === 'apartment' || event.id === 'storeroom')) || (resource.itemId === 'electronic-parts' && event.id === 'workshop-floor')) || resource.quantity !== 1) return false;
       ids.add(resource.itemId);
     }
   }

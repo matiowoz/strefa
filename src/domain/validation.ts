@@ -165,15 +165,19 @@ function validHealthyState(value: unknown, version: number): boolean {
     && (!state.lastReport || state.lastReport.health === null);
 }
 
-export function isGameState(value: unknown): value is GameState {
-  if (!validHealthyState(value, 13) || !record(value) || !record(value.trader) || !record(value.trader.stock)) return false;
+function validTraderState(value: unknown, version: number): boolean {
+  if (!validHealthyState(value, version) || !record(value) || !record(value.trader) || !record(value.trader.stock)) return false;
   const stock = value.trader.stock;
   const maximum = initialTraderStock();
   return Object.keys(stock).length === tradeGoods.length && tradeGoods.every((id) => integer(stock[id]) && stock[id] >= 0 && stock[id] <= maximum[id]);
 }
 
+export function isGameState(value: unknown): value is GameState {
+  return validTraderState(value, 14) && record(value) && typeof value.miraQuest === 'string' && ['available', 'active', 'completed'].includes(value.miraQuest);
+}
+
 export function validateSave(value: unknown): GameState {
-  if (record(value) && ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].includes(Number(value.schemaVersion))) {
+  if (record(value) && ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].includes(Number(value.schemaVersion))) {
     throw new Error('Nieobsługiwana wersja zapisu. Dane pozostawiono bez zmian.');
   }
   if (record(value) && value.schemaVersion === 1 && validStructure(value)) {
@@ -244,6 +248,9 @@ export function validateSave(value: unknown): GameState {
   }
   if (record(value) && value.schemaVersion === 12 && validHealthyState(value, 12)) {
     return validateSave({ ...value, schemaVersion: 13, trader: { stock: initialTraderStock() } });
+  }
+  if (record(value) && value.schemaVersion === 13 && validTraderState(value, 13)) {
+    return validateSave({ ...value, schemaVersion: 14, miraQuest: 'available' });
   }
   if (!isGameState(value)) throw new Error('Zapis jest nieprawidłowy. Dane pozostawiono bez zmian.');
   return value;

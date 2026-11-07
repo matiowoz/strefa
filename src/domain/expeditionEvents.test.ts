@@ -91,7 +91,7 @@ describe('walidacja dziennika i migracja', () => {
     const { events: _reportEvents, ...report } = next.lastReport!;
     const old = { ...next, schemaVersion: 7, activeExpedition: active, lastReport: report };
     const loaded = validateSave(old);
-    expect(loaded.schemaVersion).toBe(13);
+    expect(loaded.schemaVersion).toBe(14);
     expect(loaded.activeExpedition).toEqual({ ...active, events: null, health: null });
     expect(loaded.lastReport).toEqual({ ...report, events: null, health: null });
     expect(loaded.inventory).toEqual(old.inventory);

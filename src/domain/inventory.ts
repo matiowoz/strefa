@@ -12,6 +12,7 @@ export const gridSize = (page: number) => page === -1 ? { columns: GRID_COLUMNS,
 export const itemSizes: Record<string, { width: number; height: number }> = {
   antibiotic: { width: 1, height: 1 },
   helmet: { width: 2, height: 2 }, jacket: { width: 2, height: 3 }, boots: { width: 2, height: 2 }, crowbar: { width: 1, height: 3 },
+  'electronic-parts': { width: 1, height: 1 },
   backpack: { width: 2, height: 3 }, water: { width: 1, height: 2 },
   ration: { width: 1, height: 1 }, bandage: { width: 1, height: 1 },
   scrap: { width: 2, height: 2 }, 'raw-water': { width: 1, height: 2 },

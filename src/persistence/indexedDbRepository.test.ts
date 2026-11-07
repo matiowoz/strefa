@@ -40,7 +40,7 @@ describe('adapter IndexedDB', () => {
   });
   it('nie traktuje nowszej wersji jako pustej gry i nie usuwa surowych danych', async () => {
     const factory = new IDBFactory();
-    await writeRaw(factory, { schemaVersion: 14, marker: 'keep' });
+    await writeRaw(factory, { schemaVersion: 15, marker: 'keep' });
     const repository = new IndexedDbRepository(factory, 'test');
     await expect(repository.load()).rejects.toThrow('wersja');
     await expect(repository.load()).rejects.toThrow('wersja');
@@ -112,7 +112,7 @@ describe('transakcje wyprawy', () => {
     await writeRaw(factory, { ...legacy, schemaVersion: 1 });
     const repository = new IndexedDbRepository(factory, 'test');
     const loaded = (await repository.load())!;
-    expect(loaded.schemaVersion).toBe(13);
+    expect(loaded.schemaVersion).toBe(14);
     await repository.save(renameHero(loaded, 'Kruk', 1000), loaded);
     expect((await repository.load())!.hero.name).toBe('Kruk');
   });
@@ -180,7 +180,7 @@ it('migruje starą drugą stronę schowka i zachowuje kontrolę poprzedniego sta
   await writeRaw(factory, { ...state, schemaVersion: 4, positions: { ...state.positions, 'starter-water': { x: 9, y: 5, page: 1 } } });
   const repository = new IndexedDbRepository(factory, 'test');
   const loaded = (await repository.load())!;
-  expect(loaded.schemaVersion).toBe(13);
+  expect(loaded.schemaVersion).toBe(14);
   expect(loaded.positions['starter-water'].page).toBe(0);
   const moved = moveItem(loaded, 'starter-water', -1, undefined, 2000);
   await repository.save(moved, loaded);
@@ -455,4 +455,23 @@ it('przerwana transakcja barteru zachowuje przedmiot gracza i zapas handlarza', 
   const spy = vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(function (this: IDBDatabase, ...args: Parameters<typeof original>) { const tx = original.apply(this, args);queueMicrotask(() => tx.abort());return tx; });
   await expect(repository.save(tradeItem(state, 'starter-scrap', 3, 'water', 1000), state)).rejects.toThrow();spy.mockRestore();
   expect(await repository.load()).toEqual(state);
+});
+
+it('zlecenie Miry zapisuje części i nagrodę raz przy równoległych kartach', async () => {
+  const { acceptMiraQuest, completeMiraQuest } = await import('../domain/miraQuest');
+  const state = arrange({ ...acceptMiraQuest(createInitialState(0), 1000), inventory: [...createInitialState(0).inventory, { id: 'p', itemId: 'electronic-parts', quantity: 2, condition: null }] });
+  const repository = new IndexedDbRepository(new IDBFactory(), 'test');await repository.save(state);
+  const first = (await repository.load())!;const second = (await repository.load())!;
+  const result = await Promise.allSettled([repository.save(completeMiraQuest(first, 2000), first), repository.save(completeMiraQuest(second, 2001), second)]);
+  expect(result.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+  const loaded = (await repository.load())!;expect(loaded.miraQuest).toBe('completed');expect(loaded.inventory.some((entry) => entry.itemId === 'electronic-parts')).toBe(false);
+  expect(loaded.inventory.find((entry) => entry.itemId === 'water')!.quantity).toBe(5);expect(completeMiraQuest(loaded)).toBe(loaded);
+});
+
+it('przerwanie oddania części Mirze zachowuje części i aktywne zadanie', async () => {
+  const { acceptMiraQuest, completeMiraQuest } = await import('../domain/miraQuest');
+  const state = arrange({ ...acceptMiraQuest(createInitialState(0), 1000), inventory: [...createInitialState(0).inventory, { id: 'p', itemId: 'electronic-parts', quantity: 2, condition: null }] });
+  const repository = new IndexedDbRepository(new IDBFactory(), 'test');await repository.save(state);
+  const original = IDBDatabase.prototype.transaction;const spy = vi.spyOn(IDBDatabase.prototype, 'transaction').mockImplementation(function (this: IDBDatabase, ...args: Parameters<typeof original>) { const tx = original.apply(this, args);queueMicrotask(() => tx.abort());return tx; });
+  await expect(repository.save(completeMiraQuest(state, 2000), state)).rejects.toThrow();spy.mockRestore();expect(await repository.load()).toEqual(state);
 });

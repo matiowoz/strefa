@@ -1,3 +1,4 @@
+import { MiraQuestPanel } from './MiraQuestPanel';
 import { useState } from 'react';
 import { getItem } from '../domain/catalog';
 import { atShelter } from '../domain/inventory';
@@ -7,13 +8,14 @@ import { ItemArt } from './ItemArt';
 import { useNow } from './useNow';
 import './quests.css';
 
-type Props = { state: GameState; saving: boolean; update: (change: (state: GameState) => GameState) => Promise<boolean>; navigate: (screen: 'shelter' | 'expeditions' | 'inventory' | 'storage') => void };
+type Props = { state: GameState; saving: boolean; update: (change: (state: GameState) => GameState) => Promise<boolean>; navigate: (screen: 'shelter' | 'expeditions' | 'inventory' | 'storage' | 'settlement') => void };
 export function QuestScreen({ state, saving, update, navigate }: Props) {
   const progress = syncQuestProgress(state);
   const now = useNow(!!state.activeExpedition);
   const [notice, setNotice] = useState('');
   return <div className="quest-journal">
-    <div className="quest-intro"><span className="eyebrow">Notatnik ocalałego</span><h2>Jutro zaczyna się dzisiaj.</h2><p>Małe cele pomagają przetrwać. Możesz realizować je w dowolnej kolejności. Nagrody odbierzesz po powrocie do kryjówki.</p><strong>Odebrane nagrody: {progress.quests.claimed.length} / {quests.length}</strong><button onClick={() => navigate('shelter')}>Wróć do kryjówki</button></div>
+    <div className="quest-intro"><span className="eyebrow">Notatnik ocalałego</span><h2>Jutro zaczyna się dzisiaj.</h2><p>Małe cele pomagają przetrwać. Możesz realizować je w dowolnej kolejności. Nagrody odbierzesz po powrocie do kryjówki.</p><strong>Nagrody za cele przetrwania: {progress.quests.claimed.length} / {quests.length}</strong><button onClick={() => navigate('shelter')}>Wróć do kryjówki</button></div>
+    <section aria-labelledby="npc-quests-heading"><h2 id="npc-quests-heading">Zlecenia mieszkańców</h2><MiraQuestPanel state={state} saving={saving} journal onVisit={() => navigate('settlement')} /></section>
     <p role="status">{notice}</p>
     <div className="quest-list">{quests.map((quest, index) => {
       const complete = progress.quests.completed.includes(quest.id);
