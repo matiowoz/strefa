@@ -406,3 +406,12 @@ Schemat v14 dodaje miraQuest. Migracja poprawnych v1–v13 daje available i zach
 Weryfikacja: 211 testów i build. Regresje przyjęcia, idempotencji, dwóch wypraw i oddania, progu 60%, zatarasowanej drogi i lokalizacji, braku dropów przed/po zadaniu, skrytki, podzielonych stosów, pełnych siatek i overflow, migracji aktywnej wyprawy, błędnych danych, konfliktu kart i przerwanej transakcji. Chromium: migracja v13, przyjęcie i odświeżenie, dziennik, dwie rzeczywiste operacje start/odbiór UI z kontrolowanym RNG i przyspieszonym zegarem testowym, części, dostarczenie, dialog i nagroda raz, trwałość po odświeżeniu. 320/390/768/1440 px bez przepełnienia i wyjątków JS; obejrzano panel Miry. Bez fizycznego telefonu.
 
 Otwarta uwaga wizualna użytkownika: naturalny oddech nadal jest niedokończony mimo technicznego działania maski. Następne podejście do ruchu powinno zacząć się od oddzielnego prototypu animowanej sylwetki. Nie oznaczać jakości animacji jako ukończonej na podstawie samych testów maski. Ruch nóg pozostaje wyłączony.
+
+
+## Automatyczny oddech i mruganie — korekta 17 listopada 2026
+
+Na polecenie użytkownika usunięto przycisk Ruch oraz stan ręcznego włączania animacji we wspólnej sylwetce Postaci i Ekwipunku. Oddech i mruganie uruchamiają się automatycznie po pokazaniu postaci, również przy systemowym ograniczeniu ruchu. Zatrzymanie poza widokiem i w ukrytej karcie pozostaje; czas i grafika mrugania bez zmian.
+
+Maska klatki jest teraz nieruchoma, a pod nią porusza się wyłącznie kopia grafiki tułowia. Wdech: uniesienie o 0,25% wysokości płótna i lokalna skala 1,008 × 1,012 względem dolnej części klatki, dająca subtelne wysunięcie w stronę gracza. Cykl nadal 4,2 s. Bez skalowania całej sylwetki, rąk, głowy i wyposażenia; nogi i stopy bez zmian. To korekta oddechu 2D, bez realizacji odłożonej zmiany podparcia.
+
+Weryfikacja: 211/211 testów i npm run build zaliczone. Chromium 390 px: brak przycisku, automatyczny oddech i rzeczywiste mrugnięcie także przy prefers-reduced-motion. Osobny podgląd komponentu bez sprzętu i z kurtką, hełmem, butami oraz łomem: porównanie pikseli wydechu i maksymalnego wdechu potwierdziło zmiany tylko w obrębie maski klatki (132–221 × 101–259 na płótnie 354×530). Ręce, głowa i nogi identyczne; obejrzano zrzuty wdechu. Techniczna kontrola zakresu nie zastępuje oceny naturalności ruchu przez użytkownika. Bez testu fizycznego telefonu.
