@@ -11,9 +11,9 @@
 .survivor-shadow{position:absolute;bottom:2%;left:33%;width:34%;height:4%;border-radius:50%;background:#0009;filter:blur(5px)}
 /* Keep the feathered chest mask fixed: only the texture beneath it breathes.
    Arms, hands, head and legs remain on the stationary body layer. */
-.survivor-chest{position:absolute;inset:0;mask-image:radial-gradient(ellipse 12.5% 15% at 50% 34%,#000 55%,transparent 100%)}
-.survivor-chest-breath{position:absolute;inset:0;transform-origin:50% 40%;animation:survivor-chest-breathe 4.2s ease-in-out infinite;will-change:transform}
-@keyframes survivor-chest-breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-.25%) scale(1.008,1.012)}}
+.survivor-chest{position:absolute;inset:0;clip-path:polygon(38% 15%,62% 15%,65% 23%,63% 30%,63% 39%,37% 39%,37% 30%,35% 23%);mask-image:radial-gradient(ellipse 18% 12% at 50% 27%,#000 65%,transparent 100%)}
+.survivor-chest-breath{position:absolute;inset:0;transform-origin:50% 27%;animation:survivor-chest-breathe 4.2s ease-in-out infinite;will-change:transform}
+@keyframes survivor-chest-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
 .survivor-image{position:absolute;inset:0}
 
 .survivor-figure[data-boots=true]{--body-bottom:87%}

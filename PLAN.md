@@ -415,3 +415,10 @@ Na polecenie użytkownika usunięto przycisk Ruch oraz stan ręcznego włączani
 Maska klatki jest teraz nieruchoma, a pod nią porusza się wyłącznie kopia grafiki tułowia. Wdech: uniesienie o 0,25% wysokości płótna i lokalna skala 1,008 × 1,012 względem dolnej części klatki, dająca subtelne wysunięcie w stronę gracza. Cykl nadal 4,2 s. Bez skalowania całej sylwetki, rąk, głowy i wyposażenia; nogi i stopy bez zmian. To korekta oddechu 2D, bez realizacji odłożonej zmiany podparcia.
 
 Weryfikacja: 211/211 testów i npm run build zaliczone. Chromium 390 px: brak przycisku, automatyczny oddech i rzeczywiste mrugnięcie także przy prefers-reduced-motion. Osobny podgląd komponentu bez sprzętu i z kurtką, hełmem, butami oraz łomem: porównanie pikseli wydechu i maksymalnego wdechu potwierdziło zmiany tylko w obrębie maski klatki (132–221 × 101–259 na płótnie 354×530). Ręce, głowa i nogi identyczne; obejrzano zrzuty wdechu. Techniczna kontrola zakresu nie zastępuje oceny naturalności ruchu przez użytkownika. Bez testu fizycznego telefonu.
+
+
+## Oddech całej klatki w stronę ekranu — doprecyzowanie
+
+Zgodnie z korektą użytkownika usunięto unoszenie przy wdechu. Cały obszar klatki powiększa się równomiernie do skali 1,025 wokół własnego środka (50%/27% płótna), dając efekt wysunięcia ku ekranowi w ilustracji 2D. Szersza, przesunięta wyżej maska obejmuje klatkę zamiast wąskiego środka tułowia; dodatkowy obrys odcina rękawy i ramiona. Cykl 4,2 s, automatyczne mruganie i nieruchome nogi pozostają bez zmian.
+
+Weryfikacja: 211/211 testów, build oraz git diff --check. Osobny podgląd Chromium: koszulka oraz pełne wyposażenie, porównanie faz 0/2100 ms. Zmiany wyłącznie w klatce (123–231 × 80–207 na płótnie 354×530); porównanie wycinków potwierdza identyczne ręce, głowę i nogi. Obejrzano zrzut wdechu z kurtką. Bez testu fizycznego telefonu; naturalność pozostaje do oceny użytkownika.
